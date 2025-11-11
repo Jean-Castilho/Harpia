@@ -1,13 +1,11 @@
 import pages from "./routes/pages.js";
-import users from "./routes/user.js";
+import auth from "./routes/auth.js";
 
 
 const Server = function (app) {
 
-    
-
     app.use("/", pages);
-    app.use("/users", users);
+    app.use("/auth", auth);
 
 }
 
