@@ -1,19 +1,12 @@
 import { getDataBase } from "../config/db.js";
 
-
 export default class ProductController {
-    constructor(parameters) {
-        
-    }
-
-    getCollection() {
+  getCollection() {
     const db = getDataBase();
-    return db.collection("products")
-    }
+    return db.collection("products");
+  }
 
-    async AllProducts (){
-
-        return this.getCollection().find({}).toArray()
-
-    }
+  async AllProducts() {
+    return this.getCollection().find({}).toArray();
+  }
 }

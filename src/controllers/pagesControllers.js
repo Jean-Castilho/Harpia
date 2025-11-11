@@ -38,6 +38,8 @@ const getProducts = (req, res) => {
 
 
 
+
+
 const getRegister = (req, res) => {
   renderPage(res, '../pages/auth/register', {
     titulo: 'Registrar Conta',
@@ -53,6 +55,9 @@ const getLogin = (req, res) => {
     mensagem: 'seja Bem vindo de volta...'
   });
 }
+
+
+
 
 
 

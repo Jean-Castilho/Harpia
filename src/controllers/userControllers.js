@@ -3,10 +3,7 @@ import { getDataBase } from "../config/db.js";
 import { validationUser, criarHashPass, creatToken } from "../services/validationData.js";
 
 export default class UserControllers {
-  constructor(parameters) {
-
-  }
-
+  
   getCollection() {
     const db = getDataBase();
     return db.collection("users");
