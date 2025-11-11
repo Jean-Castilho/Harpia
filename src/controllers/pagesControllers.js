@@ -36,6 +36,8 @@ const getProducts = (req, res) => {
   });
 }
 
+
+
 const getRegister = (req, res) => {
   renderPage(res, '../pages/auth/register', {
     titulo: 'Registrar Conta',
@@ -44,10 +46,21 @@ const getRegister = (req, res) => {
   });
 }
 
+const getLogin = (req, res) => {
+  renderPage(res,"../pages/auth/login", {
+    titulo: 'Realizar Login',
+    estilo: 'login',
+    mensagem: 'seja Bem vindo de volta...'
+  });
+}
+
+
+
 export {
   getHome,
   getContact,
   getAbout,
   getProducts,
-  getRegister
+  getRegister,
+  getLogin
 }

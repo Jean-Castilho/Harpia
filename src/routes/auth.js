@@ -5,11 +5,16 @@ const userControllers = new UserControllers();
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
+router.post("/regist
+    er", async (req, res) => {
 
     const creatUser = await userControllers.creatUser(req, res);
 
-    return res.status(201).json({ message: "Usuário criado com sucesso.", user: creatUser.user });
+    return res.cookie("token", creatUser.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+    }).json({ message: "Usuário criado com sucesso.", user: creatUser.user }).status(201);
 
 });
 

@@ -7,7 +7,7 @@ export default class UserControllers {
 
   }
 
-  async getCollection() {
+  getCollection() {
     const db = getDataBase();
     return db.collection("users");
   }
@@ -19,16 +19,12 @@ export default class UserControllers {
   }
 
   async creatUser(req, res) {
-
     const dataUser = {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
       password: req.body.password,
     };
-
-    console.log(dataUser);
-    
     dataUser.email = String(dataUser.email).trim().toLowerCase();
     dataUser.phone = String(dataUser.phone).trim();
 
@@ -37,13 +33,11 @@ export default class UserControllers {
     if (!validation.valid) {
       return res.status(400).json({ message: validation.messagem });
     };
-
-    const userExists = await this.verifieldUser({ email: dataUser.email, number: dataUser.phone });
+    const userExists = await this.verifieldUser({ email: dataUser.email, phone: dataUser.phone });
 
     if (userExists) {
       return res.status(409).json({ message: "Usuário já existe." });
     };
-
     dataUser.password = await criarHashPass(dataUser.password);
 
     const userCreated = {
@@ -58,23 +52,18 @@ export default class UserControllers {
       createdAt: new Date(),
       updatedAt: new Date(),
 
-      pedidos: [],
+      orderns: [],
       cart: [],
       favorites: [],
     }
 
     const newUser = await this.getCollection().insertOne(userCreated);
 
+    console.log(newUser);
+
     const token = creatToken({
       _id: newUser.insertedId,
-      email: newUser.email.endereco,
-    });
-
-    
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+      email: userCreated.email.endereco,
     });
 
     req.session.user = newUser;
@@ -83,13 +72,14 @@ export default class UserControllers {
 
   }
 
-
-  async verifieldUser({ email, number } = {}) {
+  async verifieldUser({ email, phone } = {}) {
     const query = {};
     if (email) query["email"] = email;
-    if (number) query["phone"] = number;
+    if (phone) query["phone"] = phone;
     if (Object.keys(query).length === 0) return null;
+
     const user = await this.getCollection().findOne(query);
+
     return user;
 }
 

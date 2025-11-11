@@ -16,13 +16,12 @@ dotenv.config();
 
 export function validationUser(dataUser) {
 
-    let { name, email, number, password } = dataUser;
+    let { name, email, phone, password } = dataUser;
 
     if (!nameRegex.test(name)) {
         return {
             valid: false,
-            messagem:
-                "Nome inválido. Apenas letras, espaços, hífens e apóstrofos são permitidos.",
+            messagem: "Nome inválido. Apenas letras, espaços, hífens e apóstrofos são permitidos.",
         };
     }
 
@@ -30,7 +29,7 @@ export function validationUser(dataUser) {
         return { valid: false, messagem: "Formato de e-mail inválido." };
     }
 
-    if (!numberRegex.test(number)) {
+    if (!numberRegex.test(phone)) {
         return { valid: false, messagem: "Formato de número de telefone inválido." };
     }
 
@@ -43,7 +42,6 @@ export function validationUser(dataUser) {
 
     return { valid: true, messagem: "Todos os dados são válidos." };
 }
-
 
 export async function criarHashPass(password) {
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "12", 10);

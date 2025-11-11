@@ -1,92 +1,120 @@
 <div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card mt-5">
-                <div class="card-header">
-                    Register
-                </div>
-                <div class="card-body">
-                    <form id="registerForm">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Phone</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" required>
-                        </div>
-                        <input type="hidden" id="full_phone" name="full_phone" />
-                        <button type="submit" class="btn btn-primary" id="registerButton">Register</button>
-                    </form>
-                    <div id="message" class="mt-3"></div>
-                </div>
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="card mt-5">
+        <div class="card-header">Register</div>
+        <div class="card-body">
+          <form id="registerForm">
+            <div class="mb-3">
+              <label for="name" class="form-label">Username</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                required
+              />
             </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email address</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="phone"
+                name="phone"
+                required
+              />
+            </div>
+            <input type="hidden" id="full_phone" name="full_phone" />
+            <button type="submit" class="btn btn-primary" id="registerButton">
+              Register
+            </button>
+          </form>
+          <div id="message" class="mt-3"></div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/js/intlTelInput.min.js"></script>
 <script>
-    const phoneInputField = document.querySelector("#phone");
-    const phoneInput = window.intlTelInput(phoneInputField, {
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/js/utils.js",
-        initialCountry: "br",
-        preferredCountries: ["br", "us", "pt"],
-        separateDialCode: true,
-        formatOnDisplay: true
-    });
+  const phoneInputField = document.querySelector("#phone");
+  const phoneInput = window.intlTelInput(phoneInputField, {
+    utilsScript:
+      "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/js/utils.js",
+    initialCountry: "br",
+    preferredCountries: ["br", "us", "pt"],
+    separateDialCode: true,
+    formatOnDisplay: true,
+  });
 
-    document.getElementById('registerForm').addEventListener('submit', async function (event) {
-        event.preventDefault();
+  document
+    .getElementById("registerForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-        const registerButton = document.getElementById('registerButton');
-        const originalButtonText = registerButton.textContent;
-        const messageDiv = document.getElementById('message');
+      const registerButton = document.getElementById("registerButton");
+      const originalButtonText = registerButton.textContent;
+      const messageDiv = document.getElementById("message");
 
-        registerButton.textContent = 'Sending...';
-        registerButton.disabled = true;
-        messageDiv.innerHTML = '';
+      registerButton.textContent = "Sending...";
+      registerButton.disabled = true;
+      messageDiv.innerHTML = "";
 
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData.entries());
-        
-        const fullPhone = phoneInput.getNumber();
-        document.getElementById('full_phone').value = fullPhone;
-        data.full_phone = fullPhone;
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
 
-        console.log(data);
+      const fullPhone = phoneInput.getNumber();
+      document.getElementById("full_phone").value = fullPhone;
+      data.phone = fullPhone;
 
-        try {
-            const response = await fetch('/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+      console.log(data);
 
-            const result = await response.json();
+      try {
+        const response = await fetch("/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
 
-            if (response.ok) {
-                messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.message}</div>`;
-            } else {
-                messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.message}</div>`;
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            messageDiv.innerHTML = '<div class="alert alert-danger" role="alert">An error occurred.</div>';
+        const result = await response.json();
+
+        if (response.ok) {
+          messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.message}</div>`;
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.message}</div>`;
         }
+      } catch (error) {
+        console.error("Error:", error);
+        messageDiv.innerHTML =
+          '<div class="alert alert-danger" role="alert">An error occurred.</div>';
+      }
 
-        registerButton.textContent = originalButtonText;
-        registerButton.disabled = false;
+      registerButton.textContent = originalButtonText;
+      registerButton.disabled = false;
     });
 </script>
