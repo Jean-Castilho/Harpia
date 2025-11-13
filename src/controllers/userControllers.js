@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 import { getDataBase } from "../config/db.js";
 import { NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
 
@@ -32,7 +34,7 @@ export default class UserControllers {
     const validation = validationUser(dataUser);
 
     if (!validation.valid) {
-      return res.status(400).json({ message: validation.messagem });
+      return res.status(400).json({ mensagem: validation.mensagem });
     }
     const userExists = await this.verifieldUser({
       email: dataUser.email,
@@ -40,7 +42,7 @@ export default class UserControllers {
     });
 
     if (userExists) {
-      return res.status(409).json({ message: "Usuário já existe." });
+      return res.status(409).json({ mensagem: "Usuário já existe." });
     }
     dataUser.password = await criarHashPass(dataUser.password);
 
@@ -71,7 +73,7 @@ export default class UserControllers {
     req.session.user = newUser;
 
     return {
-      messagem: "Usuário criado com sucesso.",
+      mensagem: "Usuário criado com sucesso.",
       token: token,
       user: userCreated,
     };
@@ -82,12 +84,13 @@ export default class UserControllers {
 
     const user = await this.getUserByEmail(email);
     if (!user) {
-      throw new NotFoundError("Usuario nao encontrado...");
+      return {mensagem:"Usuario nao encontrado..."};
     }
     const ismatch = await compararSenha(password, user.password);
 
     if (!ismatch) {
-      throw new UnauthorizedError("E-mail ou senha incorretos");
+      
+      return {mensagem:"E-mail ou senha incorretos"};
     }
 
     // Mantém o campo aninhado como "email.endereço"
@@ -96,7 +99,7 @@ export default class UserControllers {
       email: user.email,
     });
 
-    return { message: "Login realizado", user, token };
+    return { mensagem: "Login realizado", user, token };
   }
 
   async verifieldUser({ email, phone } = {}) {
@@ -106,7 +109,6 @@ export default class UserControllers {
     if (Object.keys(query).length === 0) return null;
 
     return await this.getCollection().findOne(query);
-
   }
 
   async getUserByEmail(email) {
@@ -114,5 +116,32 @@ export default class UserControllers {
     const normalized = String(email).trim().toLowerCase();
     return await this.getCollection().findOne({ "email.endereco": normalized });
   }
-  
+
+  async updateUser(id, updatedUser) {
+
+    
+
+    if (!ObjectId.isValid(id)) {
+      return { messagem: "ID de usuário inválido" };
+    }
+
+    const objectId = new ObjectId(id);
+
+    const safeUpdate = {
+      name: updatedUser.name,
+      phone:{number: updatedUser.phone},
+      email: {endereco: updatedUser.email},
+    };
+    
+    if (safeUpdate._id) delete safeUpdate._id;
+
+    const resUpdated = await this.getCollection().updateOne(
+      { _id: objectId },
+      { $set: safeUpdate }
+    );
+
+    console.log(resUpdated);
+
+    return await await this.getCollection().findOne({ _id: objectId });
+  }
 }

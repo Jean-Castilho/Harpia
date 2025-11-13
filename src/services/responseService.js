@@ -2,44 +2,44 @@
 export const sendSuccess = (
   res,
   data,
-  message = "Operação realizada com sucesso",
+  mensagem = "Operação realizada com sucesso",
   statusCode = 200,
 ) => {
   return res.status(statusCode).json({
     success: true,
-    message,
+    mensagem,
     data,
   });
 };
 
 export const sendError = (
   res,
-  message = "Ocorreu um erro",
+  mensagem = "Ocorreu um erro",
   statusCode = 500,
 ) => {
   return res.status(statusCode).json({
     success: false,
-    message,
+    mensagem,
   });
 };
 
-export const sendNotFound = (res, message = "Recurso não encontrado") => {
+export const sendNotFound = (res, mensagem = "Recurso não encontrado") => {
   return res.status(404).json({
     success: false,
-    message,
+    mensagem,
   });
 };
 
-export const sendUnauthorized = (res, message = "Não autorizado") => {
+export const sendUnauthorized = (res, mensagem = "Não autorizado") => {
   return res.status(401).json({
     success: false,
-    message,
+    mensagem,
   });
 };
 
-export const sendBadRequest = (res, message = "Requisição inválida") => {
+export const sendBadRequest = (res, mensagem = "Requisição inválida") => {
   return res.status(400).json({
     success: false,
-    message,
+    mensagem,
   });
 };

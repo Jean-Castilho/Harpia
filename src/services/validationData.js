@@ -21,26 +21,26 @@ export function validationUser(dataUser) {
     if (!nameRegex.test(name)) {
         return {
             valid: false,
-            messagem: "Nome inválido. Apenas letras, espaços, hífens e apóstrofos são permitidos.",
+            mensagem: "Nome inválido. Apenas letras, espaços, hífens e apóstrofos são permitidos.",
         };
     }
 
     if (!emailRegex.test(email)) {
-        return { valid: false, messagem: "Formato de e-mail inválido." };
+        return { valid: false, mensagem: "Formato de e-mail inválido." };
     }
 
     if (!numberRegex.test(phone)) {
-        return { valid: false, messagem: "Formato de número de telefone inválido." };
+        return { valid: false, mensagem: "Formato de número de telefone inválido." };
     }
 
     if (!passwordRegex.test(password)) {
         return {
             valid: false,
-            messagem: "A senha deve ter no mínimo 8 caracteres, com uma letra maiúscula, uma minúscula e um número.",
+            mensagem: "A senha deve ter no mínimo 8 caracteres, com uma letra maiúscula, uma minúscula e um número.",
         };
     }
 
-    return { valid: true, messagem: "Todos os dados são válidos." };
+    return { valid: true, mensagem: "Todos os dados são válidos." };
 }
 
 export async function criarHashPass(password) {
@@ -66,27 +66,3 @@ export async function compararSenha(password, hashedPassword) {
   const match = await bcrypt.compare(password, hashedPassword);
   return match;
 }
-// --- Middleware de Autenticação Aprimorado ---
-
-const authMiddleware = (req, res, next) => {
-  // Suporta token via cookie ou header Authorization: Bearer <token>
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  let token = null;
-  if (authHeader && String(authHeader).startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-  } else if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
-  }
-
-  if (!token) {
-    return sendUnauthorized(res, "Acesso negado. Nenhum token fornecido.");
-  }
-
-  const decoded = verificarToken(token);
-  if (!decoded) {
-    return sendUnauthorized(res, "Token inválido ou expirado.");
-  }
-  // Adiciona os dados do usuário decodificados ao objeto de requisição para uso posterior
-  req.user = decoded;
-  next();
-};

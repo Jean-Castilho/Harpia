@@ -1,4 +1,4 @@
-<form id="registerForm">
+<form id="loginForm">
   <div class="mb-3">
     <label for="email" class="form-label">Email address</label>
     <input type="email" class="form-control" id="email" name="email" required />
@@ -21,7 +21,7 @@
 
 <script>
   document
-    .getElementById("registerForm")
+    .getElementById("loginForm")
     .addEventListener("submit", async function (event) {
       event.preventDefault();
 
@@ -46,11 +46,12 @@
         });
 
         const result = await response.json();
+        console.log(result)
 
         if (response.ok) {
-          messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.message}</div>`;
+          messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.mensagem}</div>`;
         } else {
-          messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.message}</div>`;
+          messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.mensagem}</div>`;
         }
       } catch (error) {
         console.error("Error:", error);

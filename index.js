@@ -4,6 +4,10 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Importa os middlewares CSRF
+import { generateCsrfToken } from './src/middleware/csrfMiddleware.js';
+
+
 const app = express();
 const port = process.env.PORT || 3080;
 
@@ -31,6 +35,9 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 // 1 dia
   }
 }));
+
+// Middleware para gerar e expor o token CSRF para os templates
+app.use(generateCsrfToken);
 
 // Middleware para expor dados globais aos templates
 app.use((req, res, next) => {

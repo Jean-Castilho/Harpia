@@ -16,3 +16,4 @@ export const checkUserRole = (req, res, next) => {
   res.locals.layout = layout;
   next();
 };
+

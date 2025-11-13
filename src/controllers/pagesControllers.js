@@ -28,6 +28,7 @@ const getAbout = (req, res) => {
     mensagem: 'Saiba mais sobre nossa loja!',
   });
 };
+
 const getProducts = (req, res) => { 
   renderPage(res, '../pages/public/products', {
     titulo: 'Produtos',
@@ -35,8 +36,6 @@ const getProducts = (req, res) => {
     mensagem: 'Confira nossos produtos!',
   });
 }
-
-
 
 
 
@@ -56,7 +55,18 @@ const getLogin = (req, res) => {
   });
 }
 
+const getProfile = (req, res) => {
 
+  console.log(req)
+
+   renderPage(res,"../pages/auth/profile", {
+    titulo: 'configuarçao',
+    estilo: 'peofile',
+    mensagem: 'sessao profile...',
+    
+  });
+
+}
 
 
 
@@ -67,5 +77,6 @@ export {
   getAbout,
   getProducts,
   getRegister,
-  getLogin
+  getLogin,
+  getProfile
 }

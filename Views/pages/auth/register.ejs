@@ -80,9 +80,9 @@
         const result = await response.json();
 
         if (response.ok) {
-          messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.message}</div>`;
+          messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.mensagem}</div>`;
         } else {
-          messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.message}</div>`;
+          messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.mensagem}</div>`;
         }
       } catch (error) {
         console.error("Error:", error);
