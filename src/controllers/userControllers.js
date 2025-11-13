@@ -106,7 +106,7 @@ export default class UserControllers {
     if (Object.keys(query).length === 0) return null;
 
     return await this.getCollection().findOne(query);
-    
+
   }
 
   async getUserByEmail(email) {
@@ -114,4 +114,5 @@ export default class UserControllers {
     const normalized = String(email).trim().toLowerCase();
     return await this.getCollection().findOne({ "email.endereco": normalized });
   }
+  
 }

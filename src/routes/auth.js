@@ -21,7 +21,7 @@ router.post("/login", async (req, res) => {
 
   const dataLogin = await userControllers.login(req, res);
 
-  const {user,token} = dataLogin;
+  const {user ,token} = dataLogin;
 
   return res
     .cookie("token", token, {
