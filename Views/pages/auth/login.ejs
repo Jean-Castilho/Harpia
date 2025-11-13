@@ -1,1 +1,64 @@
- 
+<form id="registerForm">
+  <div class="mb-3">
+    <label for="email" class="form-label">Email address</label>
+    <input type="email" class="form-control" id="email" name="email" required />
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input
+      type="password"
+      class="form-control"
+      id="password"
+      name="password"
+      required
+    />
+  </div>
+
+  <button type="submit" class="btn btn-primary" id="loginButton">Login</button>
+</form>
+
+<div id="message" class="mt-3"></div>
+
+<script>
+  document
+    .getElementById("registerForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const loginButton = document.getElementById("loginButton");
+      const originalButonText = loginButton.textContent;
+      const messageDiv = document.getElementById("message");
+
+      loginButton.textContent = "Sending...";
+      loginButton.disable = true;
+      messageDiv.innerHTML = "";
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageDiv.innerHTML = `<div class="alert alert-success" role="alert">${result.message}</div>`;
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">${result.message}</div>`;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        messageDiv.innerHTML =
+          '<div class="alert alert-danger" role="alert">An error occurred.</div>';
+      }
+
+      loginButton.textContent = originalButonText;
+      loginButton.disabled = false;
+    });
+</script>

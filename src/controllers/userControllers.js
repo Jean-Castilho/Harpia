@@ -1,18 +1,21 @@
-
 import { getDataBase } from "../config/db.js";
-import { validationUser, criarHashPass, creatToken } from "../services/validationData.js";
+import { NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
+
+import {
+  validationUser,
+  criarHashPass,
+  criarToken,
+  compararSenha,
+} from "../services/validationData.js";
 
 export default class UserControllers {
-  
   getCollection() {
     const db = getDataBase();
     return db.collection("users");
   }
 
   async allUsers() {
-
-    return await this.getCollection().find().toArray()
-
+    return await this.getCollection().find().toArray();
   }
 
   async creatUser(req, res) {
@@ -22,6 +25,7 @@ export default class UserControllers {
       phone: req.body.phone,
       password: req.body.password,
     };
+
     dataUser.email = String(dataUser.email).trim().toLowerCase();
     dataUser.phone = String(dataUser.phone).trim();
 
@@ -29,18 +33,21 @@ export default class UserControllers {
 
     if (!validation.valid) {
       return res.status(400).json({ message: validation.messagem });
-    };
-    const userExists = await this.verifieldUser({ email: dataUser.email, phone: dataUser.phone });
+    }
+    const userExists = await this.verifieldUser({
+      email: dataUser.email,
+      phone: dataUser.phone,
+    });
 
     if (userExists) {
       return res.status(409).json({ message: "Usuário já existe." });
-    };
+    }
     dataUser.password = await criarHashPass(dataUser.password);
 
     const userCreated = {
       name: dataUser.name,
       password: dataUser.password,
-      phone: { verified: false, number: dataUser.phone},
+      phone: { verified: false, number: dataUser.phone },
       email: { verified: false, endereco: dataUser.email },
 
       role: "user",
@@ -52,21 +59,44 @@ export default class UserControllers {
       orderns: [],
       cart: [],
       favorites: [],
-    }
+    };
 
     const newUser = await this.getCollection().insertOne(userCreated);
 
-    console.log(newUser);
-
-    const token = creatToken({
+    const token = criarToken({
       _id: newUser.insertedId,
       email: userCreated.email.endereco,
     });
 
     req.session.user = newUser;
 
-    return { messagem: "Usuário criado com sucesso.", token: token , user: userCreated };
+    return {
+      messagem: "Usuário criado com sucesso.",
+      token: token,
+      user: userCreated,
+    };
+  }
 
+  async login(req, res) {
+    const { email, password } = req.body;
+
+    const user = await this.getUserByEmail(email);
+    if (!user) {
+      throw new NotFoundError("Usuario nao encontrado...");
+    }
+    const ismatch = await compararSenha(password, user.password);
+
+    if (!ismatch) {
+      throw new UnauthorizedError("E-mail ou senha incorretos");
+    }
+
+    // Mantém o campo aninhado como "email.endereço"
+    const token = criarToken({
+      id: user._id,
+      email: user.email,
+    });
+
+    return { message: "Login realizado", user, token };
   }
 
   async verifieldUser({ email, phone } = {}) {
@@ -75,9 +105,13 @@ export default class UserControllers {
     if (phone) query["phone"] = phone;
     if (Object.keys(query).length === 0) return null;
 
-    const user = await this.getCollection().findOne(query);
+    return await this.getCollection().findOne(query);
+    
+  }
 
-    return user;
-}
-
+  async getUserByEmail(email) {
+    if (!email) return null;
+    const normalized = String(email).trim().toLowerCase();
+    return await this.getCollection().findOne({ "email.endereco": normalized });
+  }
 }

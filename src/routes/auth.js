@@ -17,4 +17,19 @@ router.post("/register", async (req, res) => {
     .status(201);
 });
 
+router.post("/login", async (req, res) => {
+
+  const dataLogin = await userControllers.login(req, res);
+
+  const {user,token} = dataLogin;
+
+  return res
+    .cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    }).json({ message: "Login realizado", user })
+    .status(201);
+});
+
 export default router;

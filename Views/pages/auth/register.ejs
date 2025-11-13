@@ -1,62 +1,39 @@
-<div class="container">
-  <div class="row">
-    <div class="col-md-6 offset-md-3">
-      <div class="card mt-5">
-        <div class="card-header">Register</div>
-        <div class="card-body">
-          <form id="registerForm">
-            <div class="mb-3">
-              <label for="name" class="form-label">Username</label>
-              <input
-                type="text"
-                class="form-control"
-                id="name"
-                name="name"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="email" class="form-label">Email address</label>
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                name="email"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                name="password"
-                required
-              />
-            </div>
-
-            <div class="mb-3">
-              <label for="phone" class="form-label">Phone</label>
-              <input
-                type="tel"
-                class="form-control"
-                id="phone"
-                name="phone"
-                required
-              />
-            </div>
-            <input type="hidden" id="full_phone" name="full_phone" />
-            <button type="submit" class="btn btn-primary" id="registerButton">
-              Register
-            </button>
-          </form>
-          <div id="message" class="mt-3"></div>
-        </div>
-      </div>
-    </div>
+<form id="registerForm">
+  <div class="mb-3">
+    <label for="name" class="form-label">Username</label>
+    <input type="text" class="form-control" id="name" name="name" required />
   </div>
-</div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label">Email address</label>
+    <input type="email" class="form-control" id="email" name="email" required />
+  </div>
+
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input
+      type="password"
+      class="form-control"
+      id="password"
+      name="password"
+      required
+    />
+  </div>
+
+  <div class="mb-3">
+    <label for="phone" class="form-label">Phone</label>
+    <input type="tel" class="form-control" id="phone" name="phone" required />
+  </div>
+
+  <input type="hidden" id="full_phone" name="full_phone" />
+  
+  <button type="submit" class="btn btn-primary" id="registerButton">
+    Register
+  </button>
+</form>
+
+
+<div id="message" class="mt-3"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/js/intlTelInput.min.js"></script>
 <script>
@@ -87,10 +64,9 @@
       const data = Object.fromEntries(formData.entries());
 
       const fullPhone = phoneInput.getNumber();
+      console.log(fullPhone);
       document.getElementById("full_phone").value = fullPhone;
       data.phone = fullPhone;
-
-      console.log(data);
 
       try {
         const response = await fetch("/auth/register", {
