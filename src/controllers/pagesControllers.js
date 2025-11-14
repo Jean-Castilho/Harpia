@@ -1,8 +1,8 @@
 const renderPage = (res, page, options = {}) => {
-    res.render(res.locals.layout, {
-        page,
-        ...options,
-    });
+  res.render(res.locals.layout, {
+    page,
+    ...options,
+  });
 }
 
 const getHome = (req, res) => {
@@ -29,7 +29,7 @@ const getAbout = (req, res) => {
   });
 };
 
-const getProducts = (req, res) => { 
+const getProducts = (req, res) => {
   renderPage(res, '../pages/public/products', {
     titulo: 'Produtos',
     estilo: 'products',
@@ -48,22 +48,31 @@ const getRegister = (req, res) => {
 }
 
 const getLogin = (req, res) => {
-  renderPage(res,"../pages/auth/login", {
+  renderPage(res, "../pages/auth/login", {
     titulo: 'Realizar Login',
     estilo: 'login',
     mensagem: 'seja Bem vindo de volta...'
   });
 }
 
+
+
+
 const getProfile = (req, res) => {
 
-  console.log(req)
+  res.locals.layout = './layout/auth';
 
-   renderPage(res,"../pages/auth/profile", {
+  if(!req.session.user){
+  
+    return res.redirect('/login');
+    
+  }
+
+  renderPage(res, "../pages/auth/profile", {
     titulo: 'configuarçao',
     estilo: 'peofile',
     mensagem: 'sessao profile...',
-    
+
   });
 
 }

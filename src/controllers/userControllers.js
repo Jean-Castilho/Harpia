@@ -43,7 +43,7 @@ export default class UserControllers {
 
     if (userExists) {
       return res.status(409).json({ mensagem: "Usuário já existe." });
-    }
+    };
     dataUser.password = await criarHashPass(dataUser.password);
 
     const userCreated = {
@@ -83,14 +83,14 @@ export default class UserControllers {
     const { email, password } = req.body;
 
     const user = await this.getUserByEmail(email);
+    console.log(user);
     if (!user) {
-      return {mensagem:"Usuario nao encontrado..."};
+      return res.status(402).json({ mensagem: "Usuário nao encontrado." });
     }
     const ismatch = await compararSenha(password, user.password);
 
     if (!ismatch) {
-      
-      return {mensagem:"E-mail ou senha incorretos"};
+      return res.status(409).json({ mensagem: "Email ou senha incorretos." });
     }
 
     // Mantém o campo aninhado como "email.endereço"
@@ -98,6 +98,8 @@ export default class UserControllers {
       id: user._id,
       email: user.email,
     });
+
+    req.session.user = user;
 
     return { mensagem: "Login realizado", user, token };
   }
@@ -119,8 +121,6 @@ export default class UserControllers {
 
   async updateUser(id, updatedUser) {
 
-    
-
     if (!ObjectId.isValid(id)) {
       return { messagem: "ID de usuário inválido" };
     }
@@ -129,10 +129,10 @@ export default class UserControllers {
 
     const safeUpdate = {
       name: updatedUser.name,
-      phone:{number: updatedUser.phone},
-      email: {endereco: updatedUser.email},
+      phone: { verified: false, number: updatedUser.phone },
+      email: { verified: false, endereco: updatedUser.email },
     };
-    
+
     if (safeUpdate._id) delete safeUpdate._id;
 
     const resUpdated = await this.getCollection().updateOne(

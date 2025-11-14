@@ -12,8 +12,6 @@ const router = express.Router();
 router.post("/register", generateCsrfToken, async (req, res) => {
   const creatUser = await userControllers.creatUser(req, res);
 
-  req.session.user = creatUser.user;
-
   return res
     .cookie("token", creatUser.token, {
       httpOnly: true,
@@ -26,8 +24,7 @@ router.post("/register", generateCsrfToken, async (req, res) => {
 
 router.post("/login", generateCsrfToken, async (req, res) => {
   const dataLogin = await userControllers.login(req, res);
-  req.session.user = dataLogin.user;
-
+  console.log(dataLogin)
   return res
     .cookie("token", dataLogin.token, {
       httpOnly: true,
@@ -39,7 +36,7 @@ router.post("/login", generateCsrfToken, async (req, res) => {
 });
 
 router.put("/updatedUser", validateCsrfToken, async (req, res) => {
-  
+
   const id = req.session.user._id;
   const userUpdated = await userControllers.updateUser(id, req.body);
 

@@ -7,7 +7,7 @@
       id="name"
       name="name"
       class="form-control"
-      value="<%= session.c %>"
+      value="<%= session.user.name %>"
     />
   </div>
 
@@ -109,13 +109,17 @@
       document.getElementById("full_phone").value = fullPhone;
       data.phone = fullPhone;
 
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
       try {
         const response = await fetch("/auth/updatedUser", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            'X-CSRF-Token': csrfToken
           },
           body: JSON.stringify(data),
+          
         });
 
         const result = await response.json();
