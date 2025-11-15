@@ -1,0 +1,108 @@
+<div class="container">
+    <link rel="stylesheet" href="/css/main.css">
+
+    <header class="page-header">
+        <h1>Gerenciamento de Inventário</h1>
+    </header>
+
+    <div class="inventory-container">
+
+        <% if (products && products.length> 0) { %>
+            <div class="inventory-table-container">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Nome do Produto</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th>Requisitos</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(product=> { %>
+                            <% const nome = product.nome || product.name || 'Sem nome' ;
+                             
+                            const rawImg=(product.imagens &&
+                                product.imagens.length) ? product.imagens[0] : null; 
+                                
+                                const imagem=rawImg ?
+                                (String(rawImg).startsWith('http') ? rawImg : ('/products/images/' + rawImg))                              : '/images/no-image.png' ; const precoVal=(product.preco !=null &&
+                                !isNaN(Number(product.preco))) ? Number(product.preco) : null;
+
+                                 const precoText=precoVal
+                                !==null ? precoVal.toLocaleString('pt-BR', { style: 'currency' , currency: 'BRL' })
+                                : 'Preço sob consulta' ;
+
+                                 const estoque=(product.stock !=null) ? product.stock :
+                                (product.estoque != null ? product.estoque : '—' ); 
+                                
+                                const ativo=product.ativo=="true" ;
+
+                                const requerMontagem = product.requerMontagem === "on" || product.requerMontagem === true;
+                                const categoria=product.categoria || '—'; %>
+                                <tr>
+                                    <td>
+                                        <img src="<%= imagem %>" alt="<%= nome %>" class="inventory-product-image">
+                                    </td>
+                                    <td><strong>
+                                            <%= nome %>
+                                        </strong></td>
+                                    <td>
+                                        <%= precoText %>
+                                    </td>
+                                    <td>
+                                        <%= estoque %>
+                                    </td>
+                                    <td>
+                                        <%= categoria %>
+                                    </td>
+                                    <td>
+                                        <% if (ativo) { %>
+                                            <span class="status-badge status-active">Ativo</span>
+                                            <% } else { %>
+                                                <span class="status-badge status-inactive">Inativo</span>
+                                                <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (requerMontagem) { %>
+                                            <span class="status-badge status-warning">Requer montagem</span>
+                                            <% } else { %>
+                                                <span>—</span>
+                                                <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <a href="/product/edit/<%= product._id %>"
+                                                class="btn btn-sm btn-secundario">Editar</a>
+
+                                            <form action="/admin/products/delete" method="post"
+                                                onsubmit="return confirm('Confirma a exclusão deste produto?');">
+                                                <input type="hidden" name="id" value="<%= product._id %>">
+                                                <button type="submit" class="btn btn-sm btn-remover">Excluir</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="inventory-actions">
+                <a href="/admin/add-product" class="btn btn-destaque">Adicionar Novo Produto</a>
+            </div>
+
+            <% } else { %>
+
+                <div class="alert alert-info">
+                    Nenhum produto encontrado. <a href="/admin/add-product">Adicione um novo produto</a>.
+                </div>
+                <% } %>
+
+    </div>
+</div>

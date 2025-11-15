@@ -1,0 +1,71 @@
+<header class="header">
+  <nav class="navbar">
+    <a href="/" class="nav-logo">Encanto Rústico</a>
+
+    <ul class="nav-menu">
+      <li><a href="/"
+          class="nav-link <%= (typeof pageIdentifier !== 'undefined' && pageIdentifier === 'home') ? 'active' : '' %>">Home</a>
+      </li>
+      <li><a href="/products"
+          class="nav-link <%= (typeof pageIdentifier !== 'undefined' && pageIdentifier === 'products') ? 'active' : '' %>">Podutos</a>
+      </li>
+      <li><a href="/about"
+          class="nav-link <%= (typeof pageIdentifier !== 'undefined' && pageIdentifier === 'about') ? 'active' : '' %>">Sobre</a>
+      </li>
+      <li><a href="/contact"
+          class="nav-link <%= (typeof pageIdentifier !== 'undefined' && pageIdentifier === 'contact') ? 'active' : '' %>">Contato</a>
+      </li>
+
+      <!-- Icons are now inside the nav-menu -->
+      <li class="header-icons-container">
+        <div class="header-icons">
+          <% if (user) { %>
+            <a href="/profile" class="nav-link" aria-label="Perfil do Usuário">
+              <span class="material-icons notranslate md-22">person</span>
+            </a>
+
+            <% if (user.role==='admin' ) { %>
+              <a href="/admin/dashboard" class="nav-link" aria-label="Painel do Administrador">
+                <span class="material-icons notranslate md-22">admin_panel_settings</span>
+              </a>
+              <% } %>
+
+                <% if (user.role==='delivery' || user.role==='admin' ) { %>
+                  <a href="/delivery" class="nav-link <%= (typeof pageIdentifier !== 'undefined' && pageIdentifier === 'delivery') ? 'active' : '' %>" aria-label="Painel do Entregador">
+                    <span class="material-icons notranslate md-22">local_shipping</span>
+                  </a>
+                  <% } %>
+
+                    <% if (user.role==='staff' || user.role==='admin' ) { %>
+                      <a href="/admin/inventory" class="nav-link" aria-label="Estoque">
+                        <span class="material-icons notranslate md-22">inventory</span>
+                      </a>
+                      <% } %>
+
+                        <a href="/logout" class="nav-link" aria-label="Sair">
+                          <span class="material-icons notranslate md-22">logout</span>
+                        </a>
+                        <% } else { %>
+                          <a href="/login" class="nav-link" aria-label="Login">
+                            <span class="material-icons notranslate md-22">person</span>
+                          </a>
+                          <% } %>
+
+                            <a href="/favorites" class="nav-link" aria-label="Meus Favoritos">
+                              <span class="material-icons notranslate md-22">favorite_border</span>
+                            </a>
+                            <a href="/cart" class="nav-link" aria-label="Meu Carrinho">
+                              <span class="material-icons notranslate md-22">shopping_cart</span>
+                            </a>
+        </div>
+      </li>
+    </ul>
+
+    <div class="hamburger">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </nav>
+  <div class="nav-overlay"></div>
+</header>

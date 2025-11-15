@@ -1,0 +1,63 @@
+
+
+<div class="orders-admin-container">
+  <div class="orders-admin-header">
+    <h1>Gerenciamento de Pedidos</h1>
+  </div>
+
+  <div class="order-summary">
+    <div class="summary-card total">
+      <div class="icon"><span class="material-icons">shopping_bag</span></div>
+      <div class="text">
+        <h3>Total de Pedidos</h3>
+        <p><%= totalApproved %></p>
+      </div>
+    </div>
+    <div class="summary-card pending">
+      <div class="icon"><span class="material-icons">hourglass_top</span></div>
+      <div class="text">
+        <h3>Pedidos Entregues</h3>
+        <p><%= totalDelivered %></p>
+      </div>
+    </div>
+    <div class="summary-card in-transit">
+      <div class="icon"><span class="material-icons">local_shipping</span></div>
+      <div class="text">
+        <h3>Em Rota</h3>
+        <p><%= ordernsEnviada%></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-table-container">
+    <table class="order-table">
+      <thead>
+        <tr>
+          <th>ID do Pedido</th>
+          <th>Cliente</th>
+          <th>Status</th>
+          <th>Prazo de Entrega</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(order => { %>
+          <tr>
+            <td><%= order._id %></td>
+            <td><%= order.user.name %></td>
+            <td>
+              <span class="status <%= 
+                order.status === 'Pendente' ? 'status-pending' : 
+                order.status === 'Em Rota' ? 'status-in-transit' : 'status-delivered' 
+              %>">
+                <%= order.status %>
+              </span>
+            </td>
+            <td>15 dias</td>
+            <td><a href="/orders/<%= order._id %>/details" class="action-btn">Detalhes</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>

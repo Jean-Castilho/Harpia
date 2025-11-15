@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap');
+
+/* ===================================================================
+   Theme: Encanto Rústico (Unified)
+   Author: Gemini
+   Description: Single, scalable stylesheet for the entire project.
+   =================================================================== */
+
+/* ===================================================================
+   1. SETTINGS
+   - Google Fonts Import
+   - CSS Variables (Colors, Fonts, Spacing)
+   =================================================================== */
+@import url('./variables.css');
+
+/* ===================================================================
+   2. GENERIC
+   - Reset, Global Styles, Scrollbar
+   =================================================================== */
+@import url('./base/reset.css');
+
+/* ===================================================================
+   3. ELEMENTS
+   - Base styling for HTML elements (h1, a, p, main)
+   =================================================================== */
+@import url('./base/typography.css');
+
+/* ===================================================================
+   5. COMPONENTS
+   - Reusable UI components (Buttons, Cards, Forms, etc.)
+   =================================================================== */
+@import url('./components/button.css');
+@import url('./components/card.css');
+@import url('./components/form.css');
+@import url('./components/search.css');
+
+/* ===================================================================
+   6. LAYOUT
+   - Header, Footer, etc.
+   =================================================================== */
+@import url('./layout/header.css');
+@import url('./layout/footer.css');
+
+/* ===================================================================
+   7. PAGES
+   - Page-specific styles
+   =================================================================== */
+@import url('./pages/home.css');
+@import url('./pages/product-detail.css');
+@import url('./pages/contact.css');
+@import url('./pages/cart.css');
+@import url('./pages/about.css');
+@import url('./pages/auth.css');
+@import url('./pages/add-product.css');
+@import url('./pages/otp.css');
+@import url('./pages/admin-orders.css');
+@import url('./pages/admin-inventory.css');
+@import url('./pages/admin-dashboard.css');
+@import url('./pages/admin-order-details.css');
+
+/* ===================================================================
+   8. RESPONSIVENESS
+   - Media Queries
+   =================================================================== */
+@import url('./responsive.css');
+
+
+/* ===================================================================
+   4. OBJECTS / LAYOUT
+   - Layout helpers like .container
+   =================================================================== */
+
+.container {
+    width: max-content;
+    max-width: 100vw;
+}
+
+
+.card-icon {
+   margin-top: 5px;
+}

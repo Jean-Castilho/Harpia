@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { getDataBase } from "../config/db.js";
 import { getGridFSBucket } from "../config/db.js";
 import { Readable } from "stream";
@@ -12,51 +13,76 @@ export default class ProductController {
     return this.getCollection().find({}).toArray();
   }
 
-  
+  /**
+   * Tries to upload a file to GridFS with a retry mechanism.
+   * @param {object} file - The file object from multer (with buffer).
+   * @param {GridFSBucket} bucket - The GridFS bucket instance.
+   * @param {number} retries - The number of times to retry on failure.
+   * @returns {Promise<string>} A promise that resolves with the unique filename.
+   */
+  async #uploadFileWithRetry(file, bucket, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await new Promise((resolve, reject) => {
+          const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          const readableStream = new Readable();
+          readableStream.push(file.buffer);
+          readableStream.push(null);
+
+          const uploadStream = bucket.openUploadStream(uniqueName, {
+            contentType: file.mimetype,
+            metadata: { originalname: file.originalname },
+          });
+
+          readableStream.pipe(uploadStream)
+            .on('finish', () => resolve(uniqueName))
+            .on('error', (err) => reject(err));
+        });
+      } catch (error) {
+        //console.error(`Upload attempt ${i + 1} para ${file.originalname} failed. Seguinte...`);
+        if (i === retries - 1) throw error; // Rethrow error on last attempt
+      }
+    }
+  }
   // Versão simplificada: não usa endereço, só campos essenciais + imagens
-  async uploadProductAndImage(req) {
-    const files =
-      req.body.files && req.body.files.length
-        ? req.body.files
-        : req.body.file
-          ? [req.body.file]
-          : [];
+  async uploadProductAndImage(req, res) {
+
+    const files = req.files || [];
 
     if (!files || files.length === 0) {
-      throw new Error("Nenhum arquivo foi enviado");
+      return res.status(400).json({ mensagem: "Nenhum arquivo enviado." });
     }
-
-    console.log(files);
 
     const bucket = getGridFSBucket();
 
-    // Faz upload de todos os arquivos e obtém os nomes usados no GridFS
-    const uploadPromises = files.map((file) => {
-      return new Promise((res, rej) => {
-        const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.originalname}`;
-        const readableStream = new Readable();
-        readableStream.push(file.buffer);
-        readableStream.push(null);
+    // Use a função com retry para cada arquivo
+    const uploadPromises = files.map(file => this.#uploadFileWithRetry(file, bucket));
 
-        const uploadStream = bucket.openUploadStream(uniqueName, {
-          contentType: file.mimetype,
-          metadata: { originalname: file.originalname },
-        });
-        readableStream.pipe(uploadStream);
+    // Promise.allSettled espera todas as promises terminarem (sucesso ou falha)
+    const results = await Promise.allSettled(uploadPromises);
 
-        uploadStream.on("finish", () => res(uniqueName));
-        uploadStream.on("error", (err) => rej(err));
-      });
+    const successfulUploads = [];
+    const failedUploads = [];
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        successfulUploads.push(result.value);
+      } else {
+        failedUploads.push(files[index].originalname);
+      }
     });
 
-    const filesName = await Promise.all(uploadPromises);
+    // Se qualquer upload falhar, não crie o produto e retorne um erro.
+    if (failedUploads.length > 0) {
+      return res.status(500).json({ mensagem: `Não foi possível salvar o produto. Falha no upload dos seguintes arquivos: ${failedUploads.join(', ')}` });
+    }
 
     const productData = {
       // --- Informações Principais ---
       nome: req.body.nome, // Ex: "Poltrona Costela com Puff".
       slug: req.body.slug, // Ex: "poltrona-costela-com-puff-couro-preto".
       preco: parseFloat(req.body.preco), // Ex: 1890.00
-      imagens: filesName,
+      imagens: successfulUploads, // Usa apenas os nomes dos arquivos que tiveram sucesso
       // --- Organização e Estilo ---
       estilo: req.body.estilo, // Ex: "Moderno", "Industrial", "Clássico".
       colecao: req.body.colecao, // Ex: "Coleção Viena 2024".
@@ -100,12 +126,24 @@ export default class ProductController {
       peso: req.body.peso,
     };
 
-    const result = await this.createProduct(productData);
+    const result = await this.getCollection().insertOne(productData);
 
     // retorna o documento criado já com imagens convertidas (via getProductById)
     const created = await this.getProductById(result.insertedId.toString());
     return created;
   }
 
+  async getProductById(id) {
+    if (!ObjectId.isValid(id)) {
+      throw new Error("ID inválido");
+    }
+    const objectId = new ObjectId(id);
+    const product = await this.getCollection().findOne({ _id: objectId });
+    if (!product) {
+      return null;
+    }
+
+    return product;
+  }
 
 }

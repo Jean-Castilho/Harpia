@@ -45,4 +45,15 @@ router.put("/updatedUser", validateCsrfToken, async (req, res) => {
   return res.status(200).json({ mensagem: "Usuario atualizado", userUpdated });
 });
 
+router.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Erro ao destruir a sessão:", err);
+      return res.status(500).redirect('/');
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/');
+  });
+});
+
 export default router;

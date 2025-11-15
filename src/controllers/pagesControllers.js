@@ -5,7 +5,7 @@ const renderPage = (res, page, options = {}) => {
   });
 }
 
-const getHome = (req, res) => {
+export const getHome = (req, res) => {
   renderPage(res, '../pages/public/home', {
     titulo: 'Encanto Rústico',
     estilo: 'home',
@@ -13,7 +13,7 @@ const getHome = (req, res) => {
   });
 };
 
-const getContact = (req, res) => {
+export const getContact = (req, res) => {
   renderPage(res, '../pages/public/contact', {
     titulo: 'Contato',
     estilo: 'contact',
@@ -21,7 +21,7 @@ const getContact = (req, res) => {
   });
 };
 
-const getAbout = (req, res) => {
+export const getAbout = (req, res) => {
   renderPage(res, '../pages/public/about', {
     titulo: 'Sobre Nós',
     estilo: 'about',
@@ -29,7 +29,7 @@ const getAbout = (req, res) => {
   });
 };
 
-const getProducts = (req, res) => {
+export const getProducts = (req, res) => {
   renderPage(res, '../pages/public/products', {
     titulo: 'Produtos',
     estilo: 'products',
@@ -39,7 +39,7 @@ const getProducts = (req, res) => {
 
 
 
-const getRegister = (req, res) => {
+export const getRegister = (req, res) => {
   renderPage(res, '../pages/auth/register', {
     titulo: 'Registrar Conta',
     estilo: 'register',
@@ -47,7 +47,7 @@ const getRegister = (req, res) => {
   });
 }
 
-const getLogin = (req, res) => {
+export const getLogin = (req, res) => {
   renderPage(res, "../pages/auth/login", {
     titulo: 'Realizar Login',
     estilo: 'login',
@@ -57,10 +57,11 @@ const getLogin = (req, res) => {
 
 
 
-
-const getProfile = (req, res) => {
+export const getProfile = (req, res) => {
 
   res.locals.layout = './layout/auth';
+
+  console.log('User Session:', req.session.user);
 
   if(!req.session.user){
   
@@ -77,15 +78,9 @@ const getProfile = (req, res) => {
 
 }
 
-
-
-
-export {
-  getHome,
-  getContact,
-  getAbout,
-  getProducts,
-  getRegister,
-  getLogin,
-  getProfile
-}
+export const changePassword = (req, res) => {
+  renderPage(res, '../pages/auth/changePassword', {
+    titulo: 'Alterar Senha',
+    mensagem: 'solicite o codigo para redefinir senha',
+  });
+};

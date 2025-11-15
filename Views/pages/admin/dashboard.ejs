@@ -1,0 +1,53 @@
+
+
+<div class="container">
+    <header class="page-header" style="text-align: center; margin-bottom: 3rem;">
+        <h1>Dashboard Administrativo</h1>
+        </header>
+
+    <div class="dashboard-grid">
+
+        <% if(session.user.role==='admin' ) { %>
+
+            <!-- Card de Vendas Totais -->
+            <div class="card dashboard-card">
+                <div class="card-icon"><span class="material-icons">attach_money</span></div>
+                <div class="card-content">
+                    <h3>Total de Vendas</h3>
+                    <p class="card-value">R$ <%= totalPriceApproved %></p>
+                    <a href="/admin/orders" class="card-link">Ver Pedidos</a>
+                </div>
+            </div>
+            <% } %>
+                <!-- Card de Usuários -->
+                <div class="card dashboard-card">
+                    <div class="card-icon"><span class="material-icons">people</span></div>
+                    <div class="card-content">
+                        <h3>Usuários Registrados</h3>
+                        <p class="card-value"><%= totalUsers%></p>
+                        <a href="/admin/users" class="card-link">Gerenciar Usuários</a>
+                    </div>
+                </div>
+
+                <!-- Card de Produtos -->
+                <div class="card dashboard-card">
+                    <div class="card-icon"><span class="material-icons">inventory_2</span></div>
+                    <div class="card-content">
+                        <h3>Produtos em Estoque</h3>
+                        <p class="card-value"><%= totalProducts %></p>
+                        <a href="/admin/inventory" class="card-link">Gerenciar Produtos</a>
+                    </div>
+                </div>
+
+                <!-- Card de Pedidos Pendentes -->
+                <div class="card dashboard-card">
+                    <div class="card-icon"><span class="material-icons">pending_actions</span></div>
+                    <div class="card-content">
+                        <h3>Pedidos Pendentes</h3>
+                        <p class="card-value"><%= totalOrders %></p>
+                        <a href="/admin/orders" class="card-link">Revisar Pedidos</a>
+                    </div>
+                </div>
+
+    </div>
+</div>
