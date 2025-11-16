@@ -14,14 +14,18 @@ import {
     getInventoryPage,
     getOrdersPage,
     getUsersPage,
-    getAddProductPage
+    getAddProductPage,
+    deleteProduct
 } from '../controllers/adminControllers.js';
 
 router.get('/dashboard', getAdminDashboard);
-router.get('/inventory', getInventoryPage);
+router.get('/inventory', generateCsrfToken, getInventoryPage);
 router.get('/orders', getOrdersPage); 
 router.get('/users', getUsersPage);
 
-router.get('/add-product',generateCsrfToken,  getAddProductPage);
+router.get('/add-product', generateCsrfToken,  getAddProductPage);
+
+router.delete('/delete-product/:id', validateCsrfToken, deleteProduct);
+
 
 export default router;

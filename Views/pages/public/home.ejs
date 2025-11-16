@@ -1,1 +1,183 @@
- 
+<% const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
+  userId=session?.user?._id || null; 
+  const favorites=(session?.user?.favorites || []).map(String); const cart=(session?.user?.cart || []).map(String); 
+%>
+
+  <style>
+    /* ===== General Section Styles ===== */
+    .in-cart i {
+      color: #28a745;
+      /* Verde para indicar que está no carrinho */
+    }
+
+    .icon-btn {
+      cursor: pointer;
+    }
+
+    .section-title {
+      margin-top: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .product-categories {
+      margin: 20px 0;
+    }
+
+    /* ===== Product Card Specific Styles ===== */
+    .category-card-content {
+      padding: 3px;
+    }
+  </style>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Móveis Rústicos que Contam Histórias</h1>
+      <a href="/products" class="btn btn-primario">Todos os Produtos</a>
+
+    </div>
+  </section>
+
+  <div class="container">
+    <h2 class="section-title">Destaques da Semana</h2>
+    <section class="featured-products">
+      <div class="product-grid">
+        <% if (items.length> 0) { %>
+          <% items.slice(0, 3).forEach(product=> { %>
+            <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'main' }) %>
+          <% }); %>
+        <% } else { %>
+          <p>Nenhum produto em destaque no momento. Volte em breve!</p>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="product-categories">
+      <h2 class="section-title">Categorias em Destaque</h2>
+      <div class="category-grid">
+        <% const categories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' ]; %>
+          <% categories.forEach(category=> { %>
+            <div class="category-card">
+              <a href="/category/<%= category %>" class="category-title-link">
+                <h3><%= category %></h3>
+              </a>
+              <div class="category-products-scroll">
+                <% const productsInCategory=allProducts.filter(p=> p.categoria === category); %>
+                  <% if (productsInCategory && productsInCategory.length> 0) { %>
+                    <% productsInCategory.forEach(product=> { %>
+                      <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'category' }) %>
+                    <% }); %>
+                  <% } else { %>
+                    <p>Nenhum produto disponível nesta categoria no momento.</p>
+                  <% } %>
+              </div>
+            </div>
+            <% }); %>
+      </div>
+    </section>
+  </div>
+
+  <%- include('../../partials/footer') %>
+
+    <div id="notification-home"
+      style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px; border-radius: 5px; color: white;">
+    </div>
+
+
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const notification = document.getElementById('notification-home');
+        const csrfToken = '<%= csrfToken %>'; // Pega o token CSRF renderizado pelo EJS
+
+        function showNotification(mensagem, isSuccess) {
+          notification.textContent = mensagem;
+          notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
+          notification.style.display = 'block';
+          setTimeout(() => {
+            notification.style.display = 'none';
+          }, 3000);
+        }
+
+        // Handle favorite clicks
+        const favoriteButtons = document.querySelectorAll('.favorite-btn');
+        favoriteButtons.forEach(button => {
+          button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const productId = button.dataset.productId;
+            if (!productId) return;
+
+            const isFavorited = button.classList.contains('favorited');
+            const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
+
+            try {
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-csrf-token': csrfToken // Envia o token no cabeçalho
+                },
+                body: JSON.stringify({
+                  productId: productId,
+                  _csrf: csrfToken // Envia o token no corpo também por segurança
+                })
+              });
+
+              const result = await response.json();
+              showNotification(result.mensagem, response.ok);
+
+              if (result.success) {
+                button.classList.toggle('favorited');
+                const icon = button.querySelector('i');
+                icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
+              }
+            } catch (error) {
+              showNotification('Erro de conexão. Tente novamente.', false);
+            }
+          });
+        });
+
+        // Handle cart clicks
+        const cartButtons = document.querySelectorAll('.add-to-cart-btn');
+        cartButtons.forEach(button => {
+          button.addEventListener('click', async (event) => {
+            event.preventDefault();
+
+            if (button.classList.contains('in-cart')) {
+              window.location.href = '/cart';
+              return;
+            }
+
+            const productId = button.dataset.productId;
+            if (!productId) return;
+
+            const url = `/auth/cart/add`;
+
+            try {
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  productId: productId,
+                  _csrf: csrfToken // Envia o token no corpo também por segurança
+                })
+              });
+
+              const result = await response.json();
+              showNotification(result.mensagem, result.success);
+
+              if (result.success) {
+                button.classList.add('in-cart');
+                const icon = button.querySelector('i');
+                icon.textContent = 'shopping_cart_checkout';
+              }
+
+            } catch (error) {
+              showNotification('Erro de conexão. Tente novamente.', false);
+            }
+          });
+        });
+      });
+    </script>

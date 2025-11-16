@@ -24,26 +24,16 @@
                     </thead>
                     <tbody>
                         <% products.forEach(product=> { %>
-                            <% const nome = product.nome || product.name || 'Sem nome' ;
-                             
-                            const rawImg=(product.imagens &&
-                                product.imagens.length) ? product.imagens[0] : null; 
-                                
-                                const imagem=rawImg ?
-                                (String(rawImg).startsWith('http') ? rawImg : ('/products/images/' + rawImg))                              : '/images/no-image.png' ; const precoVal=(product.preco !=null &&
-                                !isNaN(Number(product.preco))) ? Number(product.preco) : null;
-
-                                 const precoText=precoVal
+                            <% const nome=product.nome || product.name || 'Sem nome' ; const rawImg=(product.imagens &&
+                                product.imagens.length) ? product.imagens[0] : null; const imagem=rawImg ?
+                                (String(rawImg).startsWith('http') ? rawImg : ('/products/images/' + rawImg))
+                                : '/images/no-image.png' ; const precoVal=(product.preco !=null &&
+                                !isNaN(Number(product.preco))) ? Number(product.preco) : null; const precoText=precoVal
                                 !==null ? precoVal.toLocaleString('pt-BR', { style: 'currency' , currency: 'BRL' })
-                                : 'Preço sob consulta' ;
-
-                                 const estoque=(product.stock !=null) ? product.stock :
-                                (product.estoque != null ? product.estoque : '—' ); 
-                                
-                                const ativo=product.ativo=="true" ;
-
-                                const requerMontagem = product.requerMontagem === "on" || product.requerMontagem === true;
-                                const categoria=product.categoria || '—'; %>
+                                : 'Preço sob consulta' ; const estoque=(product.stock !=null) ? product.stock :
+                                (product.estoque !=null ? product.estoque : '—' ); const ativo=product.ativo=="true" ;
+                                const requerMontagem=product.requerMontagem==="on" || product.requerMontagem===true;
+                                const categoria=product.categoria || '—' ; %>
                                 <tr>
                                     <td>
                                         <img src="<%= imagem %>" alt="<%= nome %>" class="inventory-product-image">
@@ -80,7 +70,7 @@
                                             <a href="/product/edit/<%= product._id %>"
                                                 class="btn btn-sm btn-secundario">Editar</a>
 
-                                            <form action="/admin/products/delete" method="post"
+                                            <form action="/admin/products/delete" method="delete"
                                                 onsubmit="return confirm('Confirma a exclusão deste produto?');">
                                                 <input type="hidden" name="id" value="<%= product._id %>">
                                                 <button type="submit" class="btn btn-sm btn-remover">Excluir</button>
@@ -103,6 +93,5 @@
                     Nenhum produto encontrado. <a href="/admin/add-product">Adicione um novo produto</a>.
                 </div>
                 <% } %>
-
     </div>
 </div>
