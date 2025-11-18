@@ -28,8 +28,6 @@ router.post("/register", generateCsrfToken, async (req, res) => {
 
 router.post("/login", generateCsrfToken, async (req, res) => {
   try {
-    console.log("login");
-
     const dataLogin = await userControllers.login(req);
 
     return res

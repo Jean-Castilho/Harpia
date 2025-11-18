@@ -14,34 +14,47 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 dotenv.config();
 
-export function validationUser(dataUser) {
+export const validationUser = (data) => {
+  const errors = [];
 
-    let { name, email, phone, password } = dataUser;
+  if (!data.name || data.name.length < 3) {
+    errors.push({
+      field: "name",
+      message: "O nome é obrigatório e precisa ter no mínimo 3 caracteres.",
+    });
+  }
 
-    if (!nameRegex.test(name)) {
-        return {
-            valid: false,
-            mensagem: "Nome inválido. Apenas letras, espaços, hífens e apóstrofos são permitidos.",
-        };
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!data.email || !emailRegex.test(data.email)) {
+    errors.push({
+      field: "email",
+      message: "O email é obrigatório e precisa ser um endereço válido.",
+    });
+  }
 
-    if (!emailRegex.test(email)) {
-        return { valid: false, mensagem: "Formato de e-mail inválido." };
-    }
+  const phoneRegex = /^\d{10,11}$/; // Ex: 11987654321
+  if (!data.phone || !phoneRegex.test(data.phone)) {
+    errors.push({
+      field: "phone",
+      message:
+        "O telefone é obrigatório e deve conter 10 ou 11 dígitos numéricos.",
+    });
+  }
 
-    if (!numberRegex.test(phone)) {
-        return { valid: false, mensagem: "Formato de número de telefone inválido." };
-    }
+  if (!data.password || data.password.length < 8) {
+    errors.push({
+      field: "password",
+      message: "A senha é obrigatória e precisa ter no mínimo 8 caracteres.",
+    });
+  }
 
-    if (!passwordRegex.test(password)) {
-        return {
-            valid: false,
-            mensagem: "A senha deve ter no mínimo 8 caracteres, com uma letra maiúscula, uma minúscula e um número.",
-        };
-    }
+  return {
+    isValid: errors.length === 0,
+    errors: errors,
+  };
+};
 
-    return { valid: true, mensagem: "Todos os dados são válidos." };
-}
+
 
 export async function criarHashPass(password) {
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "12", 10);

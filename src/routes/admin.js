@@ -15,7 +15,8 @@ import {
     getOrdersPage,
     getUsersPage,
     getAddProductPage,
-    deleteProduct
+    deleteProduct,
+    getDelivery
 } from '../controllers/adminControllers.js';
 
 router.get('/dashboard', getAdminDashboard);
@@ -24,6 +25,8 @@ router.get('/orders', getOrdersPage);
 router.get('/users', getUsersPage);
 
 router.get('/add-product', generateCsrfToken,  getAddProductPage);
+
+router.get('/delivery', getDelivery);
 
 router.delete('/delete-product/:id', validateCsrfToken, deleteProduct);
 

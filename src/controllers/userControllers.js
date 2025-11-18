@@ -33,8 +33,11 @@ export default class UserControllers {
 
     const validation = validationUser(dataUser);
 
-    if (!validation.valid) {
-      return res.status(400).json({ mensagem: validation.mensagem });
+    if (!validation.isValid) {
+      return res.status(422).json({
+        message: "Dados inválidos. Por favor, verifique os campos.",
+        errors: validation.errors,
+      });
     }
     const userExists = await this.verifieldUser({
       email: dataUser.email,

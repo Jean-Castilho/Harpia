@@ -1,8 +1,22 @@
+import dotenv from "dotenv"
 import UserControllers from "../controllers/userControllers.js";
 import ProductControllers from "../controllers/productControllers.js";
+import OrderControllers from "../controllers/orderControllers.js"
+
+dotenv.config();
 
 const userControllers = new UserControllers();
 const productControllers = new ProductControllers();
+const orderControllers = new OrderControllers();
+
+
+
+const renderPage = (res, page, options = {}) => {
+  res.render(res.locals.layout, {
+    page,
+    ...options,
+  });
+}
 
 const renderAdminPage = (res, page, options = {}) => {
   res.render(res.locals.layout || './layout/admin', { page, ...options });
@@ -27,7 +41,7 @@ export const getAdminDashboard = async (req, res) => {
 
   const products = await productControllers.allProducts();
 
-  const orders = [];
+  const orders = await orderControllers.getCollection().find({}).toArray();
 
   const ordernsApproved = orders.filter(order => order.status === 'approved');
   const totalPriceApproved = parseFloat(ordernsApproved.reduce((total, order) => total + order.valor, 0).toFixed(3));
@@ -43,10 +57,6 @@ export const getAdminDashboard = async (req, res) => {
 };
 
 export const getInventoryPage = async (req, res) => {
-
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
 
   const pageOptions = {
     titulo: 'Gerenciar Estoque',
@@ -73,7 +83,7 @@ export const getOrdersPage = async (req, res) => {
   };
 
   try {
-    const orders = await orderControllers.allOrders();
+    const orders = await orderControllers.getCollection().find({}).toArray();
     const ordernsApproved = orders.filter(order => order.status === 'approved');
     pageOptions.totalApproved = ordernsApproved.length;
 
@@ -117,7 +127,7 @@ export const getEditUserPage = async (req, res) => {
   };
 
   try {
-    const user = await userControllers.getCollection.findOne({id});
+    const user = await userControllers.getCollection.findOne({ id });
 
     pageOptions.user = user;
     renderAdminPage(res, '../pages/admin/editUser', { ...pageOptions });
@@ -139,31 +149,58 @@ export const getAddProductPage = (req, res) => {
 
 
 export const deleteProduct = async (req, res) => {
-    const { id } = req.body;
-try{
-        res.redirect('/admin/inventory');
-    } catch (error) {
-        console.error('Erro ao excluir produto:', error.message);
-        res.status(error.status || 500).send('Erro ao excluir o produto.');
-    }
+  const { id } = req.body;
+  try {
+    res.redirect('/admin/inventory');
+  } catch (error) {
+    console.error('Erro ao excluir produto:', error.message);
+    res.status(error.status || 500).send('Erro ao excluir o produto.');
+  }
 };
 
-export const postEditProduct = async (req, res) => { 
+export const postEditProduct = async (req, res) => {
 
-    const { id } = req.params;
-    const { nome, slug, preco, ambientes, ativo, colecao, requerMontagem, garantia, categoria, estoque, descricao, peso } = req.body;
-    // dimensoes podem vir como campos aninhados: dimensoes[altura]
-    const altura = req.body['dimensoes[altura]'] || req.body.altura;
-    const largura = req.body['dimensoes[largura]'] || req.body.largura;
-    const profundidade = req.body['dimensoes[profundidade]'] || req.body.profundidade;
-    const existingImages = Array.isArray(req.body['existingImages[]']) ? req.body['existingImages[]'] : (req.body['existingImages[]'] ? [req.body['existingImages[]']] : []);
-    const files = [].concat(req.files || req.file || []);
-    const filenames = files.map(file => file.filename);
+  const { id } = req.params;
+  const { nome, slug, preco, ambientes, ativo, colecao, requerMontagem, garantia, categoria, estoque, descricao, peso } = req.body;
+  // dimensoes podem vir como campos aninhados: dimensoes[altura]
+  const altura = req.body['dimensoes[altura]'] || req.body.altura;
+  const largura = req.body['dimensoes[largura]'] || req.body.largura;
+  const profundidade = req.body['dimensoes[profundidade]'] || req.body.profundidade;
+  const existingImages = Array.isArray(req.body['existingImages[]']) ? req.body['existingImages[]'] : (req.body['existingImages[]'] ? [req.body['existingImages[]']] : []);
+  const files = [].concat(req.files || req.file || []);
+  const filenames = files.map(file => file.filename);
 
-    try {
-        res.redirect('/admin/inventory');
-    } catch (error) {
-        console.error('Erro ao editar produto:', error.message);
-        res.status(error.status || 500).send('Erro interno do servidor ao editar o produto.');
-    }
+  try {
+    res.redirect('/admin/inventory');
+  } catch (error) {
+    console.error('Erro ao editar produto:', error.message);
+    res.status(error.status || 500).send('Erro interno do servidor ao editar o produto.');
+  }
+};
+
+export const getDelivery = async (req, res) => {
+
+  res.locals.layout = './layout/delivery'
+
+  const pageOptions = {
+    titulo: 'Página de Entrega',
+    mensagem: 'Página de entrega é rota',
+    apiKey: process.env.GOOGLE_MAPS_API_KEY,
+    orders: [],
+  };
+
+  try {
+
+    const orders = await orderControllers.getCollection().find({}).toArray();
+
+    const ordernsShipped = orders.filter(order => order.status === 'shipped');
+    const ordernsApproved = orders.filter(order => order.status === 'approved');
+
+    pageOptions.orders = [...ordernsShipped, ...ordernsApproved] || [];
+
+    renderPage(res, '../pages/admin/delivery/dashboard', { ...pageOptions, mensagem: 'Página de entrega é rota' });
+  } catch (error) {
+    console.error('Erro ao buscar pedidos para entrega:', error);
+    renderPage(res, '../pages/admin/delivery/dashboard', { ...pageOptions, mensagem: 'Erro ao carregar pedidos para entrega.' });
+  }
 };
