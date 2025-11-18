@@ -45,8 +45,8 @@
     document.addEventListener('DOMContentLoaded', () => {
         const notification = document.getElementById('notification-fav');
 
-        function showNotification(message, isSuccess) {
-            notification.textContent = message;
+        function showNotification(mensagem, isSuccess) {
+            notification.textContent = mensagem;
             notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
             notification.style.display = 'block';
             setTimeout(() => {
@@ -72,7 +72,7 @@
                     });
 
                     const result = await response.json();
-                    showNotification(result.message, result.success);
+                    showNotification(result.mensagem, result.success);
 
                     if (result.success) {
                         const cardToRemove = document.getElementById(`favorite-card-${productId}`);

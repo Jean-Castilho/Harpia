@@ -27,7 +27,7 @@
                                     <input type="checkbox" name="selectedItems" value="<%= item._id %>"
                                         class="item-checkbox" checked
                                         style="width: fit-content; transform: scale(1.5);">
-                                        
+
 
                                     <img src="/products/images/<%= item.imagens[0] %>" alt="<%= item.nome %>">
                                     <div class="item-details">
@@ -36,7 +36,8 @@
                                         </h3>
                                         <p><strong>R$ <%= (parseFloat(item.preco)) %></strong></p>
                                     </div>
-                                    <button class="btn btn-remover" style="font-size:0.8rem; width: -webkit-fill-available;"
+                                    <button class="btn btn-remover"
+                                        style="font-size:0.8rem; width: -webkit-fill-available;"
                                         data-product-id="<%= id %>">Remover</button>
                                 </div>
                                 <% }); %>
@@ -80,8 +81,8 @@
 <script>
     const notification = document.getElementById('notification-cart');
 
-    function showNotification(message, isSuccess) {
-        notification.textContent = message;
+    function showNotification(mensagem, isSuccess) {
+        notification.textContent = mensagem;
         notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
         notification.style.display = 'block';
         setTimeout(() => {
@@ -113,8 +114,8 @@
         if (totalPriceDisplayMainEl) totalPriceDisplayMainEl.textContent = `R$ ${formattedPrice}`;
     }
 
-    async function removeCart(id, buttonElement) {
-        if (!id) {
+    async function removeCart(productId, buttonElement) {
+        if (!productId) {
             showNotification('Produto inválido.', false);
             return;
         }
@@ -124,10 +125,20 @@
             buttonElement.textContent = 'Removendo...';
         }
 
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+
         try {
-            const response = await fetch(`/cart/remove/${encodeURIComponent(id)}`, {
-                headers: { 'x-csrf-token': '<%= csrfToken %>' },
+            const response = await fetch(`/cart/remove`, {
                 method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    'x-csrf-token': csrfToken
+                },
+
+                    body: JSON.stringify(productId),
+
             });
 
             const result = await response.json().catch(() => ({
@@ -144,17 +155,17 @@
                 return;
             }
 
-            const itemElement = document.querySelector(`.cart-item[data-item-id="${id}"]`);
+            const itemElement = document.querySelector(`.cart-item[data-item-id="${productId}"]`);
             if (itemElement) {
                 itemElement.remove();
             }
 
             updateSummary(); // Atualiza o resumo localmente
-            showNotification(result.message || 'Item removido com sucesso!', true);
+            showNotification(result.mensagem || 'Item removido com sucesso!', true);
 
             // Se o carrinho ficar vazio, recarrega a página para mostrar o estado "vazio"
             if (document.querySelectorAll('.cart-item').length === 0) {
-                 window.location.reload();
+                window.location.reload();
             }
 
         } catch (err) {
@@ -171,8 +182,8 @@
         removeButtons.forEach(button => {
             button.addEventListener('click', event => {
                 event.preventDefault();
-                const id = button.getAttribute('data-product-id');
-                removeCart(id, button);
+                const productId = button.getAttribute('data-product-id');
+                removeCart(productId, button);
             });
         });
 

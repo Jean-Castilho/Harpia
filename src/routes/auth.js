@@ -5,6 +5,9 @@ import {
   validateCsrfToken,
   generateCsrfToken,
 } from "../middleware/csrfMiddleware.js";
+
+import {ensureAuthenticated} from "../middleware/authMiddleware.js"
+
 import { ObjectId } from "mongodb";
 
 const userControllers = new UserControllers();
@@ -36,7 +39,7 @@ router.post("/login", generateCsrfToken, async (req, res) => {
     .json({ mensagem: "Login realizado", user: dataLogin.user });
 });
 
-router.put("/updatedUser", validateCsrfToken, async (req, res) => {
+router.put("/updatedUser",ensureAuthenticated, validateCsrfToken, async (req, res) => {
 
   const id = req.session.user._id;
   const userUpdated = await userControllers.updateUser(id, req.body);
@@ -45,16 +48,6 @@ router.put("/updatedUser", validateCsrfToken, async (req, res) => {
 
   return res.status(200).json({ mensagem: "Usuario atualizado", userUpdated });
 });
-
-// Middleware para garantir que o usuário está autenticado
-const ensureAuthenticated = (req, res, next) => {
-  if (!req.session.user || !req.session.user._id) {
-    return res.status(401).json({ success: false, mensagem: "Acesso não autorizado. Por favor, faça login." });
-  }
-  req.userId = req.session.user._id; // Anexa o ID do usuário à requisição
-  console.log(req.userId)
-  next();
-};
 
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res) => {
   const { productId } = req.body;
@@ -161,6 +154,33 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
   } catch (error) {
     console.error("Erro ao remover produto do carrinho:", error);
     return res.status(500).json({ success: false, mensagem: "Erro ao remover produto do carrinho." });
+  }
+});
+
+router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async (req, res) => {
+  const { productId, quantity } = req.body;
+  const userId = req.userId;
+
+  if (!productId || quantity === undefined) {
+    return res.status(400).json({ success: false, mensagem: "ID do produto e quantidade são obrigatórios." });
+  }
+
+  const numQuantity = parseInt(quantity, 10);
+  if (isNaN(numQuantity) || numQuantity < 0) {
+    return res.status(400).json({ success: false, mensagem: "Quantidade inválida." });
+  }
+
+  try {
+    const updatedUser = await userControllers.updateCartQuantity(userId, productId, numQuantity);
+
+    if (updatedUser) {
+      req.session.user = updatedUser; // Atualiza a sessão
+      return res.status(200).json({ success: true, mensagem: "Quantidade atualizada com sucesso.", cart: updatedUser.cart });
+    }
+    return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
+  } catch (error) {
+    console.error("Erro ao atualizar a quantidade do produto no carrinho:", error);
+    return res.status(500).json({ success: false, mensagem: "Erro ao atualizar a quantidade do produto." });
   }
 });
 

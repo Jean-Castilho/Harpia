@@ -1,7 +1,6 @@
 <% const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
-  userId=session?.user?._id || null; 
-  const favorites=(session?.user?.favorites || []).map(String); const cart=(session?.user?.cart || []).map(String); 
-%>
+  userId=session?.user?._id || null; const favorites=(session?.user?.favorites || []).map(String); const
+  cart=(session?.user?.cart || []).map(String); %>
 
   <style>
     /* ===== General Section Styles ===== */
@@ -15,7 +14,7 @@
     }
 
     .section-title {
-      margin-top: 1.4rem;
+      margin-top: 0rem;
       margin-bottom: 1rem;
     }
 
@@ -44,31 +43,36 @@
         <% if (items.length> 0) { %>
           <% items.slice(0, 3).forEach(product=> { %>
             <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'main' }) %>
-          <% }); %>
-        <% } else { %>
-          <p>Nenhum produto em destaque no momento. Volte em breve!</p>
-        <% } %>
+              <% }); %>
+                <% } else { %>
+                  <p>Nenhum produto em destaque no momento. Volte em breve!</p>
+                  <% } %>
       </div>
     </section>
 
     <section class="product-categories">
       <h2 class="section-title">Categorias em Destaque</h2>
       <div class="category-grid">
-        <% const categories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' ]; %>
+        <% const categories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' , 'Escritorio' ]; %>
           <% categories.forEach(category=> { %>
             <div class="category-card">
               <a href="/category/<%= category %>" class="category-title-link">
-                <h3><%= category %></h3>
+                <h3>
+                  <%= category %>
+                </h3>
               </a>
               <div class="category-products-scroll">
-                <% const productsInCategory=allProducts.filter(p=> p.categoria === category); %>
+                <% const productsInCategory=items.filter(p=> p.categoria === category); %>
                   <% if (productsInCategory && productsInCategory.length> 0) { %>
                     <% productsInCategory.forEach(product=> { %>
+
+
                       <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'category' }) %>
-                    <% }); %>
-                  <% } else { %>
-                    <p>Nenhum produto disponível nesta categoria no momento.</p>
-                  <% } %>
+
+                        <% }); %>
+                          <% } else { %>
+                            <p>Nenhum produto disponível nesta categoria no momento.</p>
+                            <% } %>
               </div>
             </div>
             <% }); %>

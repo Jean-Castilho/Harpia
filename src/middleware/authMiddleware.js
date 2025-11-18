@@ -17,3 +17,13 @@ export const checkUserRole = (req, res, next) => {
   next();
 };
 
+
+// Middleware para garantir que o usuário está autenticado
+export const ensureAuthenticated = (req, res, next) => {
+  if (!req.session.user || !req.session.user._id) {
+    return res.status(401).json({ success: false, mensagem: "Acesso não autorizado. Por favor, faça login." });
+  }
+  req.userId = req.session.user._id; // Anexa o ID do usuário à requisição
+  console.log(req.userId)
+  next();
+};

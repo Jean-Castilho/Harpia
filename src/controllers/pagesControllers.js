@@ -49,6 +49,7 @@ export const getProducts = (req, res) => {
 
 
 
+
 export const getRegister = (req, res) => {
   renderPage(res, '../pages/auth/register', {
     titulo: 'Registrar Conta',
@@ -73,10 +74,10 @@ export const getProfile = (req, res) => {
 
   console.log('User Session:', req.session.user);
 
-  if(!req.session.user){
-  
+  if (!req.session.user) {
+
     return res.redirect('/login');
-    
+
   }
 
   renderPage(res, "../pages/auth/profile", {
@@ -135,24 +136,46 @@ export const getCartPage = async (req, res) => {
     totalItems: 0,
   };
 
-  if (!req.session.user) {
-    return renderPage(res, '../pages/public/cart', { ...pageOptions, mensagem: 'Você precisa estar logado para ver seu carrinho.' });
-  };
+  if (!req.session.user || !req.session.user.cart || req.session.user.cart.length === 0) {
+    return renderPage(res, '../pages/public/cart', { ...pageOptions, mensagem: 'Seu carrinho está vazio.' });
+  }
 
-  
-  const { cart: cartsProduts } = req.session.user;
-
+  const { cart: productIds } = req.session.user;
 
   try {
-    const productsCart = await productControllers.getCollection().find({ _id: { $in: cartsProduts } }).toArray();
+    // 1. Contar a quantidade de cada produto
+    const quantityMap = productIds.reduce((acc, id) => {
+      acc[id] = (acc[id] || 0) + 1;
+      return acc;
+    }, {});
 
-    console.log(productsCart)
+    const uniqueProductIds = Object.keys(quantityMap).map(id => new ObjectId(id));
 
-    renderPage(res, '../pages/public/cart', { ...pageOptions, cart: { items }, totalPrice, totalItems, mensagem: 'Seus produtos no carrinho.' });
+    // 2. Buscar os detalhes dos produtos únicos
+    const productsDetails = await productControllers.getCollection().find({ _id: { $in: uniqueProductIds } }).toArray();
+
+    // 3. Combinar detalhes do produto com a quantidade
+    const itemsWithQuantity = productsDetails.map(product => ({
+      ...product,
+      quantity: quantityMap[product._id.toString()],
+    }));
+
+    // 4. Calcular o preço total e a quantidade total de itens
+    const totalPrice = itemsWithQuantity.reduce((acc, item) => acc + (item.preco * item.quantity), 0);
+    const totalItems = productIds.length; // O total de itens é simplesmente o tamanho do array original
+
+    renderPage(res, '../pages/public/cart', {
+      ...pageOptions,
+      cart: { items: itemsWithQuantity },
+      totalPrice,
+      totalItems,
+      mensagem: 'Seus produtos no carrinho.'
+    });
+
   } catch (error) {
     console.error('Erro ao carregar o carrinho:', error);
     renderPage(res, '../pages/public/cart', { ...pageOptions, mensagem: 'Erro ao carregar seu carrinho. Tente novamente mais tarde.' });
-  };
+  }
 };
 
 
