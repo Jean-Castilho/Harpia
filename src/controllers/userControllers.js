@@ -82,6 +82,8 @@ export default class UserControllers {
   async login(req, res) {
     const { email, password } = req.body;
 
+    console.log(email,password)
+
     const user = await this.getUserByEmail(email);
     console.log(user);
     if (!user) {

@@ -1,9 +1,13 @@
 import UserControllers from "./userControllers.js";
 import { ObjectId } from "mongodb";
 import ProductControllers from "./productControllers.js";
+import OrdersControllers from "./orderControllers.js";
 
 const userControllers = new UserControllers();
 const productControllers = new ProductControllers();
+const orderControllers = new OrdersControllers();
+
+
 const renderPage = (res, page, options = {}) => {
   res.render(res.locals.layout, {
     page,
@@ -39,11 +43,15 @@ export const getAbout = (req, res) => {
   });
 };
 
-export const getProducts = (req, res) => {
+export const getProducts = async (req, res) => {
+
+  const allProducts = await productControllers.getCollection().find().toArray();
+
   renderPage(res, '../pages/public/products', {
     titulo: 'Produtos',
     estilo: 'products',
     mensagem: 'Confira nossos produtos!',
+    products: allProducts
   });
 }
 
@@ -175,6 +183,44 @@ export const getCartPage = async (req, res) => {
   } catch (error) {
     console.error('Erro ao carregar o carrinho:', error);
     renderPage(res, '../pages/public/cart', { ...pageOptions, mensagem: 'Erro ao carregar seu carrinho. Tente novamente mais tarde.' });
+  }
+};
+
+
+
+export const getOrders = async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  const pageOptions = {
+    titulo: 'Meus Pedidos',
+    orders: [],
+  
+  };
+
+  const objectIds = req.session.user.pedido;
+
+  try {
+
+    const orders = await orderControllers.getCollection().find({_id: objectIds })
+
+    if (!orders || orders.length === 0) {
+      return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: 'Você ainda não fez nenhum pedido.' });
+    }
+
+    pageOptions.orders = orders;
+
+    if (!orders || orders.length === 0) {
+      return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: 'Você ainda não fez nenhum pedido.' });
+    }
+
+    renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: 'Seu histórico de pedidos.' });
+  } catch (error) {
+
+    const apiMessage = (error && error.data && (error.data.message || error.data.msg)) || error.message || 'Erro ao carregar seu histórico de pedidos.';
+    console.error('Erro ao buscar orders para usuário:', apiMessage, error);
+    return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: apiMessage });
   }
 };
 

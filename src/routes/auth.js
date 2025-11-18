@@ -27,16 +27,25 @@ router.post("/register", generateCsrfToken, async (req, res) => {
 });
 
 router.post("/login", generateCsrfToken, async (req, res) => {
-  const dataLogin = await userControllers.login(req, res);
-  console.log(dataLogin)
-  return res
-    .cookie("token", dataLogin.token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    })
-    .status(200) // 200 OK é mais comum para um login bem-sucedido do que 201 Created
-    .json({ mensagem: "Login realizado", user: dataLogin.user });
+  try {
+    console.log("login");
+
+    const dataLogin = await userControllers.login(req);
+
+    return res
+      .cookie("token", dataLogin.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      })
+      .status(200)
+      .json({ mensagem: "Login realizado", user: dataLogin.user });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    return res
+      .status(error.statusCode || 401)
+      .json({ mensagem: error.message });
+  }
 });
 
 router.put("/updatedUser",ensureAuthenticated, validateCsrfToken, async (req, res) => {
@@ -68,7 +77,6 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
       return res.status(200).json({ success: true, mensagem: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
     }
   } catch (error) {
-    console.error('[FAVORITES_ADD] Erro durante a operação no banco de dados:', error);
     return res.status(500).json({ success: false, mensagem: "Ocorreu um erro no servidor ao tentar adicionar o favorito." });
   }
   return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
@@ -103,10 +111,6 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
   const { productId } = req.body;
   const userId = req.userId;
 
-  // Logs para depuração
-  console.log(`[CART_ADD] Tentando adicionar produto: ${productId} para o usuário: ${userId}`);
-  console.log(`[CART_ADD] Tipo do userId: ${typeof userId}`);
-
   if (!productId) {
     return res.status(400).json({ success: false, mensagem: "ID do produto é obrigatório." });
   }
@@ -117,8 +121,6 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
       { $addToSet: { cart: productId } },
       { returnDocument: 'after' }
     );
-
-    console.log('[CART_ADD] Resultado da busca no banco:', updatedUser ? 'Usuário encontrado e atualizado.' : 'Usuário NÃO encontrado.');
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão

@@ -23,8 +23,6 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const allProducts = await productControllers.allProducts();
 
-  console.log(allProducts);
-
   res.status(201).json(allProducts);
 });
 

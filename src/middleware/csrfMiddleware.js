@@ -45,9 +45,8 @@ export const validateCsrfToken = (req, res, next) => {
       "Ação não permitida. Token de segurança inválido ou ausente.",
       403 // 403 Forbidden é o status code apropriado;
     );
-  }
-
-  // Se a validação for bem-sucedida, continua para o próximo middleware ou controller
+  }// Se a validação for bem-sucedida, continua para o próximo middleware ou controller
+  
   next();
 };
 
