@@ -46,7 +46,7 @@ router.post("/login", generateCsrfToken, async (req, res) => {
   }
 });
 
-router.put("/updatedUser",ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.put("/updatedUser", ensureAuthenticated, validateCsrfToken, async (req, res) => {
 
   const id = req.session.user._id;
   const userUpdated = await userControllers.updateUser(id, req.body);
@@ -54,6 +54,12 @@ router.put("/updatedUser",ensureAuthenticated, validateCsrfToken, async (req, re
   req.session.user = userUpdated;
 
   return res.status(200).json({ mensagem: "Usuario atualizado", userUpdated });
+});
+
+router.put("/updatedProduct", ensureAuthenticated,validateCsrfToken, async (req, res) => {
+
+  const userUpdated = await productController.updatedProduct(req);
+
 });
 
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res) => {
@@ -79,6 +85,7 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
   }
   return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
 });
+
 
 router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (req, res) => {
   const { productId } = req.body;
@@ -131,7 +138,6 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
   }
 });
 
-
 router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, res) => {
   const { productId } = req.body;
 
@@ -183,7 +189,6 @@ router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async 
     return res.status(500).json({ success: false, mensagem: "Erro ao atualizar a quantidade do produto." });
   }
 });
-
 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {

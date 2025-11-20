@@ -2,14 +2,11 @@ import express from "express";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import {
-  generateCsrfToken,
-  validateCsrfToken
-} from '../middleware/csrfMiddleware.js';
+import { validateCsrfToken } from '../middleware/csrfMiddleware.js';
 
 import ProductControllers from "../controllers/productControllers.js";
 import { getGridFSBucket } from "../config/db.js";
-
+import { handleResponse } from "../utils/handleResponse.js";
 
 const uploadDir = path.resolve(process.cwd(), 'uploads');
 
@@ -21,16 +18,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const allProducts = await productControllers.allProducts();
-
-  res.status(201).json(allProducts);
+  handleResponse(res, productControllers.allProducts());
 });
 
-router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res) => {
-  const newProduct = await productControllers.uploadProductAndImage(req,res);
-
-
-  res.status(201).json(newProduct);
+router.post("/", upload.array('imagens', 5), validateCsrfToken, async (req, res) => {
+ handleResponse(res, productControllers.uploadProductAndImage(req), 201);
 });
 
 // Rota para servir imagens do GridFS

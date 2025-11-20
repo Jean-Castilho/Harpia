@@ -223,5 +223,3 @@ export const getOrders = async (req, res) => {
     return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: apiMessage });
   }
 };
-
-

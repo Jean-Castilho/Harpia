@@ -3,9 +3,7 @@
 
 
 .cart-items-column{
-
-    min-width: 45vw;
-
+   width: 500px;
 }
 
 
@@ -63,7 +61,7 @@
 .cart-content {
     display: flex;
     align-items: center;
-
+    gap: 10rem;
     justify-content: space-evenly;
     flex-direction: row;
 }
