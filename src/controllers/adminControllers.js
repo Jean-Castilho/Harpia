@@ -1,4 +1,5 @@
 import dotenv from "dotenv"
+import { ObjectId } from "mongodb"; 
 import UserControllers from "../controllers/userControllers.js";
 import ProductControllers from "../controllers/productControllers.js";
 import OrderControllers from "../controllers/orderControllers.js"
@@ -61,6 +62,7 @@ export const getInventoryPage = async (req, res) => {
   const pageOptions = {
     titulo: 'Gerenciar Estoque',
     products: [],
+    csrfToken: res.locals.csrfToken
   };
 
   try {
@@ -127,7 +129,9 @@ export const getEditUserPage = async (req, res) => {
   };
 
   try {
-    const user = await userControllers.getCollection.findOne({ id });
+    const user = await userControllers.getUserById(id);
+
+    console.log(user);
 
     pageOptions.user = user;
     renderAdminPage(res, '../pages/admin/editUser', { ...pageOptions });
@@ -138,6 +142,80 @@ export const getEditUserPage = async (req, res) => {
 
 };
 
+export const updateUser = async (req, res) => {
+  
+  const { id } = req.params;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await userControllers.updateUser(id, updateData);
+    res.status(200).json({
+      success: true,
+      message: 'Usuário atualizado com sucesso!',
+      data: updatedUser
+    });
+  } catch (error) {
+    console.error('Erro ao editar usuário:', error.message);
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || 'Erro interno do servidor ao editar o usuário.'
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await userControllers.deleteUser(id);
+    res.status(200).json({ success: true, message: 'Usuário excluído com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao excluir usuário:', error.message);
+    res.status(500).json({ success: false, message: 'Erro ao excluir o usuário.' });
+  }
+};
+
+export const getEditProductPage = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await productControllers.getProductById(id);
+
+    if (!product) {
+      return res.status(404).send('Produto não encontrado');
+    }
+
+    // Normaliza os valores para o formulário
+    const formValues = {
+      nomeVal: product.nome || '',
+      slugVal: product.slug || '',
+      precoVal: product.preco || '',
+      categoriaVal: product.categoria || '',
+      colecaoVal: product.colecao || '',
+      descricaoVal: product.descricao || '',
+      ambientesVal: Array.isArray(product.ambientes) ? product.ambientes.join(', ') : (product.ambientes || ''),
+      requerMontagemChecked: product.requerMontagem ? 'checked' : '',
+      ativoChecked: product.ativo ? 'checked' : '',
+      garantiaVal: product.garantia || '',
+      pesoVal: product.peso || '',
+      estoqueVal: product.estoque || '',
+      alturaVal: product.dimensoes?.altura || '',
+      larguraVal: product.dimensoes?.largura || '',
+      profundidadeVal: product.dimensoes?.profundidade || '',
+    };
+
+    renderAdminPage(res, '../pages/admin/editProduct', {
+      titulo: 'Editar Produto',
+      product,
+      ...formValues,
+      csrfToken: res.locals.csrfToken
+    });
+
+  } catch (error) {
+    console.error('Erro ao carregar página de edição:', error);
+    res.status(500).send('Erro interno do servidor.');
+  }
+};
+
 //if user == admin;
 export const getAddProductPage = (req, res) => {
   renderAdminPage(res, '../pages/admin/addProduct', {
@@ -145,36 +223,32 @@ export const getAddProductPage = (req, res) => {
   });
 };
 
-
-
-
 export const deleteProduct = async (req, res) => {
   const { id } = req.body;
+  console.log(id)
   try {
-    res.redirect('/admin/inventory');
+    await productControllers.deleteProduct(id);
+    res.status(200).json({ success: true, message: 'Produto excluído com sucesso.' });
   } catch (error) {
     console.error('Erro ao excluir produto:', error.message);
-    res.status(error.status || 500).send('Erro ao excluir o produto.');
+    res.status(500).json({ success: false, message: 'Erro ao excluir o produto.' });
   }
 };
 
 export const postEditProduct = async (req, res) => {
-
-  const { id } = req.params;
-  const { nome, slug, preco, ambientes, ativo, colecao, requerMontagem, garantia, categoria, estoque, descricao, peso } = req.body;
-  // dimensoes podem vir como campos aninhados: dimensoes[altura]
-  const altura = req.body['dimensoes[altura]'] || req.body.altura;
-  const largura = req.body['dimensoes[largura]'] || req.body.largura;
-  const profundidade = req.body['dimensoes[profundidade]'] || req.body.profundidade;
-  const existingImages = Array.isArray(req.body['existingImages[]']) ? req.body['existingImages[]'] : (req.body['existingImages[]'] ? [req.body['existingImages[]']] : []);
-  const files = [].concat(req.files || req.file || []);
-  const filenames = files.map(file => file.filename);
-
   try {
-    res.redirect('/admin/inventory');
+    const updatedProduct = await productControllers.updateProduct(req);
+    res.status(200).json({
+      success: true,
+      message: 'Produto atualizado com sucesso!',
+      data: updatedProduct
+    });
   } catch (error) {
     console.error('Erro ao editar produto:', error.message);
-    res.status(error.status || 500).send('Erro interno do servidor ao editar o produto.');
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || 'Erro interno do servidor ao editar o produto.'
+    });
   }
 };
 

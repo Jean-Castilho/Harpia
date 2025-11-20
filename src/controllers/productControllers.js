@@ -11,7 +11,7 @@ export default class ProductController {
   }
 
   async allProducts() {
-    return this.getCollection().find({}).toArray();
+    return await this.getCollection().find({}).toArray();
   }
 
   /**
@@ -45,8 +45,7 @@ export default class ProductController {
       }
     }
   }
-  // Versão simplificada: não usa endereço, só campos essenciais + imagens
-  async uploadProductAndImage(req, res) {
+  async uploadProductAndImage(req) {
 
     const files = req.files || [];
 
@@ -131,6 +130,9 @@ export default class ProductController {
 
     // retorna o documento criado já com imagens convertidas (via getProductById)
     const created = await this.getProductById(result.insertedId.toString());
+
+    console.log(created);
+
     return created;
   }
 
@@ -145,6 +147,121 @@ export default class ProductController {
     }
 
     return product;
+  }
+
+  async updateProduct(req) {
+    const { id } = req.params;
+    console.log(id)
+    const { body, files } = req;
+
+    if (!ObjectId.isValid(id)) {
+      const err = new Error("ID de produto inválido.");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const bucket = getGridFSBucket();
+    const existingProduct = await this.getProductById(id);
+
+    if (!existingProduct) {
+      const err = new Error("Produto não encontrado.");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    // Gerenciar imagens novas
+    let newImages = [];
+    if (files && files.length > 0) {
+      const uploadPromises = files.map(file => this.#uploadFileWithRetry(file, bucket));
+      const results = await Promise.allSettled(uploadPromises);
+      newImages = results
+        .filter(res => res.status === 'fulfilled')
+        .map(res => res.value);
+    }
+
+    // Gerenciar imagens existentes
+    const keptImages = body.existingImages ? (Array.isArray(body.existingImages) ? body.existingImages : [body.existingImages]) : [];
+    
+    // Combinar imagens
+    const finalImages = [...keptImages, ...newImages];
+
+    const productData = {
+      nome: body.nome,
+      slug: body.slug,
+      preco: parseFloat(body.preco),
+      imagens: finalImages,
+      estilo: body.estilo,
+      colecao: body.colecao,
+      estoque: body.estoque,
+      garantia: body.garantia,
+      ativo: body.ativo,
+      categoria: body.categoria,
+      descricao: body.descricao,
+      dimensoes: {
+        altura: body.altura,
+        largura: body.largura,
+        profundidade: body.profundidade,
+      },
+      peso: body.peso,
+    };
+
+    await this.getCollection().updateOne(
+      { _id: new ObjectId(id) },
+      { $set: productData }
+    );
+
+    return await this.getProductById(id);
+  }
+
+  async deleteProduct(id) {
+    if (!ObjectId.isValid(id)) {
+      throw new Error("ID de produto inválido.");
+    }
+
+    const objectId = new ObjectId(id);
+    const bucket = getGridFSBucket();
+
+    // 1. Encontrar o produto para obter a lista de imagens
+    const product = await this.getCollection().findOne({ _id: objectId });
+
+    if (!product) {
+      throw new Error("Produto não encontrado.");
+    }
+
+    // 2. Se o produto tiver imagens, deletá-las do GridFS
+    if (product.imagens && product.imagens.length > 0) {
+      const db = getDataBase();
+      const filesCollection = db.collection('fs.files');
+
+      // Mapeia nomes de arquivos para promises de busca e exclusão
+      const deletePromises = product.imagens.map(async (filename) => {
+        try {
+          // Encontra o arquivo no GridFS pelo nome
+          const imageFile = await filesCollection.findOne({ filename: filename });
+          if (imageFile) {
+            // Deleta o arquivo usando o _id do GridFS
+            await bucket.delete(imageFile._id);
+            console.log(`Imagem ${filename} deletada com sucesso.`);
+          } else {
+            console.warn(`Aviso: Imagem ${filename} não encontrada no GridFS.`);
+          }
+        } catch (error) {
+          // Loga o erro mas não para o processo para que outras imagens possam ser deletadas
+          console.error(`Erro ao deletar a imagem ${filename}:`, error);
+        }
+      });
+
+      // Espera todas as operações de exclusão de imagem terminarem
+      await Promise.all(deletePromises);
+    }
+
+    // 3. Após deletar as imagens, deletar o documento do produto
+    const result = await this.getCollection().deleteOne({ _id: objectId });
+    if (result.deletedCount === 0) {
+      throw new Error("Não foi possível deletar o produto.");
+    }
+
+    return result;
   }
 
 }

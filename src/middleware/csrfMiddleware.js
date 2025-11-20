@@ -23,7 +23,7 @@ export const generateCsrfToken = (req, res, next) => {
  */
 export const validateCsrfToken = (req, res, next) => {
   // O token pode vir do corpo da requisição (formulários) ou de um cabeçalho (AJAX);
-  const receivedToken = req.body._csrf || req.headers["x-csrf-token"];
+  const receivedToken = req.headers["x-csrf-token"] || (req.body && req.body._csrf);
   const sessionToken = req.session.csrfToken;
 
   console.log("receivedToken", receivedToken);
@@ -63,14 +63,21 @@ export const authMiddleware = (req, res, next) => {
   }
 
   if (!token) {
-    return {res, mensagem:"Acesso negado. Nenhum token fornecido."};
+
+    return res.status(statusCode).json({
+      success: false,
+      mensagem: "Acesso negado. Nenhum token fornecido."
+    });
   }
 
   const decoded = verificarToken(token);
   if (!decoded) {
-    return {res, mensagem:"Token inválido ou expirado."};
-  }
-  // Adiciona os dados do usuário decodificados ao objeto de requisição para uso posterior
+
+    return res.status(statusCode).json({
+      success: false,
+      mensagem: "Token inválido ou expirado."
+    });
+  }// Adiciona os dados do usuário decodificados ao objeto de requisição para uso posterior
 
   next();
 };

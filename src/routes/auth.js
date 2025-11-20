@@ -186,7 +186,6 @@ router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async 
   }
 });
 
-
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {

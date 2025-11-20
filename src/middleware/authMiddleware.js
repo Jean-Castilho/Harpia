@@ -30,3 +30,10 @@ export const ensureAuthenticated = (req, res, next) => {
   console.log(req.userId)
   next();
 };
+
+export const ensureAdmin = (req, res, next) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Acesso negado. Somente administradores podem realizar esta ação.' });
+  }
+  next();
+};

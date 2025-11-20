@@ -129,29 +129,69 @@ export default class UserControllers {
     return await this.getCollection().findOne({ "email.endereco": normalized });
   }
 
-  async updateUser(id, updatedUser) {
+  async getUserById(id) {
+     if (!id) return null;
 
+    return await this.getCollection().findOne({ _id: new ObjectId(id) });
+  
+  }
+
+  async updateUser(id, updateData) {
     if (!ObjectId.isValid(id)) {
-      return { messagem: "ID de usuário inválido" };
+      throw new Error("ID de usuário inválido");
     }
 
     const objectId = new ObjectId(id);
 
-    const safeUpdate = {
-      name: updatedUser.name,
-      phone: { verified: false, number: updatedUser.phone },
-      email: { verified: false, endereco: updatedUser.email },
-    };
+    // Constrói o objeto de atualização dinamicamente
+    const updateFields = {};
+    if (updateData.name) {
+      updateFields.name = updateData.name;
+    }
+    if (updateData.email) {
+      // Atualiza apenas o endereço de e-mail, mantendo o status de verificação
+      updateFields['email.endereco'] = updateData.email;
+    }
+    if (updateData.role) {
+      // Adicione validação de role se necessário
+      const allowedRoles = ['user', 'stockist', 'delivery', 'admin'];
+      if (allowedRoles.includes(updateData.role)) {
+        updateFields.role = updateData.role;
+        
+      } else {
+        throw new Error("Tipo de usuário (role) inválido.");
+      }
+    }
+    
+    // Adiciona o campo updatedAt
+    updateFields.updatedAt = new Date();
 
-    if (safeUpdate._id) delete safeUpdate._id;
+    if (Object.keys(updateFields).length === 0) {
+      throw new Error("Nenhum dado para atualizar foi fornecido.");
+    }
 
-    const resUpdated = await this.getCollection().updateOne(
+    const result = await this.getCollection().updateOne(
       { _id: objectId },
-      { $set: safeUpdate }
+      { $set: updateFields }
     );
 
-    console.log(resUpdated);
+    if (result.matchedCount === 0) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
 
-    return await await this.getCollection().findOne({ _id: objectId });
+    return await this.getUserById(id);
+  }
+
+  async deleteUser(id) {
+    if (!ObjectId.isValid(id)) {
+      throw new Error("ID de usuário inválido");
+    }
+    const objectId = new ObjectId(id);
+    const result = await this.getCollection().deleteOne({ _id: objectId });
+
+    if (result.deletedCount === 0) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
+    return { message: "Usuário excluído com sucesso." };
   }
 }
