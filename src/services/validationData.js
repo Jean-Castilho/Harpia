@@ -7,10 +7,9 @@ const nameRegex = /^[\p{L}\p{M}'\s-]+$/u;
 // Regex padrão para e-mail
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Regex flexível para números de telefone: aceita +, espaços, parênteses e hífens
-const numberRegex = /^\+?[\d\s()-]+$/;
+const phoneRegex = /^\+?[\d\s()-]+$/;
 // Regex para senhas (mantida como no original para robustez)// Exige minúscula, maiúscula E número, mas sem símbolos.
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
 
 dotenv.config();
 
@@ -31,8 +30,7 @@ export const validationUser = (data) => {
       message: "O email é obrigatório e precisa ser um endereço válido.",
     });
   }
-
-  const phoneRegex = /^\d{10,11}$/; // Ex: 11987654321
+  const phoneRegex = /^\+?[\d\s()-]+$/;
   if (!data.phone || !phoneRegex.test(data.phone)) {
     errors.push({
       field: "phone",
@@ -54,8 +52,6 @@ export const validationUser = (data) => {
   };
 };
 
-
-
 export async function criarHashPass(password) {
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "12", 10);
   const salt = await bcrypt.genSalt(saltRounds);
@@ -73,7 +69,6 @@ export function criarToken(payload) {
 
   return jwt.sign(payload, secret, { expiresIn });
 }
-
 
 export async function compararSenha(password, hashedPassword) {
   const match = await bcrypt.compare(password, hashedPassword);

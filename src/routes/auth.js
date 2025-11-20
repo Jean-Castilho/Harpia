@@ -13,22 +13,26 @@ import { ObjectId } from "mongodb";
 const userControllers = new UserControllers();
 const router = express.Router();
 
-router.post("/register", generateCsrfToken, async (req, res) => {
-  const creatUser = await userControllers.creatUser(req, res);
+router.post("/register", generateCsrfToken, async (req, res, next) => {
+  try {
+    const creatUser = await userControllers.creatUser(req, res);
 
-  return res
-    .cookie("token", creatUser.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use 'secure' apenas em produção
-      sameSite: "strict",
-    })
-    .json({ mensagem: "Usuário criado com sucesso.", user: creatUser.user })
-    .status(200);
+    return res
+      .cookie("token", creatUser.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Use 'secure' apenas em produção
+        sameSite: "strict",
+      })
+      .status(201) // 201 Created é mais apropriado aqui
+      .json({ message: "Usuário criado com sucesso.", user: creatUser.user });
+  } catch (error) {
+    next(error); // Passa o erro para o middleware de erro
+  }
 });
 
-router.post("/login", generateCsrfToken, async (req, res) => {
+router.post("/login", generateCsrfToken, async (req, res, next) => {
   try {
-    const dataLogin = await userControllers.login(req);
+    const dataLogin = await userControllers.login(req, res);
 
     return res
       .cookie("token", dataLogin.token, {
@@ -37,50 +41,52 @@ router.post("/login", generateCsrfToken, async (req, res) => {
         sameSite: "strict",
       })
       .status(200)
-      .json({ mensagem: "Login realizado", user: dataLogin.user });
+      .json({ message: "Login realizado", user: dataLogin.user });
   } catch (error) {
-    console.error("Login error:", error.message);
-    return res
-      .status(error.statusCode || 401)
-      .json({ mensagem: error.message });
+    next(error); // Passa o erro para o middleware de erro
   }
 });
 
-router.put("/updatedUser",ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.put("/updatedUser", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
+  try {
+    const id = req.session.user._id;
+    const userUpdated = await userControllers.updateUser(id, req.body);
 
-  const id = req.session.user._id;
-  const userUpdated = await userControllers.updateUser(id, req.body);
+    req.session.user = userUpdated;
 
-  req.session.user = userUpdated;
-
-  return res.status(200).json({ mensagem: "Usuario atualizado", userUpdated });
+    return res.status(200).json({ message: "Usuario atualizado", userUpdated });
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
 
   if (!productId) {
-    return res.status(400).json({ success: false, mensagem: "ID do produto é obrigatório." });
+    // Usando o fluxo de erro padronizado
+    return next(new GeneralError("ID do produto é obrigatório.", 400));
   }
 
   try {
     const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(req.userId) },
       { $addToSet: { favorites: productId } },
-      { returnDocument: 'after' }
+      { returnDocument: "after" }
     );
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, mensagem: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
+      return res.status(200).json({ success: true, message: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
     }
+    // Se não encontrou o usuário, lança um erro 404
+    throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
-    return res.status(500).json({ success: false, mensagem: "Ocorreu um erro no servidor ao tentar adicionar o favorito." });
+    next(error);
   }
-  return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
 });
 
-router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
 
   if (!productId) {
@@ -91,21 +97,20 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
     const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(req.userId) },
       { $pull: { favorites: productId } },
-      { returnDocument: 'after' }
+      { returnDocument: "after" }
     );
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, mensagem: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
+      return res.status(200).json({ success: true, message: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
     }
-    return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
+    throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
-    console.error('[FAVORITES_REMOVE] Erro durante a operação no banco de dados:', error);
-    return res.status(500).json({ success: false, mensagem: "Ocorreu um erro no servidor ao tentar remover o favorito." });
+    next(error);
   }
 });
 
-router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
   const userId = req.userId;
 
@@ -117,22 +122,21 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
     const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $addToSet: { cart: productId } },
-      { returnDocument: 'after' }
+      { returnDocument: "after" }
     );
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, mensagem: "Produto adicionado ao carrinho.", cart: updatedUser.cart });
+      return res.status(200).json({ success: true, message: "Produto adicionado ao carrinho.", cart: updatedUser.cart });
     }
-    return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
+    throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
-    console.error('[CART_ADD] Erro durante a operação no banco de dados:', error);
-    return res.status(500).json({ success: false, mensagem: "Ocorreu um erro no servidor ao tentar adicionar ao carrinho." });
+    next(error);
   }
 });
 
 
-router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
 
   if (!productId) {
@@ -143,21 +147,20 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
     const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(req.userId) },
       { $pull: { cart: productId } },
-      { returnDocument: 'after' }
+      { returnDocument: "after" }
     );
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, mensagem: "Produto removido do carrinho.", cart: updatedUser.cart });
+      return res.status(200).json({ success: true, message: "Produto removido do carrinho.", cart: updatedUser.cart });
     }
-    return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
+    throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
-    console.error("Erro ao remover produto do carrinho:", error);
-    return res.status(500).json({ success: false, mensagem: "Erro ao remover produto do carrinho." });
+    next(error);
   }
 });
 
-router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async (req, res) => {
+router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId, quantity } = req.body;
   const userId = req.userId;
 
@@ -175,12 +178,11 @@ router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async 
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, mensagem: "Quantidade atualizada com sucesso.", cart: updatedUser.cart });
+      return res.status(200).json({ success: true, message: "Quantidade atualizada com sucesso.", cart: updatedUser.cart });
     }
-    return res.status(404).json({ success: false, mensagem: "Usuário não encontrado." });
+    throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
-    console.error("Erro ao atualizar a quantidade do produto no carrinho:", error);
-    return res.status(500).json({ success: false, mensagem: "Erro ao atualizar a quantidade do produto." });
+    next(error);
   }
 });
 

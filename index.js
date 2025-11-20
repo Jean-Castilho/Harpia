@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 
 // Importa os middlewares CSRF
 import { generateCsrfToken } from './src/middleware/csrfMiddleware.js';
+import handleErrors from './src/middleware/errorHandler.js'
 
 
 const app = express();
@@ -67,13 +68,13 @@ app.use((err, req, res, next) => {
     return next(err);
 });
 
-app.use(handleErrors)
-
 
 //sobrecarga de responsabilidade no index.js
 import Server from "./src/server.js"
 import { connectDataBase, closeDataBase } from './src/config/db.js';
-import handleErrors from './src/middleware/errorHandler.js'
+
+// Configuração das rotas da aplicação
+Server(app);
 
 // Função para iniciar o servidor de forma controlada
 const start = async () => {
@@ -94,6 +95,9 @@ const start = async () => {
     }
 };
 
+// Middleware de tratamento de erros (deve ser o último middleware a ser usado)
+app.use(handleErrors)
+
 process.on("SIGINT", async () => {
     console.log("Recebido sinal de encerramento. Fechando conexões...");
     await closeDataBase();
@@ -103,6 +107,3 @@ process.on("SIGINT", async () => {
 
 // Inicia a aplicação
 start();
-
-// Configuração das rotas da aplicação
-Server(app);

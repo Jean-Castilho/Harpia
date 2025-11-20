@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
-import { sendError } from "../services/responseService.js";
+import { GeneralError } from "../errors/customErrors.js";
 
 /**
  * Middleware para gerar e expor um token CSRF para os templates.
@@ -40,13 +40,13 @@ export const validateCsrfToken = (req, res, next) => {
     });
 
     // Para requisições de API, envie um erro JSON. Para outras, pode redirecionar.
-    return sendError(
-      res,
+    // Lança um erro que será capturado pelo errorHandler.
+    return next(new GeneralError(
       "Ação não permitida. Token de segurança inválido ou ausente.",
-      403 // 403 Forbidden é o status code apropriado;
-    );
-  }// Se a validação for bem-sucedida, continua para o próximo middleware ou controller
-  
+      403, // 403 Forbidden
+    ));
+  } // Se a validação for bem-sucedida, continua para o próximo middleware ou controller
+
   next();
 };
 

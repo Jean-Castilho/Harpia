@@ -26,11 +26,13 @@ router.get("/", async (req, res) => {
   res.status(201).json(allProducts);
 });
 
-router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res) => {
-  const newProduct = await productControllers.uploadProductAndImage(req,res);
-
-
-  res.status(201).json(newProduct);
+router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res, next) => {
+  try {
+    const newProduct = await productControllers.uploadProductAndImage(req, res);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Rota para servir imagens do GridFS

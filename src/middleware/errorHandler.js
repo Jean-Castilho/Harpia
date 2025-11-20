@@ -1,4 +1,4 @@
-import { GeneralError } from "../errors/customErrors.js";
+import { GeneralError, ValidationError } from "../errors/customErrors.js";
 
 // This will be our simple logger for now
 const logError = (err) => {
@@ -21,10 +21,19 @@ const handleErrors = (err, req, res, next) => {
   // Log the error first
   logError(err);
 
-  if (err instanceof GeneralError) {
+  // Se for um erro de validação, inclua os detalhes dos campos
+  if (err instanceof ValidationError) {
     return res.status(err.getCode()).json({
       success: false,
       message: err.message,
+      errors: err.errors, // Adiciona o array de erros na resposta
+    });
+  }
+
+  if (err instanceof GeneralError) {
+    return res.status(err.getCode()).json({
+      success: false,
+      message: err.message
     });
   }
 

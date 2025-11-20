@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDataBase } from "../config/db.js";
+import { GeneralError } from "../errors/customErrors.js";
 import { getGridFSBucket } from "../config/db.js";
 import { Readable } from "stream";
 
@@ -50,7 +51,7 @@ export default class ProductController {
     const files = req.files || [];
 
     if (!files || files.length === 0) {
-      return res.status(400).json({ mensagem: "Nenhum arquivo enviado." });
+      throw new GeneralError("Nenhum arquivo enviado.", 400);
     }
 
     const bucket = getGridFSBucket();
@@ -74,7 +75,7 @@ export default class ProductController {
 
     // Se qualquer upload falhar, não crie o produto e retorne um erro.
     if (failedUploads.length > 0) {
-      return res.status(500).json({ mensagem: `Não foi possível salvar o produto. Falha no upload dos seguintes arquivos: ${failedUploads.join(', ')}` });
+      throw new GeneralError(`Falha no upload dos seguintes arquivos: ${failedUploads.join(', ')}`, 500);
     }
 
     const productData = {

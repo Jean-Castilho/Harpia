@@ -1,7 +1,11 @@
 import { ObjectId } from "mongodb";
 
 import { getDataBase } from "../config/db.js";
-import { NotFoundError, UnauthorizedError } from "../errors/customErrors.js";
+import {
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "../errors/customErrors.js";
 
 import {
   validationUser,
@@ -34,19 +38,20 @@ export default class UserControllers {
     const validation = validationUser(dataUser);
 
     if (!validation.isValid) {
-      return res.status(422).json({
-        message: "Dados inválidos. Por favor, verifique os campos.",
-        errors: validation.errors,
-      });
+      // Lança um erro de validação com os detalhes dos campos inválidos
+      throw new ValidationError(
+        "Dados inválidos. Por favor, verifique os campos.",
+        validation.errors,
+      );
     }
     const userExists = await this.verifieldUser({
       email: dataUser.email,
       phone: dataUser.phone,
     });
 
-    if (userExists) {
-      return res.status(409).json({ mensagem: "Usuário já existe." });
-    };
+    if (userExists) { // 409 Conflict
+      throw new GeneralError("Usuário já existe.", 409);
+    }
     dataUser.password = await criarHashPass(dataUser.password);
 
     const userCreated = {
@@ -89,13 +94,13 @@ export default class UserControllers {
 
     const user = await this.getUserByEmail(email);
     console.log(user);
-    if (!user) {
-      return res.status(402).json({ mensagem: "Usuário nao encontrado." });
+    if (!user) { // 401 Unauthorized é mais apropriado para falha de login
+      throw new UnauthorizedError("Email ou senha incorretos.");
     }
     const ismatch = await compararSenha(password, user.password);
 
-    if (!ismatch) {
-      return res.status(409).json({ mensagem: "Email ou senha incorretos." });
+    if (!ismatch) { // 401 Unauthorized
+      throw new UnauthorizedError("Email ou senha incorretos.");
     }
 
     // Mantém o campo aninhado como "email.endereço"
