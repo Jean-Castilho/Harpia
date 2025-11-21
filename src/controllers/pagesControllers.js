@@ -7,145 +7,162 @@ const userControllers = new UserControllers();
 const productControllers = new ProductControllers();
 const orderControllers = new OrdersControllers();
 
-
 const renderPage = (res, page, options = {}) => {
   res.render(res.locals.layout, {
     page,
     ...options,
   });
-}
+};
 
 export const getHome = async (req, res) => {
+  const products = await productControllers
+    .getCollection()
+    .find()
+    .limit(10)
+    .toArray();
 
-  const products = await productControllers.getCollection().find().limit(10).toArray();
-
-  renderPage(res, '../pages/public/home', {
-    titulo: 'Encanto Rústico',
-    estilo: 'home',
-    mensagem: 'Bem-vindo à nossa loja de móveis e decorações!',
+  renderPage(res, "../pages/public/home", {
+    titulo: "Encanto Rústico",
+    estilo: "home",
+    mensagem: "Bem-vindo à nossa loja de móveis e decorações!",
     products: products,
   });
 };
 
 export const getContact = (req, res) => {
-  renderPage(res, '../pages/public/contact', {
-    titulo: 'Contato',
-    estilo: 'contact',
-    mensagem: 'Entre em contato conosco!',
+  renderPage(res, "../pages/public/contact", {
+    titulo: "Contato",
+    estilo: "contact",
+    mensagem: "Entre em contato conosco!",
   });
 };
 
 export const getAbout = (req, res) => {
-  renderPage(res, '../pages/public/about', {
-    titulo: 'Sobre Nós',
-    estilo: 'about',
-    mensagem: 'Saiba mais sobre nossa loja!',
+  renderPage(res, "../pages/public/about", {
+    titulo: "Sobre Nós",
+    estilo: "about",
+    mensagem: "Saiba mais sobre nossa loja!",
   });
 };
 
 export const getProducts = async (req, res) => {
-
   const allProducts = await productControllers.getCollection().find().toArray();
 
-  renderPage(res, '../pages/public/products', {
-    titulo: 'Produtos',
-    estilo: 'products',
-    mensagem: 'Confira nossos produtos!',
-    products: allProducts
-  });
-}
-
-
-
-
-export const getRegister = (req, res) => {
-  renderPage(res, '../pages/auth/register', {
-    titulo: 'Registrar Conta',
-    estilo: 'register',
-    mensagem: 'Crie sua conta para começar a comprar!',
-  });
-}
-
-export const getLogin = (req, res) => {
-  renderPage(res, "../pages/auth/login", {
-    titulo: 'Realizar Login',
-    estilo: 'login',
-    mensagem: 'seja Bem vindo de volta...'
-  });
-}
-
-
-
-export const getProfile = (req, res) => {
-
-  res.locals.layout = './layout/auth';
-
-  console.log('User Session:', req.session.user);
-
-  if (!req.session.user) {
-
-    return res.redirect('/login');
-
-  }
-
-  renderPage(res, "../pages/auth/profile", {
-    titulo: 'configuarçao',
-    estilo: 'peofile',
-    mensagem: 'sessao profile...',
-
-  });
-
-}
-
-export const changePassword = (req, res) => {
-  renderPage(res, '../pages/auth/changePassword', {
-    titulo: 'Alterar Senha',
-    mensagem: 'solicite o codigo para redefinir senha',
+  renderPage(res, "../pages/public/products", {
+    titulo: "Produtos",
+    estilo: "products",
+    mensagem: "Confira nossos produtos!",
+    products: allProducts,
   });
 };
 
+export const getRegister = (req, res) => {
+  renderPage(res, "../pages/auth/register", {
+    titulo: "Registrar Conta",
+    estilo: "register",
+    mensagem: "Crie sua conta para começar a comprar!",
+  });
+};
+
+export const getLogin = (req, res) => {
+  renderPage(res, "../pages/auth/login", {
+    titulo: "Realizar Login",
+    estilo: "login",
+    mensagem: "seja Bem vindo de volta...",
+  });
+};
+
+export const getProfile = (req, res) => {
+  res.locals.layout = "./layout/auth";
+
+  console.log("User Session:", req.session.user);
+
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+
+  renderPage(res, "../pages/auth/profile", {
+    titulo: "configuarçao",
+    estilo: "peofile",
+    mensagem: "sessao profile...",
+  });
+};
+
+export const changePassword = (req, res) => {
+  renderPage(res, "../pages/auth/changePassword", {
+    titulo: "Alterar Senha",
+    mensagem: "solicite o codigo para redefinir senha",
+  });
+};
 
 export const getFavoritesPage = async (req, res) => {
   const pageOptions = {
-    titulo: 'Meus Favoritos',
+    titulo: "Meus Favoritos",
     favorites: [],
   };
 
   if (!req.session.user) {
-    return renderPage(res, '../pages/public/favorites', { ...pageOptions, mensagem: 'Usuário não autenticado' });
+    return renderPage(res, "../pages/public/favorites", {
+      ...pageOptions,
+      mensagem: "Usuário não autenticado",
+    });
   }
 
   const { favorites: favoritProducts } = req.session.user;
 
-  console.log('Favorit Products IDs:', favoritProducts);
-
   if (!favoritProducts || favoritProducts.length === 0) {
-    return renderPage(res, '../pages/public/favorites', { ...pageOptions, mensagem: 'Você ainda não adicionou nenhum produto aos seus favoritos.' });
+    return renderPage(res, "../pages/public/favorites", {
+      ...pageOptions,
+      mensagem: "Você ainda não adicionou nenhum produto aos seus favoritos.",
+    });
   }
 
   try {
     // Converte o array de strings de IDs para um array de ObjectIds
-    const favoriteObjectIds = favoritProducts.map(id => new ObjectId(id));
-    const favoriteItems = await productControllers.getCollection().find({ _id: { $in: favoriteObjectIds } }).toArray();
+    const favoriteObjectIds = favoritProducts.map((id) => new ObjectId(id));
+    const favoriteItems = await productControllers
+      .getCollection()
+      .find({ _id: { $in: favoriteObjectIds } })
+      .toArray();
 
-    renderPage(res, '../pages/public/favorites', { ...pageOptions, favorites: favoriteItems, mensagem: 'Seus produtos favoritos.' });
+    console.log("Favorit Products IDs:", favoritProducts);
+    //intere o id de favoritItems para o productIdnomais, substituido o _id:objet... para apenas
+    console.log("Favorit Items:", favoriteItems);
+
+
+    
+    renderPage(res, "../pages/public/favorites", {
+      ...pageOptions,
+      favorites: favoriteItems,
+      mensagem: "Seus produtos favoritos.",
+    });
   } catch (error) {
-    console.error('Erro ao buscar favoritos:', error);
-    renderPage(res, '../pages/public/favorites', { ...pageOptions, mensagem: 'Erro ao carregar seus favoritos. Tente novamente mais tarde.' });
+    console.error("Erro ao buscar favoritos:", error);
+    renderPage(res, "../pages/public/favorites", {
+      ...pageOptions,
+      mensagem: "Erro ao carregar seus favoritos. Tente novamente mais tarde.",
+    });
   }
 };
 
 export const getCartPage = async (req, res) => {
   const pageOptions = {
-    titulo: 'Carrinho',
+    titulo: "Carrinho",
     cart: { items: [] },
-    estilo: 'cart',
+    estilo: "cart",
     totalPrice: 0,
     totalItems: 0,
   };
 
-  if (!req.session.user || !req.session.user.cart || req.session.user.cart.length === 0) {
-    return renderPage(res, '../pages/public/cart', { ...pageOptions, mensagem: 'Seu carrinho está vazio.' });
+  if (
+    !req.session.user ||
+    !req.session.user.cart ||
+    req.session.user.cart.length === 0
+  ) {
+    return renderPage(res, "../pages/public/cart", {
+      ...pageOptions,
+      mensagem: "Seu carrinho está vazio.",
+    });
   }
 
   const { cart: productIds } = req.session.user;
@@ -157,69 +174,124 @@ export const getCartPage = async (req, res) => {
       return acc;
     }, {});
 
-    const uniqueProductIds = Object.keys(quantityMap).map(id => new ObjectId(id));
+    const uniqueProductIds = Object.keys(quantityMap).map(
+      (id) => new ObjectId(id)
+    );
 
     // 2. Buscar os detalhes dos produtos únicos
-    const productsDetails = await productControllers.getCollection().find({ _id: { $in: uniqueProductIds } }).toArray();
+    const productsDetails = await productControllers
+      .getCollection()
+      .find({ _id: { $in: uniqueProductIds } })
+      .toArray();
 
     // 3. Combinar detalhes do produto com a quantidade
-    const itemsWithQuantity = productsDetails.map(product => ({
+    const itemsWithQuantity = productsDetails.map((product) => ({
       ...product,
       quantity: quantityMap[product._id.toString()],
     }));
 
     // 4. Calcular o preço total e a quantidade total de itens
-    const totalPrice = itemsWithQuantity.reduce((acc, item) => acc + (item.preco * item.quantity), 0);
+    const totalPrice = itemsWithQuantity.reduce(
+      (acc, item) => acc + item.preco * item.quantity,
+      0
+    );
     const totalItems = productIds.length; // O total de itens é simplesmente o tamanho do array original
 
-    renderPage(res, '../pages/public/cart', {
+    renderPage(res, "../pages/public/cart", {
       ...pageOptions,
       cart: { items: itemsWithQuantity },
       totalPrice,
       totalItems,
-      mensagem: 'Seus produtos no carrinho.'
+      mensagem: "Seus produtos no carrinho.",
     });
-
   } catch (error) {
-    console.error('Erro ao carregar o carrinho:', error);
-    renderPage(res, '../pages/public/cart', { ...pageOptions, mensagem: 'Erro ao carregar seu carrinho. Tente novamente mais tarde.' });
+    console.error("Erro ao carregar o carrinho:", error);
+    renderPage(res, "../pages/public/cart", {
+      ...pageOptions,
+      mensagem: "Erro ao carregar seu carrinho. Tente novamente mais tarde.",
+    });
   }
 };
 
 
 
+
+
+
+
+
+
+
+
+export const getCheckout = async (req, res) => {
+  const pageOptions = {
+    titulo: "Checkout",
+    cart: { items: [] },
+    totalPrice: 0,
+    totalItems: 0,
+  };
+
+  console.log(req.body);
+  
+  pageOptions.cart.items = req.body;
+
+};
+
+
+
+
+
+
+
+
+
+
 export const getOrders = async (req, res) => {
   if (!req.session.user) {
-    return res.redirect('/login');
+    return res.redirect("/login");
   }
 
   const pageOptions = {
-    titulo: 'Meus Pedidos',
+    titulo: "Meus Pedidos",
     orders: [],
-  
   };
 
   const objectIds = req.session.user.pedido;
 
   try {
-
-    const orders = await orderControllers.getCollection().find({_id: objectIds })
+    const orders = await orderControllers
+      .getCollection()
+      .find({ _id: objectIds });
 
     if (!orders || orders.length === 0) {
-      return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: 'Você ainda não fez nenhum pedido.' });
+      return renderPage(res, "../pages/public/orders", {
+        ...pageOptions,
+        mensagem: "Você ainda não fez nenhum pedido.",
+      });
     }
 
     pageOptions.orders = orders;
 
     if (!orders || orders.length === 0) {
-      return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: 'Você ainda não fez nenhum pedido.' });
+      return renderPage(res, "../pages/public/orders", {
+        ...pageOptions,
+        mensagem: "Você ainda não fez nenhum pedido.",
+      });
     }
 
-    renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: 'Seu histórico de pedidos.' });
+    renderPage(res, "../pages/public/orders", {
+      ...pageOptions,
+      mensagem: "Seu histórico de pedidos.",
+    });
   } catch (error) {
-
-    const apiMessage = (error && error.data && (error.data.message || error.data.msg)) || error.message || 'Erro ao carregar seu histórico de pedidos.';
-    console.error('Erro ao buscar orders para usuário:', apiMessage, error);
-    return renderPage(res, '../pages/public/orders', { ...pageOptions, mensagem: apiMessage });
+    const apiMessage =
+      (error && error.data && (error.data.message || error.data.msg)) ||
+      error.message ||
+      "Erro ao carregar seu histórico de pedidos.";
+    console.error("Erro ao buscar orders para usuário:", apiMessage, error);
+    return renderPage(res, "../pages/public/orders", {
+      ...pageOptions,
+      mensagem: apiMessage,
+    });
   }
 };

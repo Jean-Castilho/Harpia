@@ -144,7 +144,7 @@
 
                 if (response.ok && result.success) {
                     showNotification(result.message, true);
-                    // Remove the table row from the DOM
+                    // Remove the table row from the DOM;
                     this.closest('tr').remove();
                 } else {
                     showNotification(result.message || 'Ocorreu um erro.', false);

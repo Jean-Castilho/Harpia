@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getHome, getRegister, getLogin, getProfile, changePassword, getFavoritesPage, getCartPage, getContact, getAbout, getProducts, getOrders } from "../controllers/pagesControllers.js";
+import { getHome, getRegister, getLogin, getProfile, changePassword, getFavoritesPage, getCartPage, getContact, getAbout, getProducts, getOrders,getCheckout } from "../controllers/pagesControllers.js";
 
 import {
   generateCsrfToken
@@ -22,8 +22,9 @@ router.get("/products", generateCsrfToken, getProducts);
 router.get("/profile", ensureAuthenticated, generateCsrfToken, getProfile);
 router.get("/orders", getOrders);
 
-router.get("/change-password", generateCsrfToken, changePassword);
+router.post("/checkout", getCheckout);
 
+router.get("/change-password", generateCsrfToken, changePassword);
 
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);

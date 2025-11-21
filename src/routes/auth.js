@@ -135,7 +135,6 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
   }
 });
 
-
 router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
 
@@ -160,31 +159,16 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
   }
 });
 
-router.post("/cart/set-quantity", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
-  const { productId, quantity } = req.body;
-  const userId = req.userId;
 
-  if (!productId || quantity === undefined) {
-    return res.status(400).json({ success: false, mensagem: "ID do produto e quantidade são obrigatórios." });
-  }
+router.post("/create-order", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
 
-  const numQuantity = parseInt(quantity, 10);
-  if (isNaN(numQuantity) || numQuantity < 0) {
-    return res.status(400).json({ success: false, mensagem: "Quantidade inválida." });
-  }
+  console.log(req.body);
 
-  try {
-    const updatedUser = await userControllers.updateCartQuantity(userId, productId, numQuantity);
 
-    if (updatedUser) {
-      req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, message: "Quantidade atualizada com sucesso.", cart: updatedUser.cart });
-    }
-    throw new GeneralError("Usuário não encontrado.", 404);
-  } catch (error) {
-    next(error);
-  }
+
 });
+
+
 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {

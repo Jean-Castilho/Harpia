@@ -1,0 +1,71 @@
+# Gemini Code Assist Configuration for Harpia Project
+
+# --- Visão Geral do Projeto ---
+# Este arquivo de configuração guia o Gemini para entender e colaborar com o projeto Harpia.
+# O objetivo é garantir que as sugestões de código sejam consistentes com a arquitetura,
+
+# --- Contexto do Projeto (../HARPIA) ---
+# Descreve as tecnologias e a arquitetura geral.
+project_context:
+  - O projeto Harpia é uma aplicação full-stack construída com Node.js e Express.js.
+  - A linguagem principal é JavaScript, utilizando Módulos ES (import/export).
+  - O banco de dados é o MongoDB, acessado através do driver nativo `mongodb`. O GridFS é usado para armazenamento de imagens de produtos.
+  - A autenticação é baseada em sessão (`express-session`) para o front-end renderizado no servidor e tokens JWT (JSON Web Tokens) para a API, com cookies httpOnly.
+  - A segurança é reforçada com middlewares para proteção contra CSRF (`csrfMiddleware.js`).
+  - A estrutura do projeto segue uma separação clara de responsabilidades:
+    - `src/controllers`: Lógica de negócio e interação com o banco de dados (Classes como `UserControllers`, `ProductControllers`,`orderControllers`).
+    - `src/routes`: Definição das rotas da API e da web.
+    - `src/middleware`: Middlewares de Express para autenticação, autorização, tratamento de erros e CSRF.
+    - `src/services`: Funções de suporte e lógica de serviço desacoplada (ex: validação, serviços de carrinho).
+    - `src/errors`: Classes de erro personalizadas (`GeneralError`, `ValidationError`, `NotFoundError`).
+    - `src/config`: Configuração do banco de dados.
+  - O tratamento de erros é centralizado no middleware `errorHandler.js`. Os erros em rotas assíncronas devem ser capturados com `try...catch` e passados para `next(error)`.
+
+# --- Regras e Padrões de Codificação (file_rules) ---
+# Diretrizes específicas para diferentes partes do código.
+
+file_rules:
+  # Regras para Controladores (src/controllers/)
+  - path: "src/controllers/**/*.js"
+    guidance:
+      - "Use classes para organizar os controladores (ex: `UserControllers`)."
+      - "Métodos de controlador devem ser assíncronos (`async`) e interagir com `req` e `res`."
+      - "A interação com o banco de dados deve ocorrer dentro dos métodos do controlador ou em serviços chamados por eles."
+      - "Para erros de validação ou de negócio, lance as classes de erro personalizadas de `src/errors/customErrors.js` (ex: `throw new NotFoundError(...)`)."
+      - "Não retorne respostas diretamente (ex: `res.json()`). Em vez disso, retorne os dados para a rota, que será responsável pela resposta, ou passe erros para `next()`."
+      - "Ao interagir com o MongoDB, utilize `new ObjectId(id)` para converter strings de ID."
+
+  # Regras para Rotas (src/routes/)
+  - path: "src/routes/**/*.js"
+    guidance:
+      - "Use `express.Router()` para modularizar as rotas."
+      - "As rotas devem conter o mínimo de lógica de negócio possível. Elas são responsáveis por:
+        1. Receber a requisição.
+        2. Chamar o método apropriado do controlador.
+        3. Usar `try...catch` para capturar erros e passá-los para `next(error)`.
+        4. Formatar e enviar a resposta de sucesso (ex: `res.status(200).json(...)`) ou erro."
+      - "Aplique os middlewares de segurança necessários, como `ensureAuthenticated` e `validateCsrfToken`, nas rotas apropriadas (POST, PUT, DELETE)."
+
+  # Regras para Middlewares (src/middleware/)
+  - path: "src/middleware/**/*.js"
+    guidance:
+      - "Middlewares devem ser funções concisas e com uma única responsabilidade."
+      - "Para erros de autenticação ou autorização, use `next(new UnauthorizedError(...))` para delegar o tratamento ao `errorHandler`."
+      - "O middleware `ensureAuthenticated` deve verificar `req.session.user` e anexar o `userId` à requisição para uso posterior."
+
+  # Regras para Serviços (src/services/)
+  - path: "src/services/**/*.js"
+    guidance:
+      - "Serviços devem conter lógica de negócio pura ou funções de utilidade que podem ser reutilizadas."
+      - "Funções de serviço não devem interagir diretamente com `req` ou `res`. Elas devem receber dados como parâmetros e retornar um resultado ou lançar um erro."
+      - "Exemplo: `validationData.js` é um serviço perfeito para validar dados de entrada."
+
+  # Regras Gerais
+  - path: "**/*.js"
+    guidance:
+      - "Mantenha o idioma do código e dos comentários em Português para consistência."
+      - "Sempre use `async/await` para operações assíncronas em vez de `.then()` e `.catch()` para Promises, exceto quando o paralelismo for explicitamente necessário com `Promise.all` ou `Promise.allSettled`."
+      - "Use `const` por padrão e `let` apenas quando a reatribuição de variável for necessária."
+      - "Utilize a comparação estrita (`===` e `!==`)."
+      - "Ao adicionar novas dependências, prefira pacotes modernos e bem mantidos."
+

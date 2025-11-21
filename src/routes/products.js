@@ -2,7 +2,7 @@ import express from "express";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { validateCsrfToken } from '../middleware/csrfMiddleware.js';
+import { generateCsrfToken } from '../middleware/csrfMiddleware.js';
 
 import ProductControllers from "../controllers/productControllers.js";
 import { getGridFSBucket } from "../config/db.js";
