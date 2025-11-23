@@ -88,12 +88,18 @@ export const getProfile = (req, res) => {
   });
 };
 
-export const changePassword = (req, res) => {
+
+export const getResetPassword = (req, res) => {
   renderPage(res, "../pages/auth/changePassword", {
     titulo: "Alterar Senha",
     mensagem: "solicite o codigo para redefinir senha",
   });
 };
+
+export const postResetPassword = (req, res) => {
+console.log(req);
+}
+
 
 export const getFavoritesPage = async (req, res) => {
   const pageOptions = {
@@ -212,15 +218,6 @@ export const getCartPage = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
-
-
-
 
 
 export const getCheckout = async (req, res) => {

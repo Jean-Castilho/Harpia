@@ -20,13 +20,13 @@ router.post("/register", generateCsrfToken, async (req, res, next) => {
     return res
       .cookie("token", creatUser.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use 'secure' apenas em produção
+        secure: process.env.NODE_ENV === "production", // Use 'secure' apenas em produção;
         sameSite: "strict",
       })
-      .status(201) // 201 Created é mais apropriado aqui
+      .status(201) // 201 Created é mais apropriado aqui;
       .json({ message: "Usuário criado com sucesso.", user: creatUser.user });
   } catch (error) {
-    next(error); // Passa o erro para o middleware de erro
+    next(error); // Passa o erro para o middleware de erro;
   }
 });
 
@@ -43,7 +43,7 @@ router.post("/login", generateCsrfToken, async (req, res, next) => {
       .status(200)
       .json({ message: "Login realizado", user: dataLogin.user });
   } catch (error) {
-    next(error); // Passa o erro para o middleware de erro
+    next(error); // Passa o erro para o middleware de erro;
   }
 });
 

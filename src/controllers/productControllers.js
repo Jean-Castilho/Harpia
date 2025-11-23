@@ -5,6 +5,8 @@ import { getGridFSBucket } from "../config/db.js";
 import { Readable } from "stream";
 
 export default class ProductController {
+
+  
   getCollection() {
     const db = getDataBase();
     return db.collection("products");
@@ -263,5 +265,6 @@ export default class ProductController {
 
     return result;
   }
+
 
 }

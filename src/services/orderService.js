@@ -9,12 +9,11 @@ export const validateOrderItems = async (items) => {
 
   const productsSelec = await productControllers.getCollection().find({ _id: { $in: productIds } }).toArray();
 
-
-  console.log('productsSelec', productsSelec)
+  console.log('productsSelec', productsSelec);
 
   if (!productsSelec) {
     throw new Error('Não foi possível validar os produtos do carrinho via API.');
-  }
+  };
 
   const foundIds = productsSelec.data.map(p => p._id.toString());
   const notFound = productIds.filter(id => !foundIds.includes(id));
@@ -24,6 +23,6 @@ export const validateOrderItems = async (items) => {
 
   if (notFound.length > 0) {
     throw new Error(`Os seguintes produtos não foram encontrados: ${notFound.join(', ')}`);
-  }
+  };
   return productsSelec;
 };
