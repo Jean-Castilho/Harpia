@@ -29,6 +29,22 @@ export const getHome = async (req, res) => {
   });
 };
 
+export const getRegister = (req, res) => {
+  renderPage(res, "../pages/auth/register", {
+    titulo: "Registrar Conta",
+    estilo: "register",
+    message: "Crie sua conta para começar a comprar!",
+  });
+};
+
+export const getLogin = (req, res) => {
+  renderPage(res, "../pages/auth/login", {
+    titulo: "Realizar Login",
+    estilo: "login",
+    message: "seja Bem vindo de volta...",
+  });
+};
+
 export const getContact = (req, res) => {
   renderPage(res, "../pages/public/contact", {
     titulo: "Contato",
@@ -56,21 +72,6 @@ export const getProducts = async (req, res) => {
   });
 };
 
-export const getRegister = (req, res) => {
-  renderPage(res, "../pages/auth/register", {
-    titulo: "Registrar Conta",
-    estilo: "register",
-    message: "Crie sua conta para começar a comprar!",
-  });
-};
-
-export const getLogin = (req, res) => {
-  renderPage(res, "../pages/auth/login", {
-    titulo: "Realizar Login",
-    estilo: "login",
-    message: "seja Bem vindo de volta...",
-  });
-};
 
 export const getProfile = (req, res) => {
   res.locals.layout = "./layout/auth";
@@ -88,20 +89,20 @@ export const getProfile = (req, res) => {
   });
 };
 
-export const getResetPassword = (req, res) => {
-  renderPage(res, "../pages/auth/changePassword", {
+export const getSolicitOtp = (req, res) => {
+  renderPage(res, "../pages/auth/solicit-otp", {
     titulo: "Alterar Senha",
     message: "solicite o codigo para redefinir senha",
   });
 };
 
 export const getVerifyOtp = (req, res) =>{
-  
   renderPage(res, "../pages/auth/verifyOtp", {
     titulo: "Alterar Senha",
     message: "solicite o codigo para redefinir senha",
   });
-}
+};
+
 
 export const getFavoritesPage = async (req, res) => {
   const pageOptions = {
@@ -221,7 +222,6 @@ export const getCartPage = async (req, res) => {
   }
 };
 
-
 export const getCheckout = async (req, res) => {
   const pageOptions = {
     titulo: "Checkout",
@@ -235,15 +235,6 @@ export const getCheckout = async (req, res) => {
   pageOptions.cart.items = req.body;
 
 };
-
-
-
-
-
-
-
-
-
 
 export const getOrders = async (req, res) => {
   if (!req.session.user) {

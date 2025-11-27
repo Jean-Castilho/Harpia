@@ -35,6 +35,7 @@ router.get('/orders', getOrdersPage);
 
 router.get('/users', generateCsrfToken, getUsersPage);
 router.get("/user/edit/:id", generateCsrfToken, getEditUserPage);
+
 router.put("/user/edit/:id", ensureAuthenticated, ensureAdmin, validateCsrfToken, updateUser);
 router.delete('/users/:id', ensureAuthenticated, ensureAdmin, validateCsrfToken, deleteUser);
 

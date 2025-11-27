@@ -26,7 +26,7 @@ function getCurrentTime() {
         minute: now.getMinutes(),
         second: now.getSeconds(),
     };
-}
+};
 
 const router = Router();
 
@@ -49,7 +49,7 @@ router.post('/sendFedback', async (req, res) => {
         return res.status(500).json({mensagem: "erro ao enviar email"})
     }
 
-})
+});
 
 router.post("/sendOtp", async (req, res) => {
     const { email } = req.body;
@@ -58,7 +58,7 @@ router.post("/sendOtp", async (req, res) => {
 
     if (!email || !otp) {
         return res.status(400).json({ mensagem: "Email e OTP são obrigatórios." });
-    }
+    };
 
     await armazenCodeOtp(email, otp);
 

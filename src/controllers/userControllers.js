@@ -128,6 +128,11 @@ export default class UserControllers {
     const normalized = String(email).trim().toLowerCase();
     return await this.getCollection().findOne({ "email.endereco": normalized });
   }
+  async getUserByPhone(phone) {
+   if (!phone) return null;
+    return await this.getCollection().findOne({ "phone.number": phone });
+    
+  }
 
   async getUserById(id) {
     if (!id) return null;

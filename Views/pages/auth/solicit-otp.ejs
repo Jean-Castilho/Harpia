@@ -1,0 +1,161 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/css/intlTelInput.css">
+<div class="container auth-container">
+    <div class="card">
+        <header style="text-align: center; margin-bottom: 1rem;">
+            <h2>Esqueceu sua senha?</h2>
+            <p style="font-weight: extra-bold;">Não se preocupe! Insira seus dados para recuperar o acesso.</p>
+        </header>
+
+        <% if (typeof mensagem !=='undefined' && mensagem) { %>
+        <div style="background-color: #e7f3fe; border-left: 6px solid #2196F3; color: #333; padding: 1rem; margin-bottom: 1.5rem;">
+            <p style="margin: 0;">
+                <%= mensagem %>
+            </p>
+        </div>
+        <% } %>
+
+        <% if (typeof error !=='undefined' && error) { %>
+        <div style="background-color: #ffdddd; border-left: 6px solid #f44336; color: #333; padding: 1rem; margin-bottom: 1.5rem;">
+            <p style="margin: 0;">
+                <%= error %>
+            </p>
+        </div>
+        <% } %>
+
+        <form id="forgotPasswod" class="change-password-form">
+            <div class="form-group" id="email-group">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" id="email" name="contact" class="form-control" required placeholder="Digite seu e-mail">
+            </div>
+
+            <div class="form-group" id="phone-group" style="display: none;">
+                <label for="phone" class="form-label">Telefone</label>
+                <input type="tel" id="phone" class="form-control" placeholder="Digite seu telefone">
+            </div>
+
+            <div class="form-group">
+                <p class="form-label">Enviar código de verificação via:</p>
+                <div class="radio-group" style="display: flex; gap: 1rem;">
+                    <label for="send-via-email" class="radio-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" id="send-via-email" name="send_method" value="email" checked>
+                        E-mail
+                    </label>
+                    <label for="send-via-sms" class="radio-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" id="send-via-sms" name="send_method" value="sms">
+                        SMS
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-destaque" id="verifUser" style="width: 100%;">Enviar</button>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <p style="margin: 0;">Lembrou da senha? <a href="/login">Faça login</a>.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/js/intlTelInput.min.js"></script>
+
+<script>
+    const emailGroup = document.getElementById('email-group');
+    const phoneGroup = document.getElementById('phone-group');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const radioEmail = document.getElementById('send-via-email');
+    const radioSms = document.getElementById('send-via-sms');
+
+    let iti; // intl-tel-input instance
+
+    radioEmail.addEventListener('change', () => {
+        if (radioEmail.checked) {
+            emailGroup.style.display = 'block';
+            phoneGroup.style.display = 'none';
+            emailInput.name = 'contact';
+            emailInput.required = true;
+            phoneInput.removeAttribute('name');
+            phoneInput.required = false;
+        }
+    });
+
+    radioSms.addEventListener('change', () => {
+        if (radioSms.checked) {
+            emailGroup.style.display = 'none';
+            phoneGroup.style.display = 'block';
+            phoneInput.name = 'contact';
+            phoneInput.required = true;
+            emailInput.removeAttribute('name');
+            emailInput.required = false;
+            if (!iti) {
+                iti = window.intlTelInput(phoneInput, {
+                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/js/utils.js",
+                    initialCountry: "br",
+                    preferredCountries: ["br", "us", "pt"],
+                    separateDialCode: true,
+                    formatOnDisplay: true,
+                });
+            }
+        }
+    });
+
+
+    document.getElementById("forgotPasswod").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const notification = document.getElementById('notification-home');
+        const loginButton = document.getElementById("verifUser");
+        const originalButonText = loginButton.textContent;
+
+
+        function showNotification(message, isSuccess) {
+            notification.textContent = message;
+            notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+
+        loginButton.textContent = "Sending...";
+        loginButton.disable = true;
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        if (data.send_method === 'sms' && iti) {
+            data.contact = iti.getNumber();
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        try {
+            const response = await fetch("/auth/forgot-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRF-Token': csrfToken
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showNotification(result.message, true);
+                // Redirect or update UI as needed
+            } else {
+                showNotification(result.message || "Ocorreu um erro.", false);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            showNotification("Falha na comunicação com o servidor.", false);
+        } finally {
+            loginButton.textContent = originalButonText;
+            loginButton.disabled = false;
+        }
+    });
+</script>

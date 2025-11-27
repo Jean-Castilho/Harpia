@@ -5,16 +5,20 @@ import {
   getRegister,
   getLogin, 
   getProfile, 
+  getSolicitOtp,
   getVerifyOtp,
-  getResetPassword,
   getFavoritesPage, 
   getCartPage, 
-  getContact, 
+  getContact,
   getAbout, 
   getProducts,
   getOrders, 
   getCheckout,
   } from "../controllers/pagesControllers.js";
+
+  import {
+    postSendFedBack,
+  } from "../controllers/ContactControllers.js";
 
 import {
   generateCsrfToken,
@@ -31,20 +35,25 @@ router.get("/", generateCsrfToken, getHome);
 router.get("/register", getRegister);
 router.get("/login", getLogin);
 
+router.get("/profile", ensureAuthenticated, generateCsrfToken, getProfile);
+
+router.get("/solicit-otp", generateCsrfToken, getSolicitOtp);
+router.get("/verify-otp", getVerifyOtp)
+
+/*
 router.get("/reset-password", generateCsrfToken, getResetPassword);
-router.post("/atualiz", generateCsrfToken, getResetPassword);
+router.post("/atualiz", generateCsrfToken, getSolicit_otp);
+*/
 
 router.get("/contact", getContact);
+router.post("/send-fedback", postSendFedBack)
+
 router.get("/about", getAbout);
 router.get("/products", generateCsrfToken, getProducts);
 
-router.get("/profile", ensureAuthenticated, generateCsrfToken, getProfile);
 router.get("/orders", getOrders);
 
 router.post("/checkout", getCheckout);
-
-router.get("/change-password", generateCsrfToken, getResetPassword);
-router.get("/verifyOtp", getVerifyOtp)
 
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);

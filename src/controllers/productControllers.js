@@ -24,7 +24,6 @@ export default class ProductController {
    * @returns {Promise<string>} A promise that resolves with the unique filename.
    */
 
-  
   async #uploadFileWithRetry(file, bucket, retries = 3) {
     for (let i = 0; i < retries; i++) {
       try {
@@ -267,6 +266,5 @@ export default class ProductController {
 
     return result;
   }
-
 
 }
