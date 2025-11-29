@@ -1,7 +1,4 @@
 /* --- Page: Cart --- */
-
-
-
 .cart-items-column{
    width: 500px;
 }
@@ -60,8 +57,47 @@
 
 .cart-content {
     display: flex;
-    align-items: center;
     gap: 10rem;
-    justify-content: space-evenly;
-    flex-direction: row;
+}
+
+/* --- Quantity Selector --- */
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-radius);
+    width: fit-content;
+    overflow: hidden;
+}
+
+.quantity-btn {
+    background-color: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--cor-texto);
+    line-height: 1;
+}
+
+.quantity-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.quantity-input {
+    width: 40px;
+    text-align: center;
+    border: none;
+    border-left: 1px solid var(--cor-borda);
+    border-right: 1px solid var(--cor-borda);
+    background-color: transparent;
+    font-size: 1rem;
+    /* Remove arrows from number input */
+    -moz-appearance: textfield;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }

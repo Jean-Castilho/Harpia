@@ -157,7 +157,7 @@
 
             try {
                 const response = await fetch(`/admin/products/edit/${id}`, {
-                    method: "PUT",
+                    method: "POST",
                     headers: {
                         'X-CSRF-Token': csrfToken
                     },

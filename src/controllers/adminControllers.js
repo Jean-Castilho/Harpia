@@ -10,7 +10,6 @@ const productControllers = new ProductControllers();
 const orderControllers = new OrderControllers();
 
 
-
 const renderPage = (res, page, options = {}) => {
   res.render(res.locals.layout, {
     page,

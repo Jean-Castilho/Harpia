@@ -23,8 +23,9 @@ router.get("/", async (req, res) => {
 
 router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res, next) => {
   try {
-    const newProduct = await productControllers.uploadProductAndImage(req, res);
-    res.status(201).json(newProduct);
+    
+    handleResponse(res ,productControllers.uploadProductAndImage(req) ,201);
+    
   } catch (error) {
     next(error);
   }
@@ -50,6 +51,5 @@ router.get('/images/:filename', (req, res) => {
   // 'pipe' envia o stream do arquivo diretamente para a resposta da requisição
   downloadStream.pipe(res);
 });
-
 
 export default router;

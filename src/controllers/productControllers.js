@@ -78,7 +78,7 @@ export default class ProductController {
     // Se qualquer upload falhar, não crie o produto e retorne um erro.
     if (failedUploads.length > 0) {
       throw new GeneralError(`Falha no upload dos seguintes arquivos: ${failedUploads.join(', ')}`, 500);
-    }
+    };
 
     const productData = {
       // --- Informações Principais ---

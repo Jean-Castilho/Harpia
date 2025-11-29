@@ -105,10 +105,6 @@ export const getOrdersPage = async (req, res) => {
   }
 };
 
-
-
-
-
 export const createOrder = async (req, res) => {
   try {
     const validatedItems = await validateOrderItems(req.body.items);
@@ -250,8 +246,6 @@ export const getInvoice = async (req, res) => {
   }
 };
 
-
-
 export const getDetailsOrderPage = async (req, res) => {
   const { id } = req.params;
 
@@ -271,4 +265,3 @@ export const getDetailsOrderPage = async (req, res) => {
     handleError(res, error, '../pages/admin/orderDetails', pageOptions);
   }
 };
-

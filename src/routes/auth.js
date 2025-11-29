@@ -75,28 +75,21 @@ router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
   if (send_method == 'email') {
     
     const verifUser = await userControllers.getUserByEmail(contact);
-
     console.log("send Code for email",verifUser);
     if (verifUser == null) {
-      
       return next(new GeneralError("Ussuario nao encontrado", 301));
 
     }else{
       const sendemail = await sendOtpEmail(contact);
-    
       console.log("send email:", sendemail);
       return res.status(201).json({mensagem:"email enviado",})
     }
-
   };
 
   if (send_method == 'sms') {
-    
     const verifUser = await userControllers.getUserByPhone(contact);
-
     console.log("send Code for SMS",verifUser);
   };
-
 
 });
 

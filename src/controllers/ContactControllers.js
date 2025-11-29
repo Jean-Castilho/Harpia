@@ -84,7 +84,7 @@ const createMessagandCode = async (to) => {
 
 };
 
-export const sendCodeWhatzapp = async (number) => {
+export const sendOtpWhatzapp = async (number) => {
 
   if (!number) {
     throw new ValidationError("Número de telefone não fornecido.");
@@ -110,6 +110,8 @@ export const sendCodeWhatzapp = async (number) => {
     throw new Error("Erro ao enviar mensagem");
   }
 };
+
+
 
 
 export const sendOtpEmail = async (email) => {

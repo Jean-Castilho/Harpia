@@ -4,16 +4,16 @@ import {
   getHome, 
   getRegister,
   getLogin, 
-  getProfile, 
+  getContact,
+  getAbout,
+  getProducts,
+  getProfile,
   getSolicitOtp,
   getVerifyOtp,
   getFavoritesPage, 
   getCartPage, 
-  getContact,
-  getAbout, 
-  getProducts,
   getOrders, 
-  getCheckout,
+  postCheckout,
   } from "../controllers/pagesControllers.js";
 
   import {
@@ -53,7 +53,7 @@ router.get("/products", generateCsrfToken, getProducts);
 
 router.get("/orders", getOrders);
 
-router.post("/checkout", getCheckout);
+router.post("/checkout", postCheckout);
 
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);

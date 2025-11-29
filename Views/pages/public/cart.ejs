@@ -1,122 +1,93 @@
 <div class="container" id="cart-container">
-  <header class="page-header" style="text-align: center; margin-bottom: 3rem">
-    <h1>Meu Carrinho de Compras</h1>
+  <header class="page-header" style="text-align: center; margin-bottom: 1rem">
+    <h1>Carrinho de Compras</h1>
   </header>
 
-  <% if (cart && cart.items && cart.items.length> 0) { %> <% let totalPrice=0;
-  let totalItems=0; cart.items.forEach(item=> { const price =
-  parseFloat(item.preco) || 0; const quantity = parseInt(item.quantity, 10) ||
-  0; totalPrice += price * quantity; totalItems += quantity; }); %>
+  <% if (cart && cart.items && cart.items.length> 0) { %> <% let totalPrice=0; let totalItems=0;
+      cart.items.forEach(item=> { const price =
+      parseFloat(item.preco) || 0; const quantity = parseInt(item.quantity, 10) ||
+      0; totalPrice += price * quantity; totalItems += quantity; }); %>
 
-  <form id="checkout-form">
-    <div class="cart-content">
-      <!-- Coluna dos Itens -->
-      <section class="cart-items-column">
-        
+      <form id="checkout-form">
+        <div class="cart-content">
+          <!-- Coluna dos Itens -->
+          <section class="cart-items-column">
 
-        <% cart.items.forEach(item=> { %> <% let id=item._id; %>
 
-        <div
-          class="cart-item"
-          data-item-id="<%= item._id %>"
-          data-item-price="<%= item.preco %>"
-          data-item-quantity="<%= item.quantity %>"
-        >
-          <input type="number" name="quantity" value="1" min="1" />
+            <% cart.items.forEach(item=> { %> <% let id=item._id; %>
 
-          <input
-            type="checkbox"
-            name="selectedItems"
-            value="<%= item._id %>"
-            class="item-checkbox"
-            checked
-            style="width: fit-content; transform: scale(1.5)"
-          />
+                <div class="cart-item" data-item-id="<%= item._id %>" data-item-price="<%= item.preco %>"
+                  data-item-quantity="<%= item.quantity %>">
+                  <img src="/products/images/<%= item.imagens[0] %>" alt="<%= item.nome %>" />
 
-          <img
-            src="/products/images/<%= item.imagens[0] %>"
-            alt="<%= item.nome %>"
-          />
-          
-          <div class="item-details">
-            <h3><%= item.nome %></h3>
-            <p><strong>R$ <%= (parseFloat(item.preco)) %></strong></p>
-          </div>
+                  <div class="item-details">
+                    <h3>
+                      <%= item.nome %>
+                    </h3>
+                    <p><strong>R$ <%= (parseFloat(item.preco)) %></strong></p>
+                  </div>
 
-          <button
-            class="btn btn-remover"
-            style="font-size: 0.8rem; width: -webkit-fill-available"
-            data-product-id="<%= id %>"
-          >
-            Remover
-          </button>
-        </div>
-        <% }); %>
-      </section>
 
-      <!-- Coluna do Resumo -->
-      <aside class="summary-column">
-        <div class="card">
-          <h4>Resumo do Pedido</h4>
-          <div
-            style="
+                  <div class="quantity-selector">
+                    <button type="button" class="quantity-btn quantity-minus">-</button>
+                    <input type="number" name="quantity" value="<%= item.quantity %>" min="1" class="quantity-input">
+                    <button type="button" class="quantity-btn quantity-plus">+</button>
+                  </div>
+
+                  <input type="checkbox" name="selectedItems" value="<%= item._id %>" class="item-checkbox" checked
+                    style="width: fit-content; transform: scale(1.5)" />
+
+                  <button class="btn btn-remover" style="font-size: 0.8rem; width: 140px;" data-product-id="<%= id %>">
+                    Remover
+                  </button>
+                </div>
+                <% }); %>
+          </section>
+
+          <!-- Coluna do Resumo -->
+          <aside class="summary-column" style="padding: 3rem;">
+            <div class="card">
+              <h4>Resumo do Pedido</h4>
+              <div style="
               display: flex;
               justify-content: space-between;
               margin-bottom: 1rem;
-            "
-          >
-            <span id="total-items-count"
-              >Subtotal (<%= totalItems %> itens)</span
-            >
-            <strong id="total-price-display"
-              >R$ <%= totalPrice.toFixed(2).replace('.', ',' ) %>
-            </strong>
-          </div>
-          <div
-            style="
+            ">
+                <span id="total-items-count">Subtotal (<%= totalItems %> itens)</span>
+                <strong id="total-price-display">R$ <%= totalPrice.toFixed(2).replace('.', ',' ) %>
+                </strong>
+              </div>
+              <div style="
               display: flex;
               justify-content: space-between;
               font-size: 1.2rem;
               margin-bottom: 2rem;
-            "
-          >
-            <span>Valor Total</span>
-            <strong id="total-price-display-main"
-              >R$ <%= totalPrice.toFixed(2).replace('.', ',' ) %>
-            </strong>
-          </div>
-          <button
-            type="submit"
-            id="creatOrder"
-            class="btn btn-destaque"
-            style="width: 100%"
-          >
-            Finalizar Compra
-          </button>
-          <a
-            href="/products"
-            class="btn btn-secundario"
-            style="width: 100%; margin-top: 1rem"
-            >Continuar Comprando</a
-          >
+            ">
+                <span>Valor Total</span>
+                <strong id="total-price-display-main">R$ <%= totalPrice.toFixed(2).replace('.', ',' ) %>
+                </strong>
+              </div>
+              <button type="submit" id="creatOrder" class="btn btn-destaque" style="width: 100%">
+                Finalizar Compra
+              </button>
+              <a href="/products" class="btn btn-secundario"
+                style="width: 100%; margin-top: 1rem; padding: 4px 5px;">Continuar Comprando</a>
+            </div>
+          </aside>
         </div>
-      </aside>
-    </div>
-  </form>
-  <% } else { %>
-  <div class="card" style="text-align: center; padding: 4rem">
-    <h2>Seu carrinho está vazio.</h2>
-    <p style="margin-top: 1rem; margin-bottom: 2rem">
-      Adicione produtos para vê-los aqui.
-    </p>
-    <a href="/products" class="btn btn-destaque">Ver Produtos</a>
-  </div>
-  <% } %>
+      </form>
+      <% } else { %>
+        <div class="card" style="text-align: center; padding: 4rem">
+          <h2>Seu carrinho está vazio.</h2>
+          <p style="margin-top: 1rem; margin-bottom: 2rem">
+            Adicione produtos para vê-los aqui.
+          </p>
+          <a href="/products" class="btn btn-destaque">Ver Produtos</a>
+        </div>
+        <% } %>
 </div>
 
-<div
-  id="notification-cart"
-  style="
+<div id="notification-cart" style="
     display: none;
     position: fixed;
     top: 20px;
@@ -125,8 +96,7 @@
     padding: 15px;
     border-radius: 5px;
     color: white;
-  "
-></div>
+  "></div>
 <script>
   const notification = document.getElementById("notification-cart");
 
@@ -242,73 +212,116 @@
       });
     });
 
-  document
-    .getElementById("checkout-form")
-    .addEventListener("submit", async function (event) {
-      event.preventDefault();
+    const quantitySelectors = document.querySelectorAll('.quantity-selector');
 
-      const notification = document.getElementById("notification-home");
-      const loginButton = document.getElementById("creatOrder");
-      const originalButonText = loginButton.textContent;
+    quantitySelectors.forEach(selector => {
+      const minusBtn = selector.querySelector('.quantity-minus');
+      const plusBtn = selector.querySelector('.quantity-plus');
+      const input = selector.querySelector('.quantity-input');
 
-      function showNotification(message, isSuccess) {
-        notification.textContent = message;
-        notification.style.backgroundColor = isSuccess ? "#dc3545" : "#28a745";
-        notification.style.display = "block";
-        setTimeout(() => {
-          notification.style.display = "none";
-        }, 3000);
+      minusBtn.addEventListener('click', () => {
+        let value = parseInt(input.value, 10);
+        if (value > 1) {
+          value--;
+          input.value = value;
+          updateItemQuantity(input);
+        }
+      });
+
+      plusBtn.addEventListener('click', () => {
+        let value = parseInt(input.value, 10);
+        value++;
+        input.value = value;
+        updateItemQuantity(input);
+      });
+
+      input.addEventListener('change', () => {
+        // Ensure value is not less than 1
+        if (parseInt(input.value, 10) < 1 || isNaN(parseInt(input.value, 10))) {
+          input.value = 1;
+        }
+        updateItemQuantity(input);
+      });
+    });
+
+    function updateItemQuantity(input) {
+      const cartItem = input.closest('.cart-item');
+      if (cartItem) {
+        // The quantity for the form submission is now directly from the input's value
+        // but we can also update the data attribute if other scripts rely on it.
+        cartItem.dataset.itemQuantity = input.value;
+        updateSummary();
       }
+    }
+    document
+      .getElementById("checkout-form")
+      .addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-      loginButton.textContent = "Sending...";
-      loginButton.disable = true;
+        const notification = document.getElementById("notification-home");
+        const loginButton = document.getElementById("creatOrder");
+        const originalButonText = loginButton.textContent;
+
+        function showNotification(message, isSuccess) {
+          notification.textContent = message;
+          notification.style.backgroundColor = isSuccess ? "#dc3545" : "#28a745";
+          notification.style.display = "block";
+          setTimeout(() => {
+            notification.style.display = "none";
+          }, 3000);
+        }
+
+        loginButton.textContent = "Sending...";
+        loginButton.disable = true;
 
 
 
-      const formData = new FormData(this);
-
-
-      
-      const csrfToken = document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content");
-
-      console.log(Object.fromEntries(formData));
-
-
-
-      console.log(csrfToken);
-
-      try {
-        const response = await fetch("/checkout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-Token": csrfToken,
-          },
-          body: JSON.stringify(Object.fromEntries(formData)),
+        const selectedItems = [];
+        document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+          const cartItem = checkbox.closest('.cart-item');
+          const quantityInput = cartItem.querySelector('input[name="quantity"]');
+          selectedItems.push({
+            id: checkbox.value,
+            quantity: quantityInput.value
+          });
         });
 
-        const result = await response.json();
-        showNotification(result.message, result.success);
+        const csrfToken = document
+          .querySelector('meta[name="csrf-token"]')
+          .getAttribute("content");
 
-        if (response.ok) {
-          window.location.href = "/admin/inventory";
-        } else {
+        console.log({ items: selectedItems });
+
+        try {
+          const response = await fetch("/checkout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
+            },
+            body: JSON.stringify({ items: selectedItems }),
+          });
+
+          const result = await response.json();
           showNotification(result.message, result.success);
+
+          if (response.ok) {
+            window.location.href = "/admin/inventory";
+          } else {
+            showNotification(result.message, result.success);
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showNotification(
+            "An error occurred while uploading the product.",
+            false
+          );
         }
-      } catch (error) {
-        console.error("Error:", error);
-        showNotification(
-          "An error occurred while uploading the product.",
-          false
-        );
-      }
-      setTimeout(() => {
-        loginButton.textContent = originalButonText;
-        loginButton.disabled = false;
-      }, 6000);
-    });
+        setTimeout(() => {
+          loginButton.textContent = originalButonText;
+          loginButton.disabled = false;
+        }, 6000);
+      });
 
     const checkboxes = document.querySelectorAll(".item-checkbox");
     checkboxes.forEach((checkbox) => {
