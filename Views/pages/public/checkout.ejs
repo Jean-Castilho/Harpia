@@ -3,7 +3,7 @@
         <h1>Finalizar Compra</h1>
     </header>
 
-    <% if (cart.items.length > 0) { %>
+    <% if (order && order.items.length > 0) { %>
         <form action="/orders" method="POST" class="chekoutForm">
             <!-- Coluna de Formulários (Endereço e Pagamento) -->
             <section class="checkout-forms-column">
@@ -70,7 +70,7 @@
                 <div class="card" id="summary-card">
                     <h4>Resumo do Pedido</h4>
                     <div id="checkout-items-list">
-                        <% cart.items.forEach((item, index)=> { %>
+                        <% order.items.forEach((item, index)=> { %>
                             <div class="checkout-item" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
 
                                 <img src="/uploads/<%= item.imagens[0] %>" alt="<%= item.nome %>"

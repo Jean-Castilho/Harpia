@@ -3,16 +3,19 @@
     <h1>Carrinho de Compras</h1>
   </header>
 
-  <% if (cart && cart.items && cart.items.length> 0) { %> <% let totalPrice=0; let totalItems=0;
-      cart.items.forEach(item=> { const price =
-      parseFloat(item.preco) || 0; const quantity = parseInt(item.quantity, 10) ||
-      0; totalPrice += price * quantity; totalItems += quantity; }); %>
+  <% if (cart && cart.items && cart.items.length> 0) { %>
+
+    <% let totalPrice=0; let totalItems=0; cart.items.forEach( item=> {
+      const price = parseFloat(item.preco) || 0;
+      const quantity = parseInt(item.quantity, 10) || 0;
+      totalPrice += price * quantity;
+      totalItems += quantity;
+      }); %>
 
       <form id="checkout-form">
         <div class="cart-content">
           <!-- Coluna dos Itens -->
           <section class="cart-items-column">
-
 
             <% cart.items.forEach(item=> { %> <% let id=item._id; %>
 
@@ -45,7 +48,7 @@
           </section>
 
           <!-- Coluna do Resumo -->
-          <aside class="summary-column" style="padding: 3rem;">
+          <aside class="summary-column">
             <div class="card">
               <h4>Resumo do Pedido</h4>
               <div style="
@@ -274,8 +277,6 @@
         loginButton.textContent = "Sending...";
         loginButton.disable = true;
 
-
-
         const selectedItems = [];
         document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
           const cartItem = checkbox.closest('.cart-item');
@@ -293,7 +294,7 @@
         console.log({ items: selectedItems });
 
         try {
-          const response = await fetch("/checkout", {
+          const response = await fetch("/orders", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -303,12 +304,15 @@
           });
 
           const result = await response.json();
-          showNotification(result.message, result.success);
+
+          console.log("response:", result);
+
+          showNotification(result.mensagem, result.success);
 
           if (response.ok) {
             window.location.href = "/admin/inventory";
           } else {
-            showNotification(result.message, result.success);
+            showNotification(result.mensagem, result.success);
           }
         } catch (error) {
           console.error("Error:", error);

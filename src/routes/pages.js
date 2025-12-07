@@ -13,7 +13,7 @@ import {
   getFavoritesPage, 
   getCartPage, 
   getOrders, 
-  postCheckout,
+  getCheckout
   } from "../controllers/pagesControllers.js";
 
   import {
@@ -24,8 +24,8 @@ import {
   generateCsrfToken,
   validateCsrfToken
 } from "../middleware/csrfMiddleware.js";
-import { checkUserRole, ensureAuthenticated } from "../middleware/authMiddleware.js";
 
+import { checkUserRole, ensureAuthenticated } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.get("/login", getLogin);
 router.get("/profile", ensureAuthenticated, generateCsrfToken, getProfile);
 
 router.get("/solicit-otp", generateCsrfToken, getSolicitOtp);
-router.get("/verify-otp", getVerifyOtp)
+router.get("/verify-otp", getVerifyOtp);
 
 /*
 router.get("/reset-password", generateCsrfToken, getResetPassword);
@@ -46,18 +46,17 @@ router.post("/atualiz", generateCsrfToken, getSolicit_otp);
 */
 
 router.get("/contact", getContact);
-router.post("/send-fedback", postSendFedBack)
+router.post("/send-fedback", postSendFedBack);
 
 router.get("/about", getAbout);
 router.get("/products", generateCsrfToken, getProducts);
 
 router.get("/orders", getOrders);
 
-router.post("/checkout", postCheckout);
-
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);
 
+router.get("/checkout/:id", getCheckout);
 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {

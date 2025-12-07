@@ -7,6 +7,10 @@ const userControllers = new UserControllers();
 const productControllers = new ProductControllers();
 const orderControllers = new OrdersControllers();
 
+const handleError = (res, error, page, data) => {
+  console.error(`Error on page ${page}:`, error.message);
+  renderPage(res, page, data);
+};
 const renderPage = (res, page, options = {}) => {
   res.render(res.locals.layout, {
     page,
@@ -96,7 +100,7 @@ export const getSolicitOtp = (req, res) => {
   });
 };
 
-export const getVerifyOtp = (req, res) =>{
+export const getVerifyOtp = (req, res) => {
   renderPage(res, "../pages/auth/verifyOtp", {
     titulo: "Alterar Senha",
     message: "solicite o codigo para redefinir senha",
@@ -140,7 +144,7 @@ export const getFavoritesPage = async (req, res) => {
     console.log("Favorit Items:", favoriteItems);
 
 
-    
+
     renderPage(res, "../pages/public/favorites", {
       ...pageOptions,
       favorites: favoriteItems,
@@ -177,10 +181,7 @@ export const getCartPage = async (req, res) => {
 
   const { cart: productIds } = req.session.user;
 
-  console.log(productIds);
-
   try {
-    // 1. Contar a quantidade de cada produto
     const quantityMap = productIds.reduce((acc, id) => {
       acc[id] = (acc[id] || 0) + 1;
       return acc;
@@ -190,23 +191,16 @@ export const getCartPage = async (req, res) => {
       (id) => new ObjectId(id)
     );
 
-    // 2. Buscar detalhes dos produtos únicos
     const productsDetails = await productControllers
       .getCollection()
       .find({ _id: { $in: uniqueProductIds } })
       .toArray();
 
-      console.log(productsDetails);
-
-    // 3. Combinar detalhes do produto com a quantidade
     const itemsWithQuantity = productsDetails.map((product) => ({
       ...product,
       quantity: quantityMap[product._id.toString()],
     }));
 
-    console.log(itemsWithQuantity);
-
-    // 4. Calcular o preço total e a quantidade total de itens
     const totalPrice = itemsWithQuantity.reduce(
       (acc, item) => acc + item.preco * item.quantity,
       0
@@ -281,16 +275,43 @@ export const getOrders = async (req, res) => {
   }
 };
 
-export const postCheckout = async (req, res) => {
-  const pageOptions = {
-    titulo: "Checkout",
-    cart: { items: [] },
-    totalPrice: 0,
-    totalItems: 0,
-  };
+export const getCheckout = async (req, res) => {
+    const pageOptions = {
+      titulo: "Checkout",
+      order: null,
+      totalPrice: 0,
+      totalItems: 0,
+    };
+  try {
 
-  console.log(req.body,"postChekout");
-  
-  pageOptions.cart.items = req.body.items;
+    const { id} = req.params;
 
+    if (!ObjectId.isValid(id)) {
+      throw new Error("ID de pedido inválido.");
+    }
+
+    const order = await orderControllers
+      .getCollection()
+      .findOne({ _id: new ObjectId(id) });
+
+    if (!order) {
+      return handleError(res, new Error("Pedido não encontrado."), '../pages/public/checkout', { ...pageOptions, mensagem: 'Pedido não encontrado.' });
+    }
+
+    const totalPrice = order.items.reduce(
+      (acc, item) => acc + item.preco * item.quantity,
+      0
+    );
+
+    const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
+
+    pageOptions.order = order;
+    pageOptions.totalPrice = totalPrice;
+    pageOptions.totalItems = totalItems;
+
+    renderPage(res, "../pages/public/checkout", { ...pageOptions, mensagem: "Detalhes da ordem." });
+
+  } catch (error) {
+    handleError(res, error, '../pages/public/checkout', { ...pageOptions, mensagem: 'Erro ao carregar os detalhes do pedido. Tente novamente mais tarde.' });
+  }
 };

@@ -64,8 +64,6 @@ router.put("/updatedUser", ensureAuthenticated, validateCsrfToken, async (req, r
   }
 });
 
-
-
 router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
 
   console.log("req.body:", req.body);
@@ -92,8 +90,6 @@ router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
   };
 
 });
-
-
 
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
@@ -192,14 +188,6 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
   } catch (error) {
     next(error);
   }
-});
-
-router.post("/create-order", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
-
-  console.log(req.body);
-
-
-
 });
 
 export default router;

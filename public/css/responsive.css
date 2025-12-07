@@ -1,5 +1,9 @@
 /* --- Responsiveness --- */
 @media (max-width: 1200px) {
+    .card {
+        margin: 4rem;
+    }
+    
     .delivery-dashboard {
         padding: 1.5rem;
     }
@@ -25,8 +29,17 @@
 }
 
 @media (max-width: 990px) {
+
+    .container {
+        padding: 0.9rem 1.3rem;
+    }
+
     .contact-content {
         grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        gap: 1rem;
     }
 
     .cart-item h3 {
@@ -34,8 +47,9 @@
     }
 
     .cart-content {
+        gap: 0px;
         flex-direction: column;
-
+        align-items: center;
     }
 
     .filter-btn {
@@ -49,6 +63,11 @@
 }
 
 @media (max-width: 950px) {
+
+
+    .summary-card {
+        padding: 3rem;
+    }
 
     .filter-btn {
         padding: 10px 10px;

@@ -31,7 +31,7 @@ router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res,
   }
 });
 
-// Rota para servir imagens do GridFS
+// Rota para servir imagens do GridFS;
 router.get('/images/:filename', (req, res) => {
   const bucket = getGridFSBucket();
   const { filename } = req.params;
