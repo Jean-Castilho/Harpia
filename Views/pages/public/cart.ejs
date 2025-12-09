@@ -265,17 +265,8 @@
         const loginButton = document.getElementById("creatOrder");
         const originalButonText = loginButton.textContent;
 
-        function showNotification(message, isSuccess) {
-          notification.textContent = message;
-          notification.style.backgroundColor = isSuccess ? "#dc3545" : "#28a745";
-          notification.style.display = "block";
-          setTimeout(() => {
-            notification.style.display = "none";
-          }, 3000);
-        }
-
         loginButton.textContent = "Sending...";
-        loginButton.disable = true;
+        loginButton.disabled = true;
 
         const selectedItems = [];
         document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
@@ -303,28 +294,26 @@
             body: JSON.stringify({ items: selectedItems }),
           });
 
+          if (response.redirected) {
+            window.location.href = response.url;
+            return;
+          }
+          
           const result = await response.json();
-
-          console.log("response:", result);
-
           showNotification(result.mensagem, result.success);
 
-          if (response.ok) {
-            window.location.href = "/admin/inventory";
-          } else {
-            showNotification(result.mensagem, result.success);
-          }
         } catch (error) {
-          console.error("Error:", error);
+          console.error("Error creating order:", error);
           showNotification(
-            "An error occurred while uploading the product.",
+            "An error occurred while creating the order.",
             false
           );
+        } finally {
+          setTimeout(() => {
+            loginButton.textContent = originalButonText;
+            loginButton.disabled = false;
+          }, 1000);
         }
-        setTimeout(() => {
-          loginButton.textContent = originalButonText;
-          loginButton.disabled = false;
-        }, 6000);
       });
 
     const checkboxes = document.querySelectorAll(".item-checkbox");

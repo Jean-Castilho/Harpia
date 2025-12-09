@@ -276,19 +276,19 @@ export const getOrders = async (req, res) => {
 };
 
 export const getCheckout = async (req, res) => {
-    const pageOptions = {
-      titulo: "Checkout",
-      order: null,
-      totalPrice: 0,
-      totalItems: 0,
-    };
+
+  const pageOptions = {
+    titulo: "Checkout",
+    order: null,
+    totalPrice: 0,
+    totalItems: 0,
+  };
+
   try {
-
-    const { id} = req.params;
-
+    const id = req.params.id;
     if (!ObjectId.isValid(id)) {
       throw new Error("ID de pedido inválido.");
-    }
+    };
 
     const order = await orderControllers
       .getCollection()
@@ -296,22 +296,21 @@ export const getCheckout = async (req, res) => {
 
     if (!order) {
       return handleError(res, new Error("Pedido não encontrado."), '../pages/public/checkout', { ...pageOptions, mensagem: 'Pedido não encontrado.' });
-    }
-
-    const totalPrice = order.items.reduce(
-      (acc, item) => acc + item.preco * item.quantity,
-      0
-    );
-
-    const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
+    };
+    const totalPrice = order.items.reduce((acc, item) => acc + item.preco * Number(item.quantidade), 0);
+    const totalItems = order.items.reduce((acc, item) => acc + Number(item.quantidade), 0);
 
     pageOptions.order = order;
     pageOptions.totalPrice = totalPrice;
     pageOptions.totalItems = totalItems;
+
+    console.log(pageOptions);
 
     renderPage(res, "../pages/public/checkout", { ...pageOptions, mensagem: "Detalhes da ordem." });
 
   } catch (error) {
     handleError(res, error, '../pages/public/checkout', { ...pageOptions, mensagem: 'Erro ao carregar os detalhes do pedido. Tente novamente mais tarde.' });
   }
+
 };
+

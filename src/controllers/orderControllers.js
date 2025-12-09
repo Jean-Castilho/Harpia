@@ -22,7 +22,6 @@ export default class OrderControllers {
 
   async creatOrder(req, res) {
     const validatedItems = await validateOrderItems(req.body.items);
-    console.log(req.session)
     const { _id, name, role, phone } = req.session.user;
 
     const payment_data = {
@@ -41,11 +40,11 @@ export default class OrderControllers {
       createdAt: new Date(),
       updatedAt: new Date
     };
-    console.log("payload", payloadOrder);
+    
     const orderCreat = await this.getCollection().insertOne(payloadOrder);
     console.log("order creat",orderCreat);
 
-    return res.redirect(`/checkout/${orderCreat.insertedId}`);
+    return res.redirect(`/checkout/${orderCreat.insertedId.toString()}`);
 
   };
 

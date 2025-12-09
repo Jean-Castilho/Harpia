@@ -176,13 +176,11 @@
     <% if (orders && orders.length> 0) { %>
         <% orders.forEach(order=> { %>
             <div class="order-card">
-
                 <div class="order-header">
                     <div class="order-header-item">
                         <strong>PEDIDO FEITO EM</strong>
                         <span>
-                            <%= formatters.formatDate(order.createdAt) %> - <%= formatters.formatTime(order.createdAt)
-                                    %>
+                            <%= formatters.formatDate(order.createdAt) %> - <%= formatters.formatTime(order.createdAt) %>
                         </span>
                     </div>
                     <div class="order-header-item">
@@ -208,11 +206,9 @@
                 </div>
 
                 <div class="order-body">
-
                     <% order.items.forEach(item=> { %>
                         <div class="order-item">
                             <% if (item && item.imagens && item.imagens.length> 0) { %>
-
 
                                 <div style="display: flex; gap: 20px; width: 100%;" class="order-item-details">
 

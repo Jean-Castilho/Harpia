@@ -1,7 +1,7 @@
 /* --- Responsiveness --- */
 @media (max-width: 1200px) {
     .card {
-        margin: 4rem;
+        margin: 0rem;
     }
     
     .delivery-dashboard {
