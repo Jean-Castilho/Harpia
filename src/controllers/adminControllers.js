@@ -84,6 +84,7 @@ export const getOrdersPage = async (req, res) => {
 
   try {
     const orders = await orderControllers.getCollection().find({}).toArray();
+
     const ordernsApproved = orders.filter(order => order.status === 'approved');
     pageOptions.totalApproved = ordernsApproved.length;
 
@@ -128,8 +129,6 @@ export const getEditUserPage = async (req, res) => {
 
   try {
     const user = await userControllers.getUserById(id);
-
-    console.log(user);
 
     pageOptions.user = user;
     renderAdminPage(res, '../pages/admin/editUser', { ...pageOptions });
@@ -223,7 +222,6 @@ export const getAddProductPage = (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   const { id } = req.body;
-  console.log(id)
   try {
     await productControllers.deleteProduct(id);
     res.status(200).json({ success: true, message: 'Produto excluído com sucesso.' });
@@ -265,6 +263,7 @@ export const getDelivery = async (req, res) => {
 
     const orders = await orderControllers.getCollection().find({}).toArray();
 
+    
     const ordernsShipped = orders.filter(order => order.status === 'shipped');
     const ordernsApproved = orders.filter(order => order.status === 'approved');
 

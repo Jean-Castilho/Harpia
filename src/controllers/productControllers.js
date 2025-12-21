@@ -133,9 +133,6 @@ export default class ProductController {
 
     // retorna o documento criado já com imagens convertidas (via getProductById)
     const created = await this.getProductById(result.insertedId.toString());
-
-    console.log(created);
-
     return created;
   }
 
@@ -154,7 +151,6 @@ export default class ProductController {
 
   async updateProduct(req) {
     const { id } = req.params;
-    console.log(id)
     const { body, files } = req;
 
     if (!ObjectId.isValid(id)) {

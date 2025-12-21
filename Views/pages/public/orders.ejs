@@ -167,8 +167,8 @@
 </style>
 
 <div class="container">
-    <header class="page-header" style="text-align: center; margin-bottom: 3rem;">
-        <h1 style="margin-bottom: 0px; margin-top: 1.5rem;">
+    <header class="page-header" style="text-align: center; margin-top: 1.3rem;">
+        <h1 style="margin-bottom: 1rem;">
             <%= titulo %>
         </h1>
     </header>
@@ -189,7 +189,6 @@
                             <%= formatters.statusLabel(order.status) %>
                         </span>
                     </div>
-
 
                     <div class="order-header-item">
                         <strong>PEDIDO Nº</strong>
@@ -212,18 +211,18 @@
 
                                 <div style="display: flex; gap: 20px; width: 100%;" class="order-item-details">
 
-                                    <img src="/uploads/<%= item.imagens[0] %>" alt="<%= item.name %>"
+                                    <img src="/products/images/<%= item.imagens[0] %>" alt="<%= item.nome %>"
                                         class="order-item-img">
 
                                     <h5>
-                                        <%= item.name %>
+                                        <%= item.nome %>
                                     </h5>
                                 </div>
 
                                 <div class="order-item-price">
-                                    <div>Unit: <%= formatters.formatCurrency(item.valor || 0) %>
+                                    <div>Unit: <%= formatters.formatCurrency(item.preco || 0) %>
                                     </div>
-                                    <div>Subtotal: <%= formatters.formatCurrency((item.valor || 0) * (item.quantity ||
+                                    <div>Subtotal: <%= formatters.formatCurrency((item.preco || 0) * (item.quantidade ||
                                             1)) %>
                                     </div>
                                 </div>
@@ -269,9 +268,9 @@
                                 <div class="summary-box">
                                     <strong>Pagamento</strong>
                                     <div style="margin-top:0.5rem; color: #495057;">
-                                        <% if (order.paymentMethod) { %>
+                                        <% if (order.payment) { %>
                                             <div>
-                                                Método de pagamento: <%= order.paymentMethod.payment_method %>
+                                                Método de pagamento: <%= order.payment.payment_method %>
                                             </div>
                                             <% } else { %>
                                                 <div>Método não informado</div>
@@ -284,15 +283,17 @@
                                     <div style="margin-top:0.5rem; color: #495057;">
                                         <div>Itens: <%= order.items.length %>
                                         </div>
-                                        <div>Subtotal: <%= formatters.formatCurrency(((order.valor || 0) -
-                                                (order.shipping || 0) - (order.tax || 0))) %>
+                                        <% const subtotal = order.items.reduce((acc, item) => acc + (item.preco || 0) * (item.quantidade || 1), 0); %>
+                                        <% const frete = 0; %>
+                                        <% const taxas = 0; %>
+                                        <% const total = subtotal + frete + taxas; %>
+                                        <div>Subtotal: <%= formatters.formatCurrency(subtotal) %>
                                         </div>
-                                        <div>Frete: <%= formatters.formatCurrency(order.shipping || 0) %>
+                                        <div>Frete: <%= formatters.formatCurrency(frete) %>
                                         </div>
-                                        <div>Taxas: <%= formatters.formatCurrency(order.tax || 0) %>
+                                        <div>Taxas: <%= formatters.formatCurrency(taxas) %>
                                         </div>
-                                        <div style="font-weight:700; margin-top:0.5rem;">Total: <%=
-                                                formatters.formatCurrency(order.valor) || 0 %>
+                                        <div style="font-weight:700; margin-top:0.5rem;">Total: <%= formatters.formatCurrency(total) %>
                                         </div>
                                     </div>
                                 </div>
@@ -310,11 +311,9 @@
                                                 , 'delivered' , 'cancelled' ]; %>
 
                                                 <% steps.forEach( s=> { %>
-                                                    <% const cls=(s===order.status) ? 'timeline-step active'
-                                                        : 'timeline-step' ; %>
+                                                    <% const cls=(s===order.status) ? 'timeline-step active' : 'timeline-step'; %>
                                                         <div class="<%= cls %>">
-                                                            <%= (statusTranslations[s] || s).replace('_', ' '
-                                                                ).toUpperCase() %>
+                                                            <%= (statusTranslations[s] || s).replace('_', ' ').toUpperCase() %>
                                                         </div>
                                                         <% }); %>
                                     </div>

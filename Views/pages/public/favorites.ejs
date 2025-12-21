@@ -85,7 +85,6 @@
           .getAttribute("content");
 
         const productId = button.dataset.productId;
-        console.log("productId", productId)
         if (!productId) return;
 
         const url = `/auth/favorites/remove`;
@@ -104,8 +103,6 @@
           });
 
           const result = await response.json();
-
-          console.log(result);
 
           showNotification(result.message, result.success);
 

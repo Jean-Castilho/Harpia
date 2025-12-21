@@ -16,9 +16,9 @@
                 <p>Nenhum pedido disponível no momento.</p>
                 <% } else { %>
                     <% orders.forEach(order=> { %>
-                        <div class="order-card" data-order-id="<%= order.id %>"
+                        <div class="order-card" data-order-id="<%= order._id.toString() %>"
                             data-order='<%- JSON.stringify(order) %>'>
-                            <h3>Pedido #<%= order._id.substring(0, 8) %>
+                            <h3>Pedido #<%= order._id.toString().substring(0, 8) %>
                             </h3>
                             <p><strong>Cliente:</strong>
                                 <%= order.user.name %>

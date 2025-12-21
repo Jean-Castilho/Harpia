@@ -9,7 +9,7 @@ export const gerarPix = async (valor) => {
 
     if (!valor) {
         return { mensagem: 'O campo "valor" é obrigatório.' }
-    }
+    };
 
     const data = { email: "jeancastilho646@gmail.com", nome: "jean", sobrenome: "castilho", cpf: 17984881758 }
     const valorInteiro = parseFloat(valor).toFixed(2);
@@ -29,7 +29,6 @@ export const gerarPix = async (valor) => {
     };
     try {
         const payment = new Payment(client);
-        console.log(payment);
         const result = await payment.create({ body: payment_data });
         const { qr_code, qr_code_base64 } = result.point_of_interaction.transaction_data;
 
@@ -38,11 +37,11 @@ export const gerarPix = async (valor) => {
             status: result.status,
             qr_code,
             qr_code_base64,
-        }
+        };
 
     } catch (error) {
         return { error: 'Erro ao gerar PIX' };
-    }
+    };
 };
 
 export const consultarPix = async (id) => {

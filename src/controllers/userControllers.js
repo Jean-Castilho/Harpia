@@ -90,10 +90,7 @@ export default class UserControllers {
   async login(req, res) {
     const { email, password } = req.body;
 
-    console.log(email, password)
-
     const user = await this.getUserByEmail(email);
-    console.log(user);
     if (!user) { // 401 Unauthorized é mais apropriado para falha de login
       throw new UnauthorizedError("Email ou senha incorretos.");
     }

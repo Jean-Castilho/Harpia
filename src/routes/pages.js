@@ -1,24 +1,26 @@
 import express from "express";
 
-import { 
-  getHome, 
+import {
+  getHome,
   getRegister,
-  getLogin, 
+  getLogin,
   getContact,
   getAbout,
   getProducts,
   getProfile,
   getSolicitOtp,
   getVerifyOtp,
-  getFavoritesPage, 
-  getCartPage, 
-  getOrders, 
-  getCheckout
-  } from "../controllers/pagesControllers.js";
+  getFavoritesPage,
+  getCartPage,
+  getOrders,
+  getCheckout,
+  getPayment,
+  getAddressByCep
+} from "../controllers/pagesControllers.js";
 
-  import {
-    postSendFedBack,
-  } from "../controllers/ContactControllers.js";
+import {
+  postSendFedBack,
+} from "../controllers/ContactControllers.js";
 
 import {
   generateCsrfToken,
@@ -55,10 +57,11 @@ router.get("/orders", getOrders);
 
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);
+router.get('/cep/:cep', getAddressByCep);
 
 router.get("/checkout/:id", getCheckout);
 
-
+router.post("/payment/:id", getPayment);
 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {

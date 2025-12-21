@@ -5,6 +5,6 @@
     border-radius: var(--borda-radius);
     box-shadow: var(--sombra-padrao);
     padding: 1rem;
-    margin-bottom: 1.5rem;
+    margin-top: 3.5rem;
     overflow: hidden;
 }

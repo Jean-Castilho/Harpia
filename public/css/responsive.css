@@ -1,5 +1,11 @@
 /* --- Responsiveness --- */
+@media (max-width: 1800px) {
+    .container{ max-width: 80rem;}
+
+}
+
 @media (max-width: 1200px) {
+
     .card {
         margin: 0rem;
     }
@@ -17,7 +23,6 @@
 }
 
 @media (max-width: 1090px) {
-
 
     .container {
         padding: 0.9rem 3rem;

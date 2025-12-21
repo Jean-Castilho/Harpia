@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import UserControllers from "./userControllers.js";
 import ProductControllers from "./productControllers.js";
 import OrdersControllers from "./orderControllers.js";
+import formatters from "../utils/formatters.js";
 
 const userControllers = new UserControllers();
 const productControllers = new ProductControllers();
@@ -65,6 +66,7 @@ export const getAbout = (req, res) => {
   });
 };
 
+
 export const getProducts = async (req, res) => {
   const allProducts = await productControllers.getCollection().find().toArray();
 
@@ -87,7 +89,7 @@ export const getProfile = (req, res) => {
   }
 
   renderPage(res, "../pages/auth/profile", {
-    titulo: "configuarçao",
+    titulo: "configuraçao",
     estilo: "peofile",
     message: "sessao profile...",
   });
@@ -106,7 +108,6 @@ export const getVerifyOtp = (req, res) => {
     message: "solicite o codigo para redefinir senha",
   });
 };
-
 
 
 export const getFavoritesPage = async (req, res) => {
@@ -167,7 +168,6 @@ export const getCartPage = async (req, res) => {
     totalPrice: 0,
     totalItems: 0,
   };
-
   if (
     !req.session.user ||
     !req.session.user.cart ||
@@ -234,17 +234,16 @@ export const getOrders = async (req, res) => {
     titulo: "Meus Pedidos",
     orders: [],
   };
-
-  const objectIds = req.session.user.pedido;
+  const userId = req.session.user._id;
 
   try {
-    const orders = await orderControllers
-      .getCollection()
-      .find({ _id: objectIds });
+
+    const orders = await orderControllers.getOrdersByUserId(userId);
 
     if (!orders || orders.length === 0) {
       return renderPage(res, "../pages/public/orders", {
         ...pageOptions,
+        formatters,
         message: "Você ainda não fez nenhum pedido.",
       });
     }
@@ -254,19 +253,18 @@ export const getOrders = async (req, res) => {
     if (!orders || orders.length === 0) {
       return renderPage(res, "../pages/public/orders", {
         ...pageOptions,
+        formatters,
         message: "Você ainda não fez nenhum pedido.",
       });
     }
 
     renderPage(res, "../pages/public/orders", {
       ...pageOptions,
+      formatters,
       message: "Seu histórico de pedidos.",
     });
   } catch (error) {
-    const apiMessage =
-      (error && error.data && (error.data.message || error.data.msg)) ||
-      error.message ||
-      "Erro ao carregar seu histórico de pedidos.";
+    const apiMessage = (error && error.data && (error.data.message || error.data.msg)) || error.message || "Erro ao carregar seu histórico de pedidos.";
     console.error("Erro ao buscar orders para usuário:", apiMessage, error);
     return renderPage(res, "../pages/public/orders", {
       ...pageOptions,
@@ -276,7 +274,6 @@ export const getOrders = async (req, res) => {
 };
 
 export const getCheckout = async (req, res) => {
-
   const pageOptions = {
     titulo: "Checkout",
     order: null,
@@ -286,9 +283,12 @@ export const getCheckout = async (req, res) => {
 
   try {
     const id = req.params.id;
+
     if (!ObjectId.isValid(id)) {
       throw new Error("ID de pedido inválido.");
     };
+
+    console.log(req.body);
 
     const order = await orderControllers
       .getCollection()
@@ -304,13 +304,90 @@ export const getCheckout = async (req, res) => {
     pageOptions.totalPrice = totalPrice;
     pageOptions.totalItems = totalItems;
 
-    console.log(pageOptions);
-
     renderPage(res, "../pages/public/checkout", { ...pageOptions, mensagem: "Detalhes da ordem." });
 
   } catch (error) {
     handleError(res, error, '../pages/public/checkout', { ...pageOptions, mensagem: 'Erro ao carregar os detalhes do pedido. Tente novamente mais tarde.' });
   }
-
 };
 
+export const getPayment = async (req, res) => {
+
+  const pageOptions = {
+    titulo: "payment",
+  };
+  const id = req.params.id;
+  const data = req.body;
+
+  try {
+    console.log("endereço", data.endereco);
+
+    // Atualizar o pedido com os dados do endereço
+    if (data && Object.keys(data).length > 0) {
+      await orderControllers
+        .getCollection()
+        .updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { endereco: data.endereco } }
+        );
+    }
+
+    const order = await orderControllers
+      .getCollection()
+      .findOne({ _id: new ObjectId(id) });
+
+    pageOptions.qr_code = order.payment.data.qr_code;
+    pageOptions.qr_code_base64 = order.payment.data.qr_code_base64;
+
+    renderPage(res, "../pages/public/payment", { ...pageOptions, mensagem: "Detalhes da ordem." });
+
+  } catch (error) {
+    handleError(res, error, '../pages/public/payment', { ...pageOptions, mensagem: 'Erro ao carregar os detalhes do pagamento. Tente novamente mais tarde.' });
+  }
+};
+
+export const updateUserAddress = (req, res) => {
+  const { cep } = req.body;
+
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+
+  req.session.user.cep = cep;
+  res.redirect("/profile");
+};
+
+export const getAddressByCep = async (req, res) => {
+  const { cep } = req.params;
+  const cepLimpo = cep.replace(/\D/g, '');
+
+  if (cepLimpo.length !== 8) {
+    return res.status(400).json({ success: false, message: 'CEP inválido.' });
+  }
+
+  try {
+    const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+
+    if (!response.ok) {
+      return res.status(500).json({ success: false, message: 'Erro ao consultar o CEP.' });
+    }
+
+    const address = await response.json();
+
+    if (address.erro) {
+      return res.status(404).json({ success: false, message: 'CEP não encontrado.' });
+    }
+
+    const filteredAddress = {
+      rua: address.logradouro,
+      bairro: address.bairro,
+      cidade: address.localidade,
+      estado: address.uf,
+    };
+
+    res.json({ success: true, data: filteredAddress });
+  } catch (error) {
+    console.error('Erro ao consultar o CEP:', error);
+    res.status(500).json({ success: false, message: 'Erro ao consultar o CEP.' });
+  }
+};

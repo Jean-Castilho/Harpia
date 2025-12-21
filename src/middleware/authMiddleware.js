@@ -27,7 +27,6 @@ export const ensureAuthenticated = (req, res, next) => {
     return next(new UnauthorizedError("Acesso não autorizado. Por favor, faça login."));
   }
   req.userId = req.session.user._id; // Anexa o ID do usuário à requisição
-  console.log(req.userId)
   next();
 };
 

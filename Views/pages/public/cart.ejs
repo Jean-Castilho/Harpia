@@ -142,13 +142,11 @@
   }
 
   async function removeCart(productId, buttonElement) {
-    console.log(productId);
 
     if (!productId) {
       showNotification("Produto inválido.", false);
       return;
     }
-
     if (buttonElement) {
       buttonElement.disabled = true;
       buttonElement.textContent = "Removendo...";
@@ -165,12 +163,9 @@
           "Content-Type": "application/json",
           "x-csrf-token": csrfToken,
         },
-
         body: JSON.stringify({ productId }),
       });
-
       const result = await response.json();
-      console.log(result);
 
       if (!response.ok) {
         showNotification(result.message || "Erro ao remover o item.", false);
@@ -184,6 +179,7 @@
       const itemElement = document.querySelector(
         `.cart-item[data-item-id="${productId}"]`
       );
+
       if (itemElement) {
         itemElement.remove();
       }
@@ -281,8 +277,6 @@
         const csrfToken = document
           .querySelector('meta[name="csrf-token"]')
           .getAttribute("content");
-
-        console.log({ items: selectedItems });
 
         try {
           const response = await fetch("/orders", {

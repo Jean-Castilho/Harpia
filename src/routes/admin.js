@@ -9,8 +9,6 @@ import {
     ensureAdmin
 } from '../middleware/authMiddleware.js';
 
-
-
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -44,7 +42,6 @@ router.get('/add-product', generateCsrfToken,  getAddProductPage);
 router.get('/products/edit/:id', generateCsrfToken, getEditProductPage);
 router.post('/products/edit/:id', upload.array('imagens', 5), validateCsrfToken, postEditProduct);
 router.post('/products/delete', ensureAuthenticated, ensureAdmin, validateCsrfToken, deleteProduct);
-
 
 router.get('/delivery', getDelivery);
 
