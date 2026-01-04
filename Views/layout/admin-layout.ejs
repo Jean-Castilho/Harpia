@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+    <title>Admin - <%= titulo %></title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/css/intlTelInput.css">
+   
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8RM/K9" crossorigin="anonymous"></script>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+        }
+        .admin-sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .admin-sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .admin-sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .admin-sidebar a:hover, .admin-sidebar a.active {
+            background-color: #34495e;
+        }
+        .admin-main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <aside class="admin-sidebar">
+        <h2>Admin</h2>
+        <nav>
+            <a href="/admin/dashboard" hx-get="/admin/dashboard" hx-target="#admin-content" hx-push-url="true">Dashboard</a>
+            <a href="/admin/inventory" hx-get="/admin/inventory" hx-target="#admin-content" hx-push-url="true">Estoque</a>
+            <a href="/admin/orders" hx-get="/admin/orders" hx-target="#admin-content" hx-push-url="true">Pedidos</a>
+            <a href="/admin/users" hx-get="/admin/users" hx-target="#admin-content" hx-push-url="true">Usuários</a>
+            
+            <hr style="border-color: #34495e; margin: 20px 0;">
+
+            <a href="/profile" hx-get="/profile" hx-target="#admin-content" hx-push-url="true">Gerenciar Perfil</a>
+            <a href="/logout">Sair</a>
+            
+            <hr style="border-color: #34495e; margin: 20px 0;">
+
+            <a href="/">Voltar ao Site</a>
+        </nav>
+    </aside>
+
+    <main id="admin-content" class="admin-main-content">
+        <%- include(page) %>
+    </main>
+
+</body>
+</html>

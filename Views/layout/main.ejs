@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.0.10/css/intlTelInput.css">
     <link rel="stylesheet" href="/css/main.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8RM/K9" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -22,7 +23,7 @@
 
 
     <%- include('../partials/header') %>
-        <main>
+        <main id="main-content">
             <%- include(page) %>
         </main>
 

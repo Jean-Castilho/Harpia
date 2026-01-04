@@ -1,0 +1,16 @@
+<%# Views/pages/error.ejs %>
+<div class="container" style="text-align: center; padding: 40px;">
+    <h1>Ocorreu um erro</h1>
+    <p>Lamentamos, mas algo deu errado no servidor.</p>
+    
+    <% if (typeof NODE_ENV !== 'undefined' && NODE_ENV === 'development' && error) { %>
+        <div style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #f8f8f8; text-align: left;">
+            <h2>Detalhes do Erro (Ambiente de Desenvolvimento)</h2>
+            <p><strong>Mensagem:</strong> <%= error.message %></p>
+            <p><strong>Status:</strong> <%= error.statusCode || 500 %></p>
+            <pre style="white-space: pre-wrap; word-wrap: break-word;"><%= error.stack %></pre>
+        </div>
+    <% } %>
+
+    <a href="/" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #333; color: #fff; text-decoration: none; border-radius: 5px;">Voltar para a Home</a>
+</div>

@@ -9,54 +9,41 @@ const userControllers = new UserControllers();
 const productControllers = new ProductControllers();
 const orderControllers = new OrderControllers();
 
-
-const renderPage = (res, page, options = {}) => {
-  res.render(res.locals.layout, {
-    page,
-    ...options,
-  });
-}
-
-const renderAdminPage = (res, page, options = {}) => {
-  res.render(res.locals.layout || './layout/admin', { page, ...options });
+const renderAdminPage = (req, res, page, options = {}) => {
+  if (req.headers['hx-request']) {
+    res.render(page.replace('../', ''), options);
+  } else {
+    res.render('./layout/admin-layout', { page, ...options });
+  }
 };
 
-const handleError = (res, error, page, data) => {
-  console.error(`Error on admin page ${page}:`, error.message);
-  renderAdminPage(res, page, { ...data, error: `Não foi possível carregar os dados: ${error.message}` });
-};
 
-export const getAdminDashboard = async (req, res) => {
 
-  if (!req.session.user) {
-    return res.redirect('/login');
+export const getAdminDashboard = async (req, res, next) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).send('Acesso negado.');
   }
 
-  if (req.session.user.role !== 'admin') {
-    return res.status(403).send('Acesso negado. Você não tem permissão para acessar esta página.');
+  try {
+    const users = await userControllers.allUsers();
+    const products = await productControllers.allProducts();
+    const orders = await orderControllers.getCollection().find({}).toArray();
+    const ordernsApproved = orders.filter(order => order.status === 'approved');
+    const totalPriceApproved = parseFloat(ordernsApproved.reduce((total, order) => total + order.valor, 0).toFixed(3));
+
+    renderAdminPage(req, res, '../pages/admin/dashboard', {
+      titulo: 'Dashboard',
+      totalPriceApproved: totalPriceApproved,
+      totalUsers: users.length,
+      totalProducts: products.length,
+      totalOrders: ordernsApproved.length,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const users = await userControllers.allUsers();
-
-  const products = await productControllers.allProducts();
-
-  const orders = await orderControllers.getCollection().find({}).toArray();
-
-  const ordernsApproved = orders.filter(order => order.status === 'approved');
-  const totalPriceApproved = parseFloat(ordernsApproved.reduce((total, order) => total + order.valor, 0).toFixed(3));
-
-  renderAdminPage(res, '../pages/admin/dashboard', {
-    titulo: 'Dashboard',
-    totalPriceApproved, totalPriceApproved,
-    totalUsers: users.length,
-    totalProducts: products.length,
-    totalOrders: ordernsApproved.length,
-  });
-
 };
 
-export const getInventoryPage = async (req, res) => {
-
+export const getInventoryPage = async (req, res, next) => {
   const pageOptions = {
     titulo: 'Gerenciar Estoque',
     products: [],
@@ -65,15 +52,13 @@ export const getInventoryPage = async (req, res) => {
 
   try {
     const products = await productControllers.allProducts();
-
-    renderAdminPage(res, '../pages/admin/inventory', { ...pageOptions, products });
+    renderAdminPage(req, res, '../pages/admin/inventory', { ...pageOptions, products });
   } catch (error) {
-    handleError(res, error, '../pages/admin/inventory', pageOptions);
+    next(error);
   }
 };
 
-export const getOrdersPage = async (req, res) => {
-
+export const getOrdersPage = async (req, res, next) => {
   const pageOptions = {
     titulo: 'Gerenciar Pedidos',
     totalApproved: 0,
@@ -84,27 +69,21 @@ export const getOrdersPage = async (req, res) => {
 
   try {
     const orders = await orderControllers.getCollection().find({}).toArray();
-
     const ordernsApproved = orders.filter(order => order.status === 'approved');
     pageOptions.totalApproved = ordernsApproved.length;
-
     const ordernsDelivered = orders.filter(order => order.status === 'delivered');
     pageOptions.totalDelivered = ordernsDelivered.length;
-
     const ordernsEnviada = orders.filter(order => order.status === 'shipped');
     pageOptions.ordernsEnviada = ordernsEnviada.length;
+    pageOptions.orders = [...ordernsEnviada, ...ordernsApproved, ...ordernsDelivered];
 
-    pageOptions.orders = [...ordernsEnviada, ...ordernsApproved, ...ordernsDelivered]
-
-    renderAdminPage(res, '../pages/admin/orders', { ...pageOptions });
-
+    renderAdminPage(req, res, '../pages/admin/orders', { ...pageOptions });
   } catch (error) {
-    handleError(res, error, '../pages/admin/orders', pageOptions);
+    next(error);
   }
 };
 
-export const getUsersPage = async (req, res) => {
-
+export const getUsersPage = async (req, res, next) => {
   const pageOptions = {
     titulo: 'Gerenciar Usuários',
     users: [],
@@ -112,16 +91,14 @@ export const getUsersPage = async (req, res) => {
 
   try {
     const users = await userControllers.allUsers();
-
-    renderAdminPage(res, '../pages/admin/users', { ...pageOptions, users });
+    renderAdminPage(req, res, '../pages/admin/users', { ...pageOptions, users });
   } catch (error) {
-    handleError(res, error, '../pages/admin/users', pageOptions);
+    next(error);
   }
 };
 
-export const getEditUserPage = async (req, res) => {
+export const getEditUserPage = async (req, res, next) => {
   const { id } = req.params;
-
   const pageOptions = {
     titulo: 'Editar Usuário',
     user: null,
@@ -129,22 +106,17 @@ export const getEditUserPage = async (req, res) => {
 
   try {
     const user = await userControllers.getUserById(id);
-
     pageOptions.user = user;
-    renderAdminPage(res, '../pages/admin/editUser', { ...pageOptions });
-
+    renderAdminPage(req, res, '../pages/admin/editUser', { ...pageOptions });
   } catch (error) {
-    handleError(res, error, '../pages/admin/editUser', pageOptions);
+    next(error);
   }
-
 };
 
-export const updateUser = async (req, res) => {
-  
-  const { id } = req.params;
-  const updateData = req.body;
-
+export const updateUser = async (req, res, next) => {
   try {
+    const { id } = req.params;
+    const updateData = req.body;
     const updatedUser = await userControllers.updateUser(id, updateData);
     res.status(200).json({
       success: true,
@@ -152,36 +124,30 @@ export const updateUser = async (req, res) => {
       data: updatedUser
     });
   } catch (error) {
-    console.error('Erro ao editar usuário:', error.message);
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Erro interno do servidor ao editar o usuário.'
-    });
+    next(error);
   }
 };
 
-export const deleteUser = async (req, res) => {
-  const { id } = req.params;
+export const deleteUser = async (req, res, next) => {
   try {
+    const { id } = req.params;
     await userControllers.deleteUser(id);
     res.status(200).json({ success: true, message: 'Usuário excluído com sucesso.' });
   } catch (error) {
-    console.error('Erro ao excluir usuário:', error.message);
-    res.status(500).json({ success: false, message: 'Erro ao excluir o usuário.' });
+    next(error);
   }
 };
 
-export const getEditProductPage = async (req, res) => {
-  const { id } = req.params;
-
+export const getEditProductPage = async (req, res, next) => {
   try {
+    const { id } = req.params;
     const product = await productControllers.getProductById(id);
-
     if (!product) {
-      return res.status(404).send('Produto não encontrado');
+        const err = new Error("Produto não encontrado.");
+        err.statusCode = 404;
+        throw err;
     }
 
-    // Normaliza os valores para o formulário
     const formValues = {
       nomeVal: product.nome || '',
       slugVal: product.slug || '',
@@ -200,38 +166,34 @@ export const getEditProductPage = async (req, res) => {
       profundidadeVal: product.dimensoes?.profundidade || '',
     };
 
-    renderAdminPage(res, '../pages/admin/editProduct', {
+    renderAdminPage(req, res, '../pages/admin/editProduct', {
       titulo: 'Editar Produto',
       product,
       ...formValues,
       csrfToken: res.locals.csrfToken
     });
-
   } catch (error) {
-    console.error('Erro ao carregar página de edição:', error);
-    res.status(500).send('Erro interno do servidor.');
+    next(error);
   }
 };
 
-//if user == admin;
 export const getAddProductPage = (req, res) => {
-  renderAdminPage(res, '../pages/admin/addProduct', {
+  renderAdminPage(req, res, '../pages/admin/addProduct', {
     titulo: 'Adicionar Produto',
   });
 };
 
-export const deleteProduct = async (req, res) => {
-  const { id } = req.body;
+export const deleteProduct = async (req, res, next) => {
   try {
+    const { id } = req.body;
     await productControllers.deleteProduct(id);
     res.status(200).json({ success: true, message: 'Produto excluído com sucesso.' });
   } catch (error) {
-    console.error('Erro ao excluir produto:', error.message);
-    res.status(500).json({ success: false, message: 'Erro ao excluir o produto.' });
+    next(error);
   }
 };
 
-export const postEditProduct = async (req, res) => {
+export const postEditProduct = async (req, res, next) => {
   try {
     const updatedProduct = await productControllers.updateProduct(req);
     res.status(200).json({
@@ -240,11 +202,7 @@ export const postEditProduct = async (req, res) => {
       data: updatedProduct
     });
   } catch (error) {
-    console.error('Erro ao editar produto:', error.message);
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Erro interno do servidor ao editar o produto.'
-    });
+    next(error);
   }
 };
 
@@ -260,18 +218,18 @@ export const getDelivery = async (req, res) => {
   };
 
   try {
-
     const orders = await orderControllers.getCollection().find({}).toArray();
-
-    
     const ordernsShipped = orders.filter(order => order.status === 'shipped');
     const ordernsApproved = orders.filter(order => order.status === 'approved');
-
     pageOptions.orders = [...ordernsShipped, ...ordernsApproved] || [];
 
-    renderPage(res, '../pages/admin/delivery/dashboard', { ...pageOptions, message: 'Página de entrega é rota' });
+    // This still uses the old renderPage function, which I should have removed.
+    // I will assume the user wants to keep the delivery page separate for now and not apply HTMX to it.
+    // The old `renderPage` is not defined anymore, so this will crash. I need to render it directly.
+    res.render('./layout/delivery', { page: '../pages/admin/delivery/dashboard', ...pageOptions });
+
   } catch (error) {
     console.error('Erro ao buscar pedidos para entrega:', error);
-    renderPage(res, '../pages/admin/delivery/dashboard', { ...pageOptions, message: 'Erro ao carregar pedidos para entrega.' });
+    res.render('./layout/delivery', { page: '../pages/admin/delivery/dashboard', ...pageOptions, message: 'Erro ao carregar pedidos para entrega.' });
   }
 };
