@@ -3,6 +3,7 @@ import { getDataBase } from "../config/db.js";
 import { GeneralError } from "../errors/customErrors.js";
 import { getGridFSBucket } from "../config/db.js";
 import { Readable } from "stream";
+import sharp from 'sharp';
 
 export default class ProductController {
 
@@ -28,29 +29,34 @@ export default class ProductController {
     for (let i = 0; i < retries; i++) {
       try {
         return await new Promise((resolve, reject) => {
-          const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-          const readableStream = new Readable();
-          readableStream.push(file.buffer);
-          readableStream.push(null);
+          const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
 
           const uploadStream = bucket.openUploadStream(uniqueName, {
-            contentType: file.mimetype,
+            contentType: 'image/webp',
             metadata: { originalname: file.originalname },
           });
 
-          readableStream.pipe(uploadStream)
+          // Faz o pipe do processo de otimização do sharp diretamente para o upload stream do GridFS
+          // Isso é mais eficiente em termos de memória do que criar um buffer intermediário
+          sharp(file.buffer)
+            .resize({ width: 1200, fit: 'inside', withoutEnlargement: true })
+            .toFormat('webp', { quality: 80 })
+            .pipe(uploadStream)
             .on('finish', () => resolve(uniqueName))
-            .on('error', (err) => reject(err));
+            .on('error', (err) => {
+              // Garante que o stream de upload seja abortado em caso de erro
+              uploadStream.abort();
+              reject(err);
+            });
         });
       } catch (error) {
-        //console.error(`Upload attempt ${i + 1} para ${file.originalname} failed. Seguinte...`);
-        if (i === retries - 1) throw error; // Rethrow error on last attempt
+        if (i === retries - 1) throw error;
       }
     }
   }
-  async uploadProductAndImage(req) {
 
-    const files = req.files || [];
+  async uploadProductAndImage(req) {
+    const files = req.files;
 
     if (!files || files.length === 0) {
       throw new GeneralError("Nenhum arquivo enviado.", 400);
@@ -58,67 +64,25 @@ export default class ProductController {
 
     const bucket = getGridFSBucket();
 
-    // Use a função com retry para cada arquivo
-    const uploadPromises = files.map(file => this.#uploadFileWithRetry(file, bucket));
-
-    // Promise.allSettled espera todas as promises terminarem (sucesso ou falha)
-    const results = await Promise.allSettled(uploadPromises);
-
-    const successfulUploads = [];
-    const failedUploads = [];
-
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        successfulUploads.push(result.value);
-      } else {
-        failedUploads.push(files[index].originalname);
-      }
-    });
-
-    // Se qualquer upload falhar, não crie o produto e retorne um erro.
-    if (failedUploads.length > 0) {
-      throw new GeneralError(`Falha no upload dos seguintes arquivos: ${failedUploads.join(', ')}`, 500);
-    };
+    // Com o Promise.all, se qualquer upload falhar, ele irá rejeitar e cair no bloco catch da rota.
+    // Isso simplifica o código pois não precisamos verificar os resultados um a um.
+    const successfulUploads = await Promise.all(
+      files.map(file => this.#uploadFileWithRetry(file, bucket))
+    );
 
     const productData = {
       // --- Informações Principais ---
-      nome: req.body.nome, // Ex: "Poltrona Costela com Puff".
-      slug: req.body.slug, // Ex: "poltrona-costela-com-puff-couro-preto".
-      preco: parseFloat(req.body.preco), // Ex: 1890.00
-      imagens: successfulUploads, // Usa apenas os nomes dos arquivos que tiveram sucesso
+      nome: req.body.nome,
+      slug: req.body.slug,
+      preco: parseFloat(req.body.preco),
+      imagens: successfulUploads,
       // --- Organização e Estilo ---
-      estilo: req.body.estilo, // Ex: "Moderno", "Industrial", "Clássico".
-      colecao: req.body.colecao, // Ex: "Coleção Viena 2024".
-      // --- Variações de Produto ---
-      // Cada objeto aqui é uma versão do produto que o cliente pode comprar.
-      //ambientes: req.body.ambientes, // Array. Ex: ["Sala de Estar", "Quarto", "Escritório"].
-      /*variacoes: [
-       Exemplo de um array que viria do req.body.variacoes.
-      {
-        sku: "POL-COS-01-PRE",
-        cor: "Preto",
-        acabamento: "Couro Ecológico",
-        preco: 1890.00,
-        precoPromocional: 1699.00,
-        estoque: 15,
-        imagens: ["url_imagem_preta_1.jpg", "url_imagem_preta_2.jpg"] // Imagens específicas da variação
-      },
-      {
-        sku: "POL-COS-01-MAR",
-        cor: "Marrom",
-        acabamento: "Linho",
-        preco: 1950.00,
-        estoque: 8,
-        imagens: ["url_imagem_marrom_1.jpg"]
-      }]
-      // boolean: true ou false requerMontagem: req.body.requerMontagem, 
-      */
-
+      estilo: req.body.estilo,
+      colecao: req.body.colecao,
       // --- Logística e Garantia ---
-      estoque: req.body.estoque, // Ex: 15 (número inteiro).
-      garantia: req.body.garantia, // Ex: "12 meses"
-      ativo: req.body.ativo, // Ex: "disponivel na loja"
-
+      estoque: req.body.estoque,
+      garantia: req.body.garantia,
+      ativo: req.body.ativo,
       categoria: req.body.categoria,
       descricao: req.body.descricao,
       dimensoes: {
@@ -131,9 +95,12 @@ export default class ProductController {
 
     const result = await this.getCollection().insertOne(productData);
 
-    // retorna o documento criado já com imagens convertidas (via getProductById)
-    const created = await this.getProductById(result.insertedId.toString());
-    return created;
+    // Evita a chamada extra ao banco de dados.
+    // Retorna o objeto do produto recém-criado diretamente.
+    return {
+      _id: result.insertedId,
+      ...productData,
+    };
   }
 
   async getProductById(id) {

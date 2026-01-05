@@ -104,6 +104,5 @@ process.on("SIGINT", async () => {
     process.exit(0);
 });
 
-
 // Inicia a aplicação
 start();
