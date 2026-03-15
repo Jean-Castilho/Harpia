@@ -19,15 +19,14 @@ import {
 } from "../controllers/pagesControllers.js";
 
 import {
-  postSendFedBack
-} from "../controllers/contactControllers.js";
-
-import {
   generateCsrfToken,
   validateCsrfToken
 } from "../middleware/csrfMiddleware.js";
 
-import { checkUserRole, ensureAuthenticated } from "../middleware/authMiddleware.js";
+import {
+  checkUserRole,
+  ensureAuthenticated
+} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
