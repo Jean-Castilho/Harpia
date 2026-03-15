@@ -19,8 +19,8 @@ import {
 } from "../controllers/pagesControllers.js";
 
 import {
-  postSendFedBack,
-} from "../controllers/contactControllers.js";
+  postSendFedBack
+} from "../../controllers/contactControllers.js";
 
 import {
   generateCsrfToken,
