@@ -30,7 +30,6 @@ export const getHome = async (req, res, next) => {
 
     renderPage(req, res, "../pages/public/home", {
       titulo: "Encanto Rústico",
-      estilo: "home",
       message: "Bem-vindo à nossa loja de móveis e decorações!",
       products: products,
     });
@@ -42,7 +41,6 @@ export const getHome = async (req, res, next) => {
 export const getRegister = (req, res) => {
   renderPage(req, res, "../pages/auth/register", {
     titulo: "Registrar Conta",
-    estilo: "register",
     message: "Crie sua conta para começar a comprar!",
   });
 };
@@ -50,7 +48,6 @@ export const getRegister = (req, res) => {
 export const getLogin = (req, res) => {
   renderPage(req, res, "../pages/auth/login", {
     titulo: "Realizar Login",
-    estilo: "login",
     message: "seja Bem vindo de volta...",
   });
 };
@@ -58,7 +55,6 @@ export const getLogin = (req, res) => {
 export const getContact = (req, res) => {
   renderPage(req, res, "../pages/public/contact", {
     titulo: "Contato",
-    estilo: "contact",
     message: "Entre em contato conosco!",
   });
 };
@@ -66,7 +62,6 @@ export const getContact = (req, res) => {
 export const getAbout = (req, res) => {
   renderPage(req, res, "../pages/public/about", {
     titulo: "Sobre Nós",
-    estilo: "about",
     message: "Saiba mais sobre nossa loja!",
   });
 };
@@ -76,7 +71,6 @@ export const getProducts = async (req, res, next) => {
     const allProducts = await productControllers.getCollection().find().toArray();
     renderPage(req, res, "../pages/public/products", {
       titulo: "Produtos",
-      estilo: "products",
       message: "Confira nossos produtos!",
       products: allProducts,
     });
@@ -92,7 +86,6 @@ export const getProfile = (req, res) => {
 
   renderPage(req, res, "../pages/auth/profile", {
     titulo: "configuraçao",
-    estilo: "peofile",
     message: "sessao profile...",
   });
 };
@@ -155,7 +148,6 @@ export const getCartPage = async (req, res, next) => {
     const pageOptions = {
       titulo: "Carrinho",
       cart: { items: [] },
-      estilo: "cart",
       totalPrice: 0,
       totalItems: 0,
     };

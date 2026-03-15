@@ -23,9 +23,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res, next) => {
   try {
-    
     handleResponse(res ,productControllers.uploadProductAndImage(req) ,201);
-    
   } catch (error) {
     next(error);
   }

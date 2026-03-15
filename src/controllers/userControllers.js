@@ -172,6 +172,11 @@ export default class UserControllers {
       // Atualiza apenas o endereço de e-mail, mantendo o status de verificação
       updateFields['email.endereco'] = updateData.email;
     }
+    
+    if (updateData.phone) {
+      // Atualiza apenas o endereço de e-mail, mantendo o status de verificação
+      updateFields['phone.number'] = updateData.phone;
+    }
     if (updateData.role) {
       // Adicione validação de role se necessário
       const allowedRoles = ['user', 'stockist', 'delivery', 'admin'];

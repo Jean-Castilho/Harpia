@@ -1,7 +1,7 @@
 import express from "express";
 
 import UserControllers from "../controllers/userControllers.js";
-import {sendOtpEmail} from "../controllers/contactControllers.js"
+import {sendOtpEmail} from "../controllers/contactControllers.js";
 
 // 1. Importe o middleware de validação CSRF
 import {
@@ -9,7 +9,7 @@ import {
   generateCsrfToken,
 } from "../middleware/csrfMiddleware.js";
 
-import {ensureAuthenticated} from "../middleware/authMiddleware.js"
+import {ensureAuthenticated} from "../middleware/authMiddleware.js";
 
 import { ObjectId } from "mongodb";
 import { GeneralError } from "../errors/customErrors.js";

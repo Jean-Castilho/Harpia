@@ -62,7 +62,7 @@ export default class OrderControllers {
     } catch (error) {
       next(error);
     }
-  }
+  };
   
   async getOrderByIdUser(req, res, next) {
     try {
@@ -78,5 +78,5 @@ export default class OrderControllers {
     } catch (error) {
       next(error);
     }
-  }
+  };
 }

@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url';
 import { generateCsrfToken } from './src/middleware/csrfMiddleware.js';
 import handleErrors from './src/middleware/errorHandler.js'
 
-
 const app = express();
 const port = process.env.PORT || 3080;
 
@@ -16,7 +15,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuração do mecanismo de visualização
+// Configuração do mecanismo de visualização;
 app.use(cors({origin: `http://localhost:${port}`}));
 app.use(express.json());
 app.set('view engine', 'ejs');
@@ -67,7 +66,6 @@ app.use((err, req, res, next) => {
     }
     return next(err);
 });
-
 
 //sobrecarga de responsabilidade no index.js
 import Server from "./src/server.js"

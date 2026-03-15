@@ -17,8 +17,6 @@ const renderAdminPage = (req, res, page, options = {}) => {
   }
 };
 
-
-
 export const getAdminDashboard = async (req, res, next) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).send('Acesso negado.');
@@ -143,9 +141,9 @@ export const getEditProductPage = async (req, res, next) => {
     const { id } = req.params;
     const product = await productControllers.getProductById(id);
     if (!product) {
-        const err = new Error("Produto não encontrado.");
-        err.statusCode = 404;
-        throw err;
+      const err = new Error("Produto não encontrado.");
+      err.statusCode = 404;
+      throw err;
     }
 
     const formValues = {
