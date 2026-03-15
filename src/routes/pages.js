@@ -47,7 +47,6 @@ router.post("/atualiz", generateCsrfToken, getSolicit_otp);
 */
 
 router.get("/contact", getContact);
-router.post("/send-fedback", postSendFedBack);
 
 router.get("/about", getAbout);
 router.get("/products", generateCsrfToken, getProducts);

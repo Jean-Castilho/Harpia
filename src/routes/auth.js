@@ -1,6 +1,7 @@
 import express from "express";
 
 import UserControllers from "../controllers/userControllers.js";
+import {sendOtpEmail} from "../controllers/contactControllers.js";
 
 // 1. Importe o middleware de validação CSRF
 import {
@@ -63,32 +64,6 @@ router.put("/updatedUser", ensureAuthenticated, validateCsrfToken, async (req, r
   }
 });
 
-router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
-
-  console.log("req.body:", req.body);
-
-  const {contact, send_method } = req.body;
-
-  if (send_method == 'email') {
-    
-    const verifUser = await userControllers.getUserByEmail(contact);
-    console.log("send Code for email",verifUser);
-    if (verifUser == null) {
-      return next(new GeneralError("Ussuario nao encontrado", 301));
-
-    }else{
-      const sendemail = await sendOtpEmail(contact);
-      console.log("send email:", sendemail);
-      return res.status(201).json({mensagem:"email enviado",})
-    }
-  };
-
-  if (send_method == 'sms') {
-    const verifUser = await userControllers.getUserByPhone(contact);
-    console.log("send Code for SMS",verifUser);
-  };
-
-});
 
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
