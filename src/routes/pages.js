@@ -19,6 +19,10 @@ import {
 } from "../controllers/pagesControllers.js";
 
 import {
+  postSendFedBack,
+} from "../controllers/contactcontrollers.js";
+
+import {
   generateCsrfToken,
   validateCsrfToken
 } from "../middleware/csrfMiddleware.js";
@@ -47,6 +51,7 @@ router.post("/atualiz", generateCsrfToken, getSolicit_otp);
 */
 
 router.get("/contact", getContact);
+router.post("/send-fedback", postSendFedBack);
 
 router.get("/about", getAbout);
 router.get("/products", generateCsrfToken, getProducts);

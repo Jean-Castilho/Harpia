@@ -128,6 +128,7 @@ export const sendOtpEmail = async (email) => {
     console.error("Erro ao enviar OTP:", error);
     return { mensagem: "Erro ao enviar OTP." };
   }
+
 };
 
 export const postSendFedBack = async (req, res) => {
