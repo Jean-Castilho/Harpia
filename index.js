@@ -4,9 +4,9 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Importa os middlewares CSRF
-import { generateCsrfToken } from './src/middleware/csrfMiddleware.js';
-import handleErrors from './src/middleware/errorHandler.js'
+// Importa os middlewares
+import { generateCsrfToken } from '#src/middleware/csrfMiddleware.js';
+import handleErrors from '#src/middleware/errorHandler.js'
 
 const app = express();
 const port = process.env.PORT || 3080;
@@ -68,8 +68,8 @@ app.use((err, req, res, next) => {
 });
 
 //sobrecarga de responsabilidade no index.js
-import Server from "./src/server.js"
-import { connectDataBase, closeDataBase } from './src/config/db.js';
+import Server from "#src/server.js"
+import { connectDataBase, closeDataBase } from '#src/config/db.js';
 
 // Configuração das rotas da aplicação
 Server(app);

@@ -1,18 +1,18 @@
 import express from "express";
 
-import UserControllers from "../controllers/userControllers.js";
-import {sendOtpEmail} from "../controllers/contactControllers.js"
+import UserControllers from "#src/controllers/userControllers.js";
+import { sendOtpEmail } from "#src/controllers/contactControllers.js"
 
 // 1. Importe o middleware de validação CSRF
 import {
   validateCsrfToken,
   generateCsrfToken,
-} from "../middleware/csrfMiddleware.js";
+} from "#src/middleware/csrfMiddleware.js";
 
-import {ensureAuthenticated} from "../middleware/authMiddleware.js";
+import {ensureAuthenticated} from "#src/middleware/authMiddleware.js";
 
 import { ObjectId } from "mongodb";
-import { GeneralError } from "../errors/customErrors.js";
+import { GeneralError } from "#src/errors/customErrors.js";
 
 const userControllers = new UserControllers();
 const router = express.Router();

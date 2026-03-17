@@ -1,8 +1,8 @@
-import pages from "./routes/pages.js";
-import auth from "./routes/auth.js";
-import orders from "./routes/orders.js";
-import products from "./routes/products.js";
-import admin from "./routes/admin.js";
+import pages from "#src/routes/pages.js";
+import auth from "#src/routes/auth.js";
+import orders from "#src/routes/orders.js";
+import products from "#src/routes/products.js";
+import admin from "#src/routes/admin.js";
 
 const Server = function (app) {
     app.use("/", pages);

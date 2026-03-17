@@ -16,21 +16,21 @@ import {
   getCheckout,
   getPayment,
   getAddressByCep
-} from "../controllers/pagesControllers.js";
+} from "#src/controllers/pagesControllers.js";
 
 import {
   postSendFedBack,
-} from "../controllers/contactControllers.js";
+} from "#src/controllers/contactControllers.js";
 
 import {
   generateCsrfToken,
   validateCsrfToken
-} from "../middleware/csrfMiddleware.js";
+} from "#src/middleware/csrfMiddleware.js";
 
 import {
   checkUserRole,
   ensureAuthenticated
-} from "../middleware/authMiddleware.js";
+} from "#src/middleware/authMiddleware.js";
 
 const router = express.Router();
 

@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 
 dotenv.config();
 
-import { armazenCodeOtp, generateOTP } from "../services/otpCodeService.js"
+import { armazenCodeOtp, generateOTP } from "#src/services/otpCodeService.js"
 
 const WHATSAPP_TOKEN = "EAA1BR5qp0TMBP5gN408BxXEDdA2FBhZBeCrARA0PjBggbz8f7rO3WEEpHgq80dhsGZCZBigtCBNbzcPisu64PxXuGSP4xZAoZAE3Du1a6FnJEZAJc6MR8ZCa4EpR2WF12FjZBM0tky54OG0HSoAhZBSKJONXphuTCgx5qIn0Pqb2gvS6HpVJkO7BiTMmc6hr4ApXgMwJ5404OS2ZClFtetKB82nHktobehR25sqNucasjJ2IvLcmSqJZCjdA8SBjywozbGoplKTBAt2EVLBJH7ZAEkMzY20mywZDZD";
 const WHATSAPP_PHONE_NUMBER_ID = "892056613982326";

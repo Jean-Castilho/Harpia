@@ -1,9 +1,9 @@
 import { ObjectId } from "mongodb";
-import UserControllers from "./userControllers.js";
-import ProductControllers from "./productControllers.js";
-import OrdersControllers from "./orderControllers.js";
-import formatters from "../utils/formatters.js";
-import { GeneralError } from "../errors/customErrors.js";
+import UserControllers from "#src/controllers/userControllers.js";
+import ProductControllers from "#src/controllers/productControllers.js";
+import OrdersControllers from "#src/controllers/orderControllers.js";
+import formatters from "#src/utils/formatters.js";
+import { GeneralError } from "#src/errors/customErrors.js";
 
 const userControllers = new UserControllers();
 const productControllers = new ProductControllers();

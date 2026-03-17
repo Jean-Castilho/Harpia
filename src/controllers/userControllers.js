@@ -1,18 +1,17 @@
 import { ObjectId } from "mongodb";
 
-import { getDataBase } from "../config/db.js";
+import { getDataBase } from "#src/config/db.js";
 import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
 } from "../errors/customErrors.js";
 
-import {
+import { 
   validationUser,
   criarHashPass,
   criarToken,
-  compararSenha,
-} from "../services/validationData.js";
+} from "#src/services/validationData.js";
 
 export default class UserControllers {
   getCollection() {

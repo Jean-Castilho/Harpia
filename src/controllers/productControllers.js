@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
-import { getDataBase } from "../config/db.js";
-import { GeneralError } from "../errors/customErrors.js";
-import { getGridFSBucket } from "../config/db.js";
+import { getDataBase } from "#src/config/db.js";
+import { GeneralError } from "#src/errors/customErrors.js";
+import { getGridFSBucket } from "#src/config/db.js";
 import { Readable } from "stream";
 import sharp from 'sharp';
 
