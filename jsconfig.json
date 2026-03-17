@@ -2,7 +2,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "#src/*": ["./src/*"]
+      "#controllers/*.js": ["./src/controllers/*.js"],
+      "#middleware/*.js": ["./src/middleware/*.js"],
+      "#services/*.js": ["./src/services/*.js"],
+      "#config/*.js": ["./src/config/*.js"],
+      "#utils/*.js": ["./src/utils/*.js"],
+      "#errors/*.js": ["./src/errors/*.js"]
     }
   },
   "include": ["src/**/*"]
