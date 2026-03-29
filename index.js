@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -30,6 +31,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Configuração da sessão
 app.use(session({
   secret: process.env.SESSION_SECRET,
+  store: MongoStore.create({
+    mongoUrl: process.env.DATABASE_URL,
+    collectionName: 'sessions'
+  }),
   resave: false,
   saveUninitialized: false,
   cookie: {
