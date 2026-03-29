@@ -16,7 +16,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuração do mecanismo de visualização;
-app.use(cors({origin: `http://localhost:${port}`}));
+app.use(cors({
+  origin: `http://localhost:${port}`,
+  credentials: true,
+}));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'Views'));
@@ -68,7 +71,7 @@ app.use((err, req, res, next) => {
 });
 
 //sobrecarga de responsabilidade no index.js
-import Server from "#src/server.js"
+import Server from "#src/server.js";
 import { connectDataBase, closeDataBase } from '#src/config/db.js';
 
 // Configuração das rotas da aplicação

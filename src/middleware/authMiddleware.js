@@ -23,9 +23,22 @@ export const checkUserRole = (req, res, next) => {
 // Middleware para garantir que o usuário está autenticado
 export const ensureAuthenticated = (req, res, next) => {
   if (!req.session.user || !req.session.user._id) {
-    // Lança um erro de "Não Autorizado" que será tratado pelo errorHandler
-    return next(new UnauthorizedError("Acesso não autorizado. Por favor, faça login."));
+    // URL de perfil sem autenticação -> redireciona para login
+    if (req.headers['hx-request']) {
+      res.set('HX-Redirect', '/login');
+      return res.status(302).redirect('/login');
+    }
+
+    if (req.accepts('html')) {
+      return res.redirect('/login');
+    }
+
+    return res.status(401).json({
+      success: false,
+      message: 'Acesso não autorizado. Por favor, faça login.',
+    });
   }
+
   req.userId = req.session.user._id; // Anexa o ID do usuário à requisição
   next();
 };

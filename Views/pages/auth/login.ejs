@@ -58,8 +58,8 @@
                 }, 3000);
             }
 
-            loginButton.textContent = "Sending...";
-            loginButton.disable = true;
+            loginButton.textContent = "Enviando...";
+            loginButton.disabled = true;
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
@@ -67,23 +67,28 @@
             try {
                 const response = await fetch("/auth/login", {
                     method: "POST",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
+                        "Accept": "application/json"
                     },
                     body: JSON.stringify(data),
                 });
 
                 const result = await response.json();
-                showNotification(result.message, result.success);
 
                 if (response.ok) {
+                    showNotification(result.message || "Login realizado", true);
                     window.location.href = "/";
-                } else {
-                    showNotification(result.message, result.success);
+                    return;
                 }
-            } catch (error) {
 
-                console.error("Error:", error);
+                // Exibe mensagem de erro retornada pelo servidor
+                showNotification(result.message || "Falha ao fazer login", false);
+            } catch (error) {
+                console.error("Error ao fazer login:", error);
+                showNotification("Erro de rede: verifique sua conexão.", false);
+            } finally {
                 loginButton.textContent = originalButonText;
                 loginButton.disabled = false;
             }

@@ -10,6 +10,6 @@ const Server = function (app) {
     app.use("/orders", orders);
     app.use("/products", products);
     app.use("/admin", admin);
-}
+};
 
 export default Server;
