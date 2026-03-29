@@ -83,18 +83,12 @@ export default class UserControllers {
       _id: newUser.insertedId,
     };
 
-    req.session.user = createdUser;
+    req.session.user = {
+      ...createdUser,
+      _id: createdUser._id.toString() // Converte ObjectId para string
+    };
 
-    if (req.session.save) {
-      await new Promise((resolve, reject) => {
-        req.session.save((err) => {
-          if (err) return reject(err);
-          resolve();
-        });
-      });
-    }
-
-    console.log(req.session.user);
+    console.log('Session saved for new user:', req.session.user);
 
     return {
       message: "Usuário criado com sucesso.",
@@ -125,18 +119,12 @@ export default class UserControllers {
       email: user.email,
     });
 
-    req.session.user = user;
+    req.session.user = {
+      ...user,
+      _id: user._id.toString() // Converte ObjectId para string
+    };
 
-    if (req.session.save) {
-      await new Promise((resolve, reject) => {
-        req.session.save((err) => {
-          if (err) return reject(err);
-          resolve();
-        });
-      });
-    }
-
-    console.log(user);
+    console.log('Session saved for user:', req.session.user);
     return { message: "Login realizado", user, token };
   }
 
