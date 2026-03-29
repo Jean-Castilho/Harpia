@@ -1,7 +1,7 @@
 import express from "express";
 
 import UserControllers from "#src/controllers/userControllers.js";
-import { sendOtpEmail } from "#src/controllers/contactControllers.js"
+import { sendOtpEmail } from "#src/controllers/ContactControllers.js"
 
 // 1. Importe o middleware de validação CSRF
 import {
