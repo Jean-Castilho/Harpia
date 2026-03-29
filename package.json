@@ -25,6 +25,7 @@
     "sharp": "^0.34.5"
   }
 ,"imports": { 
+    "#src/*": "./src/*",
     "#controllers/*.js": "./src/controllers/*.js",
     "#middleware/*.js": "./src/middleware/*.js",
     "#services/*.js": "./src/services/*.js",
