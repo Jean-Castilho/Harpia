@@ -40,6 +40,7 @@ app.use(session({
   cookie: {
     secure: isProduction, // Usar cookies seguros em produção
     httpOnly: true,
+    sameSite: 'lax', // Permite envio em navegações normais
     maxAge: 1000 * 60 * 60 * 24 // 1 dia
   }
 }));

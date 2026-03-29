@@ -24,6 +24,8 @@ export const checkUserRole = (req, res, next) => {
 export const ensureAuthenticated = (req, res, next) => {
   console.log('Checking authentication - Session user:', req.session?.user);
   console.log('Session ID:', req.sessionID);
+  console.log('Cookies:', req.headers.cookie);
+  console.log('HX-Request:', req.headers['hx-request']);
 
   if (!req.session.user || !req.session.user._id) {
     console.log('User not authenticated, redirecting to login');

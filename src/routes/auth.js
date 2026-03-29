@@ -25,7 +25,7 @@ router.post("/register", generateCsrfToken, async (req, res, next) => {
       .cookie("token", creatUser.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Use 'secure' apenas em produção;
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .status(201) // 201 Created é mais apropriado aqui;
       .json({ message: "Usuário criado com sucesso.", user: creatUser.user });
@@ -38,11 +38,14 @@ router.post("/login", generateCsrfToken, async (req, res, next) => {
   try {
     const dataLogin = await userControllers.login(req, res);
 
+    console.log('Login successful, session ID:', req.sessionID);
+    console.log('Session user:', req.session.user);
+
     return res
       .cookie("token", dataLogin.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .status(200)
       .json({ message: "Login realizado", user: dataLogin.user });
