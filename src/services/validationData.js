@@ -68,9 +68,11 @@ export function criarToken(payload) {
   const expiresIn = process.env.JWT_EXPIRATION || "1h";
 
   return jwt.sign(payload, secret, { expiresIn });
+
 }
 
 export async function compararSenha(password, hashedPassword) {
+
   const match = await bcrypt.compare(password, hashedPassword);
   return match;
 }

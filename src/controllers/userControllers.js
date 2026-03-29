@@ -11,6 +11,7 @@ import {
   validationUser,
   criarHashPass,
   criarToken,
+  compararSenha
 } from "#src/services/validationData.js";
 
 export default class UserControllers {
@@ -77,12 +78,28 @@ export default class UserControllers {
       email: userCreated.email.endereco,
     });
 
-    req.session.user = newUser;
+    const createdUser = {
+      ...userCreated,
+      _id: newUser.insertedId,
+    };
+
+    req.session.user = createdUser;
+
+    if (req.session.save) {
+      await new Promise((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }
+
+    console.log(req.session.user);
 
     return {
       message: "Usuário criado com sucesso.",
-      token: token,
-      user: userCreated,
+      token,
+      user: createdUser,
     };
   }
 
@@ -90,6 +107,9 @@ export default class UserControllers {
     const { email, password } = req.body;
 
     const user = await this.getUserByEmail(email);
+
+    console.log(user)
+
     if (!user) { // 401 Unauthorized é mais apropriado para falha de login
       throw new UnauthorizedError("Email ou senha incorretos.");
     }
@@ -107,6 +127,16 @@ export default class UserControllers {
 
     req.session.user = user;
 
+    if (req.session.save) {
+      await new Promise((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }
+
+    console.log(user);
     return { message: "Login realizado", user, token };
   }
 
@@ -128,14 +158,11 @@ export default class UserControllers {
   async getUserByPhone(phone) {
    if (!phone) return null;
     return await this.getCollection().findOne({ "phone.number": phone });
-    
   }
 
   async getUserById(id) {
     if (!id) return null;
-
     return await this.getCollection().findOne({ _id: new ObjectId(id) });
-
   }
 
   async resetPassword(id, updateData) {
@@ -148,10 +175,6 @@ export default class UserControllers {
     if (updateData.password) {
       updateFields.password = await criarHashPass(updateData.password);
     };
-
-
-    
-
 
   }
 

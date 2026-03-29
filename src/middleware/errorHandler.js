@@ -24,7 +24,11 @@ const handleErrors = (err, req, res, next) => {
   const message = err.message || "Ocorreu um erro inesperado no servidor.";
 
   // Content negotiation
-  const preferredResponse = req.accepts('html', 'json');
+  const prefersJson =
+    req.headers['accept']?.includes('application/json') ||
+    req.originalUrl?.startsWith('/auth') ||
+    req.originalUrl?.startsWith('/api');
+  const preferredResponse = prefersJson ? 'json' : req.accepts('html', 'json');
 
   if (preferredResponse === 'html') {
     // For HTMX partials, we might not want the full layout
@@ -41,7 +45,7 @@ const handleErrors = (err, req, res, next) => {
         NODE_ENV: process.env.NODE_ENV
       });
     }
-  } else { // Defaults to JSON if it's not HTML (or if it's explicitly 'json')
+  } else { // JSON response for API / auth and non-HTML accept
     const errorBody = {
       success: false,
       message,

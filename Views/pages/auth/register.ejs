@@ -91,26 +91,28 @@
             try {
                 const response = await fetch("/auth/register", {
                     method: "POST",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
+                        "Accept": "application/json"
                     },
                     body: JSON.stringify(data),
                 });
 
                 const result = await response.json();
-                showNotification(result.message, result.success);
 
                 if (response.ok) {
+                    showNotification(result.message || "Conta criada com sucesso", true);
                     window.location.href = "/";
                 } else {
-                    showNotification(result.message, result.success);
+                    showNotification(result.message || "Erro ao registrar", false);
                 }
             } catch (error) {
                 console.error("Error:", error);
-                showNotification(result.message, result.success);
+                showNotification("Erro de rede: verifique sua conexão.", false);
+            } finally {
+                registerButton.textContent = originalButtonText;
+                registerButton.disabled = false;
             }
-
-            registerButton.textContent = originalButtonText;
-            registerButton.disabled = false;
         });
 </script>
