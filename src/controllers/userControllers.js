@@ -95,7 +95,7 @@ export default class UserControllers {
       token,
       user: createdUser,
     };
-  }
+  };
 
   async login(req, res) {
     const { email, password } = req.body;

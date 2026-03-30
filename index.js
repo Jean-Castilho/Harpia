@@ -13,13 +13,23 @@ const app = express();
 const port = process.env.PORT || 3080;
 
 const isProduction = process.env.NODE_ENV === 'production';
+const clientUrl = process.env.CLIENT_URL || `http://localhost:${port}`;
+const isLocalhost = /localhost|127\.0\.0\.1/.test(clientUrl);
+const cookieSecure = isProduction && !isLocalhost;
+const cookieSameSite = cookieSecure ? 'none' : 'lax';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Em produção atrás de proxies como nginx/heroku;
+app.set('trust proxy', 1);
+
 // Configuração do mecanismo de visualização;
 app.use(cors({
-  origin: `http://localhost:${port}`,
+  origin: clientUrl,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'HX-Request'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
 }));
 app.use(express.json());
 app.set('view engine', 'ejs');
@@ -28,7 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configuração da sessão
+// Configuração da sessão;
 app.use(session({
   secret: process.env.SESSION_SECRET,
   store: MongoStore.create({
@@ -38,10 +48,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: isProduction, // Usar cookies seguros em produção
+    secure: cookieSecure,
     httpOnly: true,
-    sameSite: 'lax', // Permite envio em navegações normais
-    maxAge: 1000 * 60 * 60 * 24 // 1 dia
+    sameSite: cookieSameSite,
+    maxAge: 1000 * 60 * 60 * 24,
   }
 }));
 

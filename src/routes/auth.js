@@ -17,18 +17,31 @@ import { GeneralError } from "#src/errors/customErrors.js";
 const userControllers = new UserControllers();
 const router = express.Router();
 
+const isProduction = process.env.NODE_ENV === "production";
+const hostUrl = process.env.CLIENT_URL || "http://localhost:3080";
+const isLocalhost = /localhost|127\.0\.0\.1/.test(hostUrl);
+const cookieSecure = isProduction && !isLocalhost;
+const cookieSameSite = cookieSecure ? "none" : "lax";
+
 router.post("/register", generateCsrfToken, async (req, res, next) => {
   try {
     const creatUser = await userControllers.creatUser(req, res);
 
-    return res
-      .cookie("token", creatUser.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use 'secure' apenas em produção;
-        sameSite: "lax",
-      })
-      .status(201) // 201 Created é mais apropriado aqui;
-      .json({ message: "Usuário criado com sucesso.", user: creatUser.user });
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session after registration:', err);
+        return next(err);
+      }
+
+      return res
+        .cookie("token", creatUser.token, {
+          httpOnly: true,
+          secure: cookieSecure,
+          sameSite: cookieSameSite,
+        })
+        .status(201) // 201 Created é mais apropriado aqui;
+        .json({ message: "Usuário criado com sucesso.", user: creatUser.user });
+    });
   } catch (error) {
     next(error); // Passa o erro para o middleware de erro;
   }
@@ -41,14 +54,21 @@ router.post("/login", generateCsrfToken, async (req, res, next) => {
     console.log('Login successful, session ID:', req.sessionID);
     console.log('Session user:', req.session.user);
 
-    return res
-      .cookie("token", dataLogin.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      })
-      .status(200)
-      .json({ message: "Login realizado", user: dataLogin.user });
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session after login:', err);
+        return next(err);
+      }
+
+      return res
+        .cookie("token", dataLogin.token, {
+          httpOnly: true,
+          secure: cookieSecure,
+          sameSite: cookieSameSite,
+        })
+        .status(200)
+        .json({ message: "Login realizado", user: dataLogin.user });
+    });
   } catch (error) {
     next(error); // Passa o erro para o middleware de erro;
   }
