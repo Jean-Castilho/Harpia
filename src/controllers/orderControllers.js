@@ -79,4 +79,26 @@ export default class OrderControllers {
       next(error);
     }
   };
+
+  async cancelOrder(id) {
+    try {
+      if (!ObjectId.isValid(id)) {
+        throw new ValidationError("ID de pedido inválido.");
+      }
+
+      const objectId = new ObjectId(id);
+      const result = await this.getCollection().updateOne(
+        { _id: objectId },
+        { $set: { status: 'cancelled', updatedAt: new Date() } }
+      );
+
+      if (result.matchedCount === 0) {
+        throw new ValidationError("Pedido não encontrado ou já cancelado.");
+      }
+      
+      return { message: "Pedido cancelado com sucesso." };
+    } catch (error) {
+      throw error; // Re-throw the error for the caller to handle
+    }
+  };
 }

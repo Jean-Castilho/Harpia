@@ -179,21 +179,20 @@
                 <div class="order-header">
                     <div class="order-header-item">
                         <strong>PEDIDO FEITO EM</strong>
-                        <span>
+                        <span id="order-date-<%= order._id %>">
                             <%= formatters.formatDate(order.createdAt) %> - <%= formatters.formatTime(order.createdAt) %>
                         </span>
                     </div>
                     <div class="order-header-item">
                         <strong>STATUS</strong>
-                        <span class="status status-<%= (order.status || '').toLowerCase().replace(/\s+/g, '_') %>">
-                            <%= formatters.statusLabel(order.status) %>
+                        <span id="order-status-<%= order._id %>">
+                            <%- formatters.statusLabel(order.status) %>
                         </span>
                     </div>
 
                     <div class="order-header-item">
                         <strong>PEDIDO Nº</strong>
-                        <span>
-                            <%= order._id.toString().slice(-10) %>
+                        <span id="order-number-<%%= order._id.toString().slice(-10) %>
                         </span>
                     </div>
                     <div class="order-header-item">
@@ -208,12 +207,9 @@
                     <% order.items.forEach(item=> { %>
                         <div class="order-item">
                             <% if (item && item.imagens && item.imagens.length> 0) { %>
-
                                 <div style="display: flex; gap: 20px; width: 100%;" class="order-item-details">
-
                                     <img src="/products/images/<%= item.imagens[0] %>" alt="<%= item.nome %>"
                                         class="order-item-img">
-
                                     <h5>
                                         <%= item.nome %>
                                     </h5>
@@ -323,8 +319,15 @@
                                 <div style="display:flex; gap:0.5rem;">
                                     <% if (order.status==='pending' ) { %>
                                         <a href="/orders/pay/<%= order._id %>" class="btn btn-primary">Pagar</a>
-                                        <a href="/orders/cancel/<%= order._id %>"
-                                            class="btn btn-outline-danger">Cancelar</a>
+                                        <button
+                                            class="btn btn-outline-danger"
+                                            hx-post="/orders/cancel/<%= order._id %>"
+                                            hx-trigger="click"
+                                            hx-confirm="Tem certeza que deseja cancelar este pedido?"
+                                            hx-target="#order-status-<%= order._id %>"
+                                            hx-swap="outerHTML"
+                                            hx-vals='{"_csrf": "<%= csrfToken %>"}'
+                                        >Cancelar</button>
                                         <% } %>
                                         <a href="/contact" class="btn btn-outline-info">Suporte</a>
                                 </div>

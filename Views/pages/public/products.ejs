@@ -1,5 +1,32 @@
 <style>
-    /* Estilos para a barra de filtro de categoria */
+    /* --- Estilos Gerais --- */
+    html, body {
+        overflow-x: hidden; /* Previne rolagem horizontal na página inteira */
+    }
+    .container {
+        max-width: 1200px; /* Valor de exemplo, ajuste conforme necessário */
+        margin: 0 auto;
+        padding: 0 15px; /* Adiciona um pouco de padding em telas menores */
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 1rem;
+        margin-top: 1.2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem; /* Tamanho de exemplo, ajuste conforme necessário */
+        color: var(--cor-secundaria); /* Usando variável de variables.css */
+    }
+
+    /* --- Animações --- */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Barra de Filtro de Categoria --- */
     .category-filter-bar {
         text-align: center;
         margin-bottom: 3rem;
@@ -7,7 +34,6 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 0.8rem;
-        /* Espaçamento entre os botões */
     }
 
     .filter-btn {
@@ -16,7 +42,6 @@
         border: 2px solid var(--cor-borda);
         padding: 12px 24px;
         border-radius: 25px;
-        /* Bordas mais arredondadas */
         font-weight: bold;
         text-transform: uppercase;
         cursor: pointer;
@@ -30,7 +55,6 @@
         border-color: var(--cor-secundaria);
     }
 
-    /* Estilo do botão de filtro ativo */
     .filter-btn.active {
         background-color: var(--cor-destaque);
         color: #fff;
@@ -38,20 +62,164 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Animação de fade-in para os produtos */
-    .product-card {
-        animation: fadeIn 0.5s ease-in-out;
+    /* --- Contêiner do Grid de Produtos (para gerenciar o overflow e a rolagem sem barra) --- */
+    .product-grid-container {
+        width: 100%; /* Ocupa a largura total disponível do pai */
+        overflow-x: auto; /* Habilita a rolagem horizontal quando o conteúdo transborda */
+        -webkit-overflow-scrolling: touch; /* Suaviza a rolagem em dispositivos iOS */
+        padding-bottom: 1rem; /* Adiciona um pouco de padding para a barra de rolagem (mesmo que oculta) */
+        /* Oculta a barra de rolagem para uma estética mais limpa, mas mantém a funcionalidade */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+    }
+    .product-grid-container::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
     }
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(15px);
-        }
+    /* --- Grid de Produtos --- */
+    .product-grid {
+        display: grid;
+        grid-auto-flow: column; /* Organiza os itens em colunas, permitindo que o grid se estenda horizontalmente */
+        grid-auto-columns: minmax(280px, 1fr); /* Define a largura mínima de cada coluna e permite que ela cresça */
+        gap: 2rem;
+        width: max-content; /* Permite que o grid se expanda para acomodar todos os itens em uma linha */
+    }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+    /* --- Card de Produto --- */
+    .product-card {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--borda-radius);
+        overflow: hidden;
+        animation: fadeIn 0.5s ease-in-out;
+        box-shadow: var(--sombra-padrao);
+    }
+
+    .product-image-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 75%; /* Proporção de aspecto 4:3 para imagens, ajuste se necessário */
+        overflow: hidden;
+    }
+
+    .product-image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Garante que a imagem cubra a área sem distorção */
+        display: block;
+    }
+
+    .product-card-icons {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        z-index: 10; /* Garante que os ícones fiquem acima da imagem */
+    }
+
+    .icon-btn {
+        background-color: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        color: var(--cor-secundaria);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-btn:hover {
+        background-color: var(--cor-destaque);
+        color: #fff;
+        transform: scale(1.1);
+    }
+
+    .icon-btn i.material-icons {
+        font-size: 20px;
+    }
+
+    .favorite-btn.favorited i {
+        color: var(--cor-destaque); /* Cor para ícone favoritado */
+    }
+
+    .add-to-cart-btn.in-cart i {
+        color: var(--cor-destaque); /* Cor para ícone no carrinho */
+    }
+
+    .product-card-content {
+        padding: 15px;
+        flex-grow: 1; /* Permite que o conteúdo ocupe o espaço disponível */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Empurra o botão para a parte inferior */
+    }
+
+    .product-card h3 {
+        font-family: var(--fonte-titulo);
+        font-size: 1.2rem;
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: var(--cor-texto-escuro);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.3;
+    }
+
+    .product-card .price {
+        font-family: var(--fonte-corpo);
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--cor-destaque);
+        margin-bottom: 15px;
+    }
+
+    /* --- Estilos Gerais de Botão (para botões dentro dos cards de produto) --- */
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: var(--borda-radius);
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .btn-secundario {
+        background-color: var(--cor-secundaria);
+        color: #fff;
+        border: 1px solid var(--cor-secundaria);
+    }
+
+    .btn-secundario:hover {
+        background-color: #4a453e; /* Um tom ligeiramente mais escuro de --cor-secundaria */
+        border-color: #4a453e;
+    }
+
+    .btn-sm {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    /* --- Responsividade --- */
+    @media (max-width: 400px) {
+        .category-filter-bar {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .filter-btn {
+            width: 100%;
         }
     }
 </style>
@@ -80,68 +248,70 @@
         </div>
 
         <!-- Grid Único de Produtos -->
-        <div class="product-grid">
-            <% if (items.length> 0) { %>
-                <% items.forEach(product=> { %>
-                    <% 
-                     const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] : '/assets/img/fallback.jpg';
-                        const id = product._id || '';
-                        const productUrl = `/product/${id}`;
-                        const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', { style:
-                        'currency', currency: 'BRL' }) : 'Preço sob consulta';
+        <div class="product-grid-container">
+            <div class="product-grid">
+                <% if (items.length> 0) { %>
+                    <% items.forEach(product=> { %>
+                        <% 
+                         const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] : '/assets/img/fallback.jpg';
+                            const id = product._id || '';
+                            const productUrl = `/product/${id}`;
+                            const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', { style:
+                            'currency', currency: 'BRL' }) : 'Preço sob consulta';
 
-                        // Verifica se o produto está nos favoritos ou no carrinho do usuário
-                        const isFavorited = (session?.user?.favorites || []).map(String).includes(String(id));
-                        const isInCart = (session?.user?.cart || []).map(String).includes(String(id));
+                            // Verifica se o produto está nos favoritos ou no carrinho do usuário
+                            const isFavorited = (session?.user?.favorites || []).map(String).includes(String(id));
+                            const isInCart = (session?.user?.cart || []).map(String).includes(String(id));
 
-                        // Define as URLs de ação (requer login)
-                        const favoritUrl = session?.user?._id ? `/addFavorite/${id}` : '/login';
-                        const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) : '/login';
+                            // Define as URLs de ação (requer login)
+                            const favoritUrl = session?.user?._id ? `/addFavorite/${id}` : '/login';
+                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) : '/login';
 
-                        // Formata as categorias do produto para o atributo de dados
-                        const productCategories = Array.isArray(product.categoria) ? product.categoria.join(',') :
-                        (product.categoria || '');
-                        %>
+                            // Formata as categorias do produto para o atributo de dados
+                            const productCategories = Array.isArray(product.categoria) ? product.categoria.join(',') :
+                            (product.categoria || '');
+                            %>
 
-                        <!-- Card do Produto -->
-                        <div class="product-card" data-categories="<%= productCategories %>">
-                            <div class="product-image-container">
-                                <a href="<%= productUrl %>" class="product-link">
-                                    <img src="/products/images/<%= product.imagens[0] %>" alt="<%= product.nome %>">
-                                </a>
-                                <div class="product-card-icons">
-                                    <a href="<%= favoritUrl %>"
-                                        class="favorite-btn icon-btn <%= isFavorited ? 'favorited' : '' %>"
-                                        data-product-id="<%= id %>">
-                                        <i class="material-icons">
-                                            <%= isFavorited ? 'favorite' : 'favorite_border' %>
-                                        </i>
+                            <!-- Card do Produto -->
+                            <div class="product-card" data-categories="<%= productCategories %>">
+                                <div class="product-image-container">
+                                    <a href="<%= productUrl %>" class="product-link">
+                                        <img src="/products/images/<%= product.imagens[0] %>" alt="<%= product.nome %>">
                                     </a>
-                                    <a href="<%= carrinhoUrl %>"
-                                        class="add-to-cart-btn icon-btn <%= isInCart ? 'in-cart' : '' %>"
-                                        data-product-id="<%= id %>">
-                                        <i class="material-icons">
-                                            <%= isInCart ? 'shopping_cart_checkout' : 'shopping_cart' %>
-                                        </i>
-                                    </a>
+                                    <div class="product-card-icons">
+                                        <a href="<%= favoritUrl %>"
+                                            class="favorite-btn icon-btn <%= isFavorited ? 'favorited' : '' %>"
+                                            data-product-id="<%= id %>">
+                                            <i class="material-icons">
+                                                <%= isFavorited ? 'favorite' : 'favorite_border' %>
+                                            </i>
+                                        </a>
+                                        <a href="<%= carrinhoUrl %>"
+                                            class="add-to-cart-btn icon-btn <%= isInCart ? 'in-cart' : '' %>"
+                                            data-product-id="<%= id %>">
+                                            <i class="material-icons">
+                                                <%= isInCart ? 'shopping_cart_checkout' : 'shopping_cart' %>
+                                            </i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="product-card-content">
+                                    <h3>
+                                        <%= product.nome %>
+                                    </h3>
+                                    <p class="price">
+                                        <%= preco %>
+                                    </p>
+                                    <a href="<%= productUrl %>" class="btn btn-secundario btn-sm">Ver Detalhes</a>
                                 </div>
                             </div>
-                            <div class="product-card-content">
-                                <h3>
-                                    <%= product.nome %>
-                                </h3>
-                                <p class="price">
-                                    <%= preco %>
-                                </p>
-                                <a href="<%= productUrl %>" class="btn btn-secundario btn-sm">Ver Detalhes</a>
-                            </div>
-                        </div>
-                        <% }); %>
-                            <% } else { %>
-                                <p style="text-align: center; grid-column: 1 / -1;">Nenhum produto encontrado no
-                                    momento. Volte em breve!
-                                </p>
-                                <% } %>
+                            <% }); %>
+                                <% } else { %>
+                                    <p style="text-align: center; grid-column: 1 / -1;">Nenhum produto encontrado no
+                                        momento. Volte em breve!
+                                    </p>
+                                    <% } %>
+            </div>
         </div>
 </div>
 
@@ -164,12 +334,14 @@
                 // Adiciona a classe 'active' ao botão clicado
                 button.classList.add('active');
 
-                const selectedCategory = button.dataset.category;
+                // Normaliza a categoria selecionada para comparação (remove espaços e converte para minúsculas)
+                const selectedCategory = button.dataset.category.trim().toLowerCase();
 
                 productCards.forEach(card => {
-                    const productCategories = card.dataset.categories.split(',');
+                    // Normaliza as categorias do produto para comparação
+                    const productCategories = card.dataset.categories.split(',').map(cat => cat.trim().toLowerCase());
 
-                    if (selectedCategory === 'all' || productCategories.includes(selectedCategory)) {
+                    if (selectedCategory === 'all' || productCategories.includes(selectedCategory)) { // Compara as categorias normalizadas
                         card.style.display = 'block'; // Mostra o card
                     } else {
                         card.style.display = 'none'; // Oculta o card
