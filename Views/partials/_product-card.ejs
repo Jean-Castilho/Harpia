@@ -2,7 +2,7 @@
 <%
   if (!product) return;
   const id = product._id.toString();
-  const productUrl = `/product/${id}`;
+  const productUrl = `/products/${id}`;
   const imagem = (product.imagens && product.imagens.length > 0) ? product.imagens[0] : '/assets/img/fallback.jpg';
   const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'Preço sob consulta';
   const isFavorited = favorites.includes(id);

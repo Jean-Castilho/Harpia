@@ -82,6 +82,30 @@ export const getProducts = async (req, res, next) => {
   }
 };
 
+export const getProductDetail = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      throw new GeneralError("ID de produto inválido.", 400);
+    }
+
+    const product = await productControllers.getProductById(id);
+
+    if (!product) {
+      throw new GeneralError("Produto não encontrado.", 404);
+    }
+
+    renderPage(req, res, "../pages/public/product-detail", {
+      titulo: product.nome,
+      product: product,
+      message: "Detalhes do produto",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getProfile = (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login");

@@ -255,7 +255,7 @@
                         <% 
                          const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] : '/assets/img/fallback.jpg';
                             const id = product._id || '';
-                            const productUrl = `/product/${id}`;
+                            const productUrl = `/products/${id}`;
                             const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', { style:
                             'currency', currency: 'BRL' }) : 'Preço sob consulta';
 
