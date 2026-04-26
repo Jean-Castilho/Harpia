@@ -64,6 +64,7 @@ app.use((req, res, next) => {
   res.locals.session = req.session;
 
   res.locals.user = req.session?.user || null;
+  res.locals.isAuthenticated = !!req.session?.user?._id; // Define isAuthenticated como um booleano
   
   // Ajuda a identificar a rota ativa para a navegação
   res.locals.currentPath = req.path;

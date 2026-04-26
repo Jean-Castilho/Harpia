@@ -5,7 +5,7 @@ import fs from 'fs';
 import { generateCsrfToken } from '../middleware/csrfMiddleware.js';
 
 import ProductControllers from "../controllers/productControllers.js";
-import { getProductDetail } from "../controllers/pagesControllers.js";
+import { getProductDetail, getProductsByIds } from "../controllers/pagesControllers.js"; // Importa getProductsByIds
 import { getGridFSBucket } from "../config/db.js";
 import { handleResponse } from "../utils/handleResponse.js";
 
@@ -23,6 +23,8 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", getProductDetail);
+
+router.post("/batch", getProductsByIds); // Usa o manipulador de rota importado
 
 router.post("/", upload.array('imagens', 5), generateCsrfToken, async (req, res, next) => {
   try {

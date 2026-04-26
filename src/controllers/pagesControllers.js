@@ -138,12 +138,9 @@ export const getFavoritesPage = async (req, res, next) => {
       favorites: [],
     };
 
-    if (!req.session.user) {
-      return renderPage(req, res, "../pages/public/favorites", {
-        ...pageOptions,
-        message: "Usuário não autenticado",
-      });
-    }
+    // Se o usuário não estiver logado, o frontend lidará com os favoritos do localStorage.
+    // Apenas renderizamos a página base sem favoritos do servidor.
+    if (!req.session.user) return renderPage(req, res, "../pages/public/favorites", pageOptions);
 
     const { favorites: favoritProducts } = req.session.user;
 
@@ -376,6 +373,25 @@ export const getAddressByCep = async (req, res, next) => {
     };
 
     res.json({ success: true, data: filteredAddress });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductsByIds = async (req, res, next) => {
+  try {
+    const { productIds } = req.body; // Espera um array de IDs
+
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ success: false, message: "Nenhum ID de produto fornecido." });
+    }
+
+    const objectIds = productIds.map(id => new ObjectId(id));
+    const products = await productControllers
+      .getCollection()
+      .find({ _id: { $in: objectIds } })
+      .toArray();
+    res.json({ success: true, products });
   } catch (error) {
     next(error);
   }

@@ -116,6 +116,23 @@ export default class ProductController {
     return product;
   }
 
+  async getProductsByIds(ids) {
+    // Validar e converter IDs para ObjectId
+    const validIds = ids
+      .filter(id => ObjectId.isValid(id))
+      .map(id => new ObjectId(id));
+
+    if (validIds.length === 0) {
+      return [];
+    }
+
+    const products = await this.getCollection()
+      .find({ _id: { $in: validIds } })
+      .toArray();
+
+    return products;
+  }
+
   async updateProduct(req) {
     const { id } = req.params;
     const { body, files } = req;
