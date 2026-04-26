@@ -1,4 +1,77 @@
 <div class="container">
+  <style>
+    /* Estilos para o grid de favoritos */
+    .favorites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajusta o número de colunas automaticamente */
+      gap: 2rem; /* Espaçamento entre os cards */
+      margin-top: 2rem;
+      justify-content: center; /* Centraliza os itens no grid */
+    }
+
+    /* Estilos para o card de produto dentro do grid de favoritos */
+    .favorites-grid .product-card {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #e0e0e0;
+      border-radius: var(--borda-radius);
+      overflow: hidden;
+      box-shadow: var(--sombra-padrao);
+      width: 100%; /* Garante que o card ocupe a largura total da coluna */
+      max-width: 350px; /* Limita a largura máxima do card */
+      margin: 0 auto; /* Centraliza o card dentro da coluna */
+    }
+
+    .favorites-grid .product-card img {
+      width: 100%;
+      height: 200px; /* Altura fixa para as imagens dos cards */
+      object-fit: cover; /* Garante que a imagem cubra a área sem distorção */
+      display: block;
+    }
+
+    .favorites-grid .product-card h3 {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .favorites-grid .product-card .price {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--cor-destaque);
+      margin-bottom: 1rem;
+    }
+
+    .favorites-grid .product-card .btn-remover {
+      background-color: var(--cor-perigo); /* Cor para o botão de remover */
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: var(--borda-radius);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .favorites-grid .product-card .btn-remover:hover {
+      background-color: #dc3545; /* Um tom mais escuro */
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .favorites-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Ajusta para telas médias */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .favorites-grid {
+        grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
+      }
+    }
+  </style>
+  <% const isAuthenticated = !!session?.user?._id; %>
+
   <header class="page-header" style="text-align: center; margin-bottom: 1.6rem">
     <h1>Meus Favoritos</h1>
   </header>
@@ -7,15 +80,13 @@
   <div class="favorites-grid">
     <% favorites.forEach(item=> { %> <% const imagem = (item.imagens &&
     item.imagens.length> 0) ? item.imagens[0] : '/assets/img/fallback.jpg';
+        
+    const id = item._id.toString();
     
-    
-    
-    const id = item._id.toString(); 
-    
-    const productUrl = `/product/${id}`; %>
+    const productUrl = `/products/${id}`; %>
     <div class="product-card" id="favorite-card-<%= id %>">
       <a href="<%= productUrl %>">
-        <img src="/products/images/<%= imagem %>" alt="<%= item.name %>" />
+        <img src="/products/images/<%= imagem %>" alt="<%= item.nome %>" />
       </a>
       <div style="padding: 1.5rem">
         <h3>
@@ -23,10 +94,10 @@
             href="<%= productUrl %>"
             style="color: var(--cor-secundaria); text-decoration: none"
           >
-            <%= item.name %>
+            <%= item.nome %>
           </a>
-        </h3>
-        <p class="price">R$ <%= item.preco %></p>
+        </h3> 
+        <p class="price"><%= Number(item.preco).toLocaleString('pt-BR', { style: 'currency' , currency: 'BRL' }) %></p>
         <button
           class="btn btn-remover remove-favorite-btn"
           data-product-id="<%= id %>"
@@ -37,7 +108,7 @@
     </div>
     <% }); %>
   </div>
-  <% } else { %>
+  <% } else if (isAuthenticated) { %> <% // Se logado, mas sem favoritos no servidor %>
   <div class="card" style="text-align: center; padding: 4rem">
     <h2>Sua lista de favoritos está vazia.</h2>
     <p style="margin-top: 1rem; margin-bottom: 2rem">
@@ -45,86 +116,159 @@
     </p>
     <a href="/products" class="btn btn-destaque">Ver Produtos</a>
   </div>
+  <% } else { %> <% // Se não logado %>
+  <div class="card" id="local-empty-message" style="display: none; text-align: center; padding: 4rem">
+    <h2>Sua lista de favoritos está vazia.</h2>
+    <p style="margin-top: 1rem; margin-bottom: 2rem">
+      Clique no ícone de coração nos produtos para guardá-los aqui.
+    </p>
+    <a href="/products" class="btn btn-destaque">Ver Produtos</a>
+  </div>
+  <div class="favorites-grid" id="local-favorites-grid"></div> <% // Grid para renderizar favoritos locais via JS %>
   <% } %>
 </div>
 
-<div
-  id="notification-fav"
-  style="
-    display: none;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    padding: 15px;
-    border-radius: 5px;
-    color: white;
-  "
-></div>
+<div id="notification-fav" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px; border-radius: 5px; color: white;"></div>
 
-<script>
+<% /*
+  Alternativa para passar variáveis do servidor para o cliente de forma mais robusta.
+  Isso evita problemas de sintaxe JavaScript com strings e permite passar objetos complexos.
+*/ %>
+<script id="server-data" type="application/json">
+  {
+    "isAuthenticated": <%= isAuthenticated %>
+  }
+</script>
+
+<script type="module">
+  // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
+  import { getLocalStorageFavorites, setLocalStorageFavorites, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
+
   document.addEventListener("DOMContentLoaded", () => {
-    const notification = document.getElementById("notification-home");
+    const serverDataElement = document.getElementById('server-data');
+    const serverData = JSON.parse(serverDataElement.textContent);
+    const isUserAuthenticated = serverData.isAuthenticated;
+    // Função auxiliar para showNotification com ID específico
+    const showFavNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-fav');
 
-    function showNotification(message, isSuccess) {
-      notification.textContent = message;
-      notification.style.backgroundColor = isSuccess ? "#28a745" : "#dc3545";
-      notification.style.display = "block";
-      setTimeout(() => {
-        notification.style.display = "none";
-      }, 3000);
+    // --- Função para renderizar produtos do localStorage ---
+    async function renderLocalFavorites() {
+      const localFavorites = getLocalStorageFavorites();
+      const localFavoritesGrid = document.getElementById('local-favorites-grid');
+      const localEmptyMessage = document.getElementById('local-empty-message');
+
+      if (localFavorites.length === 0) {
+        if (localFavoritesGrid) localFavoritesGrid.innerHTML = ''; // Limpa qualquer conteúdo anterior
+        if (localEmptyMessage) localEmptyMessage.style.display = 'block';
+        return;
+      }
+
+      if (localEmptyMessage) localEmptyMessage.style.display = 'none';
+
+      try {
+        const response = await fetch('/products/batch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productIds: localFavorites }),
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.products.length > 0) {
+          localFavoritesGrid.innerHTML = ''; // Limpa o grid antes de adicionar novos cards
+          result.products.forEach(product => {
+            const imageUrl = product.imagens && product.imagens.length > 0 ? `/products/images/${product.imagens[0]}` : '/assets/img/fallback.jpg';
+            const productId = product._id.toString();
+            const productPrice = product.preco != null ? Number(product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'Preço sob consulta';
+
+            const productCard = `
+              <div class="product-card" id="favorite-card-${productId}">
+                <a href="/products/${productId}">
+                  <img src="${imageUrl}" alt="${product.nome}" />
+                </a>
+                <div style="padding: 1.5rem">
+                  <h3>
+                    <a href="/products/${productId}" style="color: var(--cor-secundaria); text-decoration: none">
+                      ${product.nome}
+                    </a>
+                  </h3>
+                  <p class="price">${productPrice}</p>
+                  <button class="btn btn-remover remove-favorite-btn" data-product-id="${productId}">
+                    Remover dos Favoritos
+                  </button>
+                </div>
+              </div>
+            `;
+            localFavoritesGrid.insertAdjacentHTML('beforeend', productCard);
+          });
+          // Re-atribuir event listeners para os botões de remoção recém-criados (se houver)
+          attachRemoveButtonListeners();
+        } else {
+          if (localEmptyMessage) localEmptyMessage.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Erro ao buscar produtos do localStorage:', error);
+        showFavNotification('Erro ao carregar favoritos locais.', false);
+        if (localEmptyMessage) localEmptyMessage.style.display = 'block';
+      }
     }
 
-    const removeButtons = document.querySelectorAll(".remove-favorite-btn");
-    removeButtons.forEach((button) => {
-      button.addEventListener("click", async (event) => {
-        event.preventDefault();
+    // Função para anexar event listeners aos botões de remoção
+    function attachRemoveButtonListeners() {
+      const currentRemoveButtons = document.querySelectorAll(".remove-favorite-btn");
+      currentRemoveButtons.forEach((button) => {
+        button.removeEventListener("click", handleRemoveFavorite); // Remove para evitar duplicatas
+        button.addEventListener("click", handleRemoveFavorite);
+      });
+    }
 
-        const csrfToken = document
-          .querySelector('meta[name="csrf-token"]')
-          .getAttribute("content");
+    // Handler unificado para remoção de favoritos
+    async function handleRemoveFavorite(event) {
+      event.preventDefault();
 
-        const productId = button.dataset.productId;
-        if (!productId) return;
+      const productId = this.dataset.productId;
+      if (!productId) return;
 
+      if (!isUserAuthenticated) {
+        removeLocalStorageFavorite(productId);
+        showFavNotification('Produto removido dos favoritos (local).', true);
+        const cardToRemove = document.getElementById(`favorite-card-${productId}`);
+        if (cardToRemove) {
+          cardToRemove.remove();
+        }
+        if (getLocalStorageFavorites().length === 0) {
+          renderLocalFavorites();
+        }
+      } else {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
         const url = `/auth/favorites/remove`;
-
         try {
           const response = await fetch(url, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-csrf-token": csrfToken, // Envia o token no cabeçalho
-            },
-            body: JSON.stringify({
-              productId,
-              csrfToken, // Envia o token no corpo também por segurança
-            }),
+            headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
+            body: JSON.stringify({ productId, _csrf: csrfToken }),
           });
-
           const result = await response.json();
-
-          showNotification(result.message, result.success);
-
+          showFavNotification(result.message, result.success);
           if (result.success) {
-            const cardToRemove = document.getElementById(
-              `favorite-card-${productId}`
-            );
-
-            if (cardToRemove) {
-              cardToRemove.remove();
-            }
-            // Opcional: verificar se a lista de favoritos está vazia e mostrar a message
+            const cardToRemove = document.getElementById(`favorite-card-${productId}`);
+            if (cardToRemove) cardToRemove.remove();
             const grid = document.querySelector(".favorites-grid");
-            if (grid && grid.children.length === 0) {
-              // Recarregar ou injetar o HTML da message de lista vazia
-              window.location.reload();
-            }
+            if (grid && grid.children.length === 0) window.location.reload();
           }
         } catch (error) {
-          showNotification("Erro de conexão. Tente novamente.", false);
+          showNotification('Erro de conexão. Tente novamente.', false);
         }
-      });
-    });
+      }
+    }
+
+    // Inicializa a lógica ao carregar a página
+    if (!isUserAuthenticated) {
+      renderLocalFavorites();
+    } else {
+      attachRemoveButtonListeners(); // Para botões renderizados pelo servidor (se houver)
+    }
   });
 </script>

@@ -12,6 +12,7 @@ import {
 import {ensureAuthenticated} from "#src/middleware/authMiddleware.js";
 
 import { ObjectId } from "mongodb";
+import { getProductsByIds } from "#src/controllers/pagesControllers.js"; // Importar a nova função
 import { GeneralError } from "#src/errors/customErrors.js";
 
 const userControllers = new UserControllers();

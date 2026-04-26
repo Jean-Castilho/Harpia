@@ -264,7 +264,7 @@
                             const isInCart = (session?.user?.cart || []).map(String).includes(String(id));
 
                             // Define as URLs de ação (requer login)
-                            const favoritUrl = session?.user?._id ? `/addFavorite/${id}` : '/login';
+                        const favoritUrl = '#'; // Garante que o href seja sempre #
                             const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) : '/login';
 
                             // Formata as categorias do produto para o atributo de dados
@@ -319,14 +319,33 @@
     style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px; border-radius: 5px; color: white;">
 </div>
 
-<script>
+<% /*
+  Alternativa para passar variáveis do servidor para o cliente de forma mais robusta.
+  Isso evita problemas de sintaxe JavaScript com strings e permite passar objetos complexos.
+*/ %>
+<script id="server-data-products" type="application/json">
+  {
+    "isAuthenticated": <%= !!session?.user?._id %>,
+    "csrfToken": "<%= csrfToken %>"
+  }
+</script>
+
+<script type="module">
+    // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
+    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
+
     document.addEventListener('DOMContentLoaded', () => {
+        const serverDataElement = document.getElementById('server-data-products');
+        const serverData = JSON.parse(serverDataElement.textContent);
+        const isAuthenticated = serverData.isAuthenticated;
+        // Função auxiliar para showNotification com ID específico
+        const showProductsNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-products');
+
         // --- LÓGICA DE FILTRAGEM DE PRODUTOS ---
         const filterButtons = document.querySelectorAll('.filter-btn');
         const productCards = document.querySelectorAll('.product-card');
 
-        const csrfToken = '<%= csrfToken %>';
-
+        const csrfToken = serverData.csrfToken;
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {
                 // Remove a classe 'active' de todos os botões
@@ -351,51 +370,51 @@
         });
 
         // --- LÓGICA DE NOTIFICAÇÃO (FAVORITOS E CARRINHO) ---
-        const notification = document.getElementById('notification-products');
-
-        function showNotification(message, isSuccess) {
-            notification.textContent = message;
-            notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
         // Lógica para Favoritos
-        const favoriteButtons = document.querySelectorAll('.favorite-btn');
+        const favoriteButtons = document.querySelectorAll('.favorite-btn'); // Seleciona todos os botões de favoritos uma vez
         favoriteButtons.forEach(button => {
             button.addEventListener('click', async (event) => {
-                event.preventDefault();
+                event.preventDefault(); // Previne o comportamento padrão do link
                 const productId = button.dataset.productId;
                 if (!productId) return;
 
-                const isFavorited = button.classList.contains('favorited');
-                const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
-
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-csrf-token': csrfToken // Envia o token no cabeçalho
-                        },
-                        body: JSON.stringify({
-                            productId: productId,
-                            _csrf: csrfToken // Envia o token no corpo também por segurança
-                        })
-                    });
-
-                    const result = await response.json();
-                    showNotification(result.message, result.success);
-
-                    if (result.success) {
-                        button.classList.toggle('favorited');
-                        const icon = button.querySelector('i');
-                        icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
+                if (!isAuthenticated) {
+                    // Lida com favoritos para usuários não autenticados (localStorage)
+                    const isCurrentlyFavorited = button.classList.contains('favorited');
+                    if (isCurrentlyFavorited) {
+                        removeLocalStorageFavorite(productId);
+                        showProductsNotification('Produto removido dos favoritos (local).', true);
+                    } else {
+                        addLocalStorageFavorite(productId);
+                        showProductsNotification('Produto adicionado aos favoritos (local).', true);
                     }
-                } catch (error) {
-                    showNotification('Erro de conexão. Tente novamente.', false);
+                    button.classList.toggle('favorited');
+                    const icon = button.querySelector('i');
+                    icon.textContent = isCurrentlyFavorited ? 'favorite_border' : 'favorite';
+                } else {
+                    // Lógica existente para usuários logados (requisição AJAX)
+                    const isFavorited = button.classList.contains('favorited');
+                    const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
+
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-csrf-token': csrfToken
+                            },
+                            body: JSON.stringify({ productId: productId, _csrf: csrfToken })
+                        });
+                        const result = await response.json();
+                        showProductsNotification(result.message, result.success);
+                        if (result.success) {
+                            button.classList.toggle('favorited');
+                            const icon = button.querySelector('i');
+                            icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
+                        }
+                    } catch (error) {
+                        showProductsNotification('Erro de conexão. Tente novamente.', false);
+                    }
                 }
             });
         });
@@ -443,5 +462,16 @@
                 }
             });
         });
+
+        // Inicializa o estado dos botões de favoritos ao carregar a página para usuários não logados
+        if (!isAuthenticated) {
+            const localFavorites = getLocalStorageFavorites();
+            favoriteButtons.forEach(button => {
+                if (localFavorites.includes(button.dataset.productId)) {
+                    button.classList.add('favorited');
+                    button.querySelector('i').textContent = 'favorite';
+                }
+            });
+        }
     });
 </script>

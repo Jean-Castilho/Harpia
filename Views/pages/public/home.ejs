@@ -26,7 +26,7 @@
   <section class="hero-section">
     <div class="hero-content">
       <h1>Móveis Rústicos que </br> Contam Histórias</h1>
-      <a href="/products" class="btn btn-primario" style="color: #ffffff;">Todos os Produtos</a>
+      <a href="/register" class="btn btn-primario" style="color: #ffffff;">Registre-se</a>
 
     </div>
   </section>
@@ -36,7 +36,7 @@
     <section class="featured-products">
       <div class="product-grid">
         <% if (items.length> 0) { %>
-          <% items.slice(0, 3).forEach(product=> { %>
+          <% items.slice(0, 1).forEach(product=> { %>
             <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'main' }) %>
               <% }); %>
                 <% } else { %>
@@ -80,56 +80,65 @@
     </div>
 
 
-
-
-    <script>
+    <script type="module">
+        // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
+        import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
+        
       document.addEventListener('DOMContentLoaded', () => {
-        const notification = document.getElementById('notification-home');
+        const isAuthenticated = <%= isAuthenticated %>; // Declarada uma única vez aqui
+
         const csrfToken = '<%= csrfToken %>'; // Pega o token CSRF renderizado pelo EJS
 
-        function showNotification(message, isSuccess) {
-          notification.textContent = message;
-          notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
-          notification.style.display = 'block';
-          setTimeout(() => {
-            notification.style.display = 'none';
-          }, 3000);
-        }
+        // Função auxiliar para showNotification com ID específico
+        const showHomeNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-home');
 
-        // Handle favorite clicks
-        const favoriteButtons = document.querySelectorAll('.favorite-btn');
+        const favoriteButtons = document.querySelectorAll('.favorite-btn'); // Declaração adicionada aqui
         favoriteButtons.forEach(button => {
           button.addEventListener('click', async (event) => {
-            event.preventDefault();
             const productId = button.dataset.productId;
             if (!productId) return;
 
-            const isFavorited = button.classList.contains('favorited');
-            const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
-
-            try {
-              const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-csrf-token': csrfToken // Envia o token no cabeçalho
-                },
-                body: JSON.stringify({
-                  productId: productId,
-                  _csrf: csrfToken // Envia o token no corpo também por segurança
-                })
-              });
-
-              const result = await response.json();
-              showNotification(result.message, response.ok);
-
-              if (result.success) {
+            if (!isAuthenticated) {
+                event.preventDefault(); // Impede o redirecionamento para /login
+                const isCurrentlyFavorited = button.classList.contains('favorited');
+                if (isCurrentlyFavorited) {
+                    removeLocalStorageFavorite(productId); // Usa a função importada
+                    showHomeNotification('Produto removido dos favoritos (local).', true); // Usa a função importada
+                } else {
+                    addLocalStorageFavorite(productId); // Usa a função importada
+                    showHomeNotification('Produto adicionado aos favoritos (local).', true); // Usa a função importada
+                }
                 button.classList.toggle('favorited');
                 const icon = button.querySelector('i');
-                icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
-              }
-            } catch (error) {
-              showNotification('Erro de conexão. Tente novamente.', false);
+                icon.textContent = isCurrentlyFavorited ? 'favorite_border' : 'favorite';
+            } else {
+              // Lógica existente para usuários logados (requisição AJAX)
+              event.preventDefault();
+              const isFavorited = button.classList.contains('favorited');
+              const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
+
+              try {
+                const response = await fetch(url, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': csrfToken // Envia o token no cabeçalho
+                  },
+                  body: JSON.stringify({
+                    productId: productId,
+                    _csrf: csrfToken // Envia o token no corpo também por segurança
+                  })
+                });
+                const result = await response.json();
+                showHomeNotification(result.message, response.ok); // Usa a função importada
+                if (result.success) {
+                  button.classList.toggle('favorited');
+                  const icon = button.querySelector('i');
+                  icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
+                }
+              } catch (error) {
+                showHomeNotification('Erro de conexão. Tente novamente.', false); // Usa a função auxiliar
+              } // Mantém a notificação original para erros de conexão
             }
           });
         });
@@ -163,7 +172,7 @@
               });
 
               const result = await response.json();
-              showNotification(result.message, result.success);
+              showHomeNotification(result.message, result.success); // Usa a função importada
 
               if (result.success) {
                 button.classList.add('in-cart');
@@ -172,9 +181,20 @@
               }
 
             } catch (error) {
-              showNotification('Erro de conexão. Tente novamente.', false);
+              showHomeNotification('Erro de conexão. Tente novamente.', false); // Usa a função importada
             }
           });
         });
+
+        // Inicializa o estado dos botões de favoritos ao carregar a página para usuários não logados
+        if (!isAuthenticated) {
+            const localFavorites = getLocalStorageFavorites();
+            favoriteButtons.forEach(button => {
+                if (localFavorites.includes(button.dataset.productId)) {
+                    button.classList.add('favorited');
+                    button.querySelector('i').textContent = 'favorite';
+                }
+            });
+        }
       });
     </script>
