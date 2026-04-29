@@ -22,6 +22,12 @@
                 <button class="btn btn-secundario" onclick="copyPixCode()"
                     style="margin-top: 1rem; padding: 0.5rem">Copiar
                     Código</button>
+
+                <div id="payment-status" style="margin-top: 1.5rem; text-align: left; background: #fafafa; padding: 1rem; border-radius: 10px;">
+                  <p style="margin: 0 0 0.5rem; font-weight: 600;">Status do pagamento:</p>
+                  <p id="payment-status-text" style="margin: 0 0 0.75rem; font-size: 1rem; color: #333;"><%= paymentStatusLabel || 'Aguardando confirmação...' %></p>
+                  <p id="payment-status-message" style="margin: 0; font-size: 0.95rem; color: #666;">Aguardando o Pix ser compensado automaticamente.</p>
+                </div>
             </div>
             <% } %>
 
@@ -32,6 +38,40 @@
 </div>
 
 <script>
+    const orderId = "<%= orderId %>";
+    const paymentStatusText = document.getElementById('payment-status-text');
+    const paymentStatusMessage = document.getElementById('payment-status-message');
+
+    async function refreshPaymentStatus() {
+        try {
+            const response = await fetch(`/payment/${orderId}/status`, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) {
+                console.warn('Falha ao consultar o status do pagamento', response.status);
+                return;
+            }
+
+            const data = await response.json();
+            const status = data.status || 'pending';
+            const label = status === 'paid' ? 'Pago' : status.replace('_', ' ').toUpperCase();
+
+            paymentStatusText.textContent = label;
+            if (status === 'paid') {
+                paymentStatusMessage.textContent = 'Pagamento confirmado! Seu pedido será processado em instantes.';
+                clearInterval(paymentStatusInterval);
+            } else {
+                paymentStatusMessage.textContent = 'Aguardando a compensação do Pix. Esta página atualizará automaticamente.';
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar status do pagamento:', error);
+        }
+    }
+
+    const paymentStatusInterval = setInterval(refreshPaymentStatus, 5000);
+    refreshPaymentStatus();
+
     function copyPixCode() {
         const pixCodeElement = document.getElementById('pix-code');
         const range = document.createRange();

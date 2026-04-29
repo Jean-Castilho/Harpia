@@ -52,7 +52,7 @@ export const consultarPix = async (id) => {
         const payment = new Payment(client);
         const paymentInfo = await payment.get({ id });
 
-        return { status: paymentInfo.status };
+        return paymentInfo; // Retorna o objeto completo de informações de pagamento
         
     } catch (error) {
         console.error('Erro ao consultar PIX:', error);

@@ -31,6 +31,13 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'HX-Request'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
 }));
+
+// Middleware para capturar o corpo raw da requisição para validação de webhook
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'Views'));

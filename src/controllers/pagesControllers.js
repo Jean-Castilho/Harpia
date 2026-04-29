@@ -323,10 +323,41 @@ export const getPayment = async (req, res, next) => {
 
     pageOptions.qr_code = order.payment.data.qr_code;
     pageOptions.qr_code_base64 = order.payment.data.qr_code_base64;
+    pageOptions.orderId = id;
+    pageOptions.paymentStatus = order.status;
+    pageOptions.paymentStatusLabel = formatters.statusLabel(order.status);
 
     renderPage(req, res, "../pages/public/payment", {
       ...pageOptions,
       mensagem: "Detalhes da ordem.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPaymentStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      throw new GeneralError("ID de pedido inválido.", 400);
+    }
+
+    const order = await orderControllers.getOrderById(id);
+    if (!order) {
+      throw new GeneralError("Pedido não encontrado.", 404);
+    }
+
+    if (!req.session.user || order.user._id.toString() !== req.session.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Acesso negado." });
+    }
+
+    return res.json({
+      success: true,
+      status: order.status,
+      payment: order.payment?.data || null,
+      message: order.status === 'paid' ? 'Pagamento confirmado.' : 'Pagamento pendente.',
     });
   } catch (error) {
     next(error);

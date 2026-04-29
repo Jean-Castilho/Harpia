@@ -218,8 +218,9 @@ export const getDelivery = async (req, res) => {
   try {
     const orders = await orderControllers.getCollection().find({}).toArray();
     const ordernsShipped = orders.filter(order => order.status === 'shipped');
-    const ordernsApproved = orders.filter(order => order.status === 'approved');
-    pageOptions.orders = [...ordernsShipped, ...ordernsApproved] || [];
+    const ordernsApproved = orders.filter(order => order.status === 'approved'); // Existing approved orders
+    const ordernsPaid = orders.filter(order => order.status === 'paid'); // New: Include paid orders
+    pageOptions.orders = [...ordernsShipped, ...ordernsApproved, ...ordernsPaid] || [];
 
     // This still uses the old renderPage function, which I should have removed.
     // I will assume the user wants to keep the delivery page separate for now and not apply HTMX to it.
