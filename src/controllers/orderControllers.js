@@ -30,14 +30,13 @@ function isValidMercadoPagoSignature(req, secret) {
     return false;
   }
 
-  // O ID usado na assinatura é o ID da notificação, que é req.body.id (não req.body.data.id)
-  // O Mercado Pago assina o ID da notificação e o timestamp.
-  const notificationId = req.body.id;
+  // O ID usado na assinatura é o ID da notificação.
+  // O Mercado Pago geralmente usa o ID do payload de notificação no topo do JSON,
+  // mas em alguns casos o webhook pode vir apenas com data.id.
+  const notificationId = req.body.id || req.body?.data?.id;
 
   if (!notificationId) {
     console.warn('ID da notificação ausente no corpo da requisição para validação da assinatura.');
-    // Dependendo da sua configuração de webhook, o ID pode estar em req.body.data.id para eventos de 'payment'
-    // Mas para a validação da assinatura, o Mercado Pago geralmente usa o ID da notificação de nível superior.
     return false;
   }
 
@@ -231,9 +230,16 @@ export default class OrderControllers {
    * @param {object} res - O objeto de resposta do Express.
    */
   async handleMercadoPagoWebhook(req, res) {
-    const { type, data } = req.body;
+    const { type, topic, data, id: notificationId } = req.body;
+    const eventType = type || topic;
+    const mercadoPagoPaymentId = data?.id || req.body?.id;
 
-    console.log('Webhook do Mercado Pago recebido:', { type, dataId: data?.id });
+    console.log('Webhook do Mercado Pago recebido:', {
+      eventType,
+      notificationId,
+      dataId: data?.id,
+      fallbackId: req.body?.id,
+    });
 
     // --- CRÍTICO: Validação da Assinatura do Webhook ---
     const webhookSecret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -241,21 +247,20 @@ export default class OrderControllers {
       console.error('MERCADOPAGO_WEBHOOK_SECRET não está configurado. A validação da assinatura do webhook será ignorada.');
       // Em um ambiente de produção, você pode querer lançar um erro ou retornar 500 aqui.
     } else {
-      if (!isValidMercadoPagoSignature(req, webhookSecret)) { // A função isValidMercadoPagoSignature foi corrigida para usar req.body.id
+      if (!isValidMercadoPagoSignature(req, webhookSecret)) {
         console.warn('Webhook recebido com assinatura inválida.');
         return res.status(403).send('Assinatura inválida');
       }
     }
     
-    if (type === 'payment' && data && data.id) {
-      const mercadoPagoPaymentId = data.id;
+    if ((eventType === 'payment' || eventType === 'payment.created' || eventType === 'payment.updated') && mercadoPagoPaymentId) {
       try {
         // Consulta o status oficial do pagamento no Mercado Pago para evitar inconsistências
         const paymentInfo = await retryOperation(async () => {
           return await consultarPix(mercadoPagoPaymentId);
         }, 5, 2000); // 5 retries, 2-second delay between retries
 
-        if (paymentInfo && (paymentInfo.status === 'approved' || paymentInfo.status === 'paid')) {
+        if (paymentInfo && !paymentInfo.error && (paymentInfo.status === 'approved' || paymentInfo.status === 'paid')) {
           const order = await this.getOrderByMercadoPagoPaymentId(mercadoPagoPaymentId);
 
           if (order) {
@@ -264,11 +269,16 @@ export default class OrderControllers {
           } else {
             console.warn(`Pedido não encontrado para o ID de pagamento do Mercado Pago: ${mercadoPagoPaymentId}`);
           }
+        } else if (paymentInfo && paymentInfo.error) {
+          console.warn(`Consulta de pagamento retornou erro para ID ${mercadoPagoPaymentId}:`, paymentInfo.error);
         }
       } catch (error) {
         console.error(`Erro ao processar webhook para pagamento ${mercadoPagoPaymentId}:`, error);
       }
+    } else {
+      console.warn('Webhook ignorado por não ser evento de pagamento ou por faltar ID:', { eventType, mercadoPagoPaymentId });
     }
+
     res.status(200).send('OK'); // Sempre responda com 200 OK para o Mercado Pago
   }
 }

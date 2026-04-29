@@ -25,10 +25,17 @@ router.post("/webhook/mercadopago", async (req, res, next) => {
   }
 });
 
-router.get("/pay/:id", async (req,res)=>{
-
+router.get("/pay/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send('ID de pedido inválido.');
+    }
+    return res.redirect(`/payment/${id}`);
+  } catch (error) {
+    next(error);
+  }
 });
-
 
 router.post("/cancel/:id", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   try {
