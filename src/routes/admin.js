@@ -45,5 +45,4 @@ router.post('/products/delete', ensureAuthenticated, ensureAdmin, validateCsrfTo
 
 router.get('/delivery', getDelivery);
 
-
 export default router;

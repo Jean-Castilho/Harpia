@@ -132,7 +132,13 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, message: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error saving session after adding favorite:', err);
+          return next(err);
+        }
+        return res.status(200).json({ success: true, message: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
+      });
     }
     // Se não encontrou o usuário, lança um erro 404
     throw new GeneralError("Usuário não encontrado.", 404);
@@ -157,7 +163,13 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
 
     if (updatedUser) {
       req.session.user = updatedUser; // Atualiza a sessão
-      return res.status(200).json({ success: true, message: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error saving session after removing favorite:', err);
+          return next(err);
+        }
+        return res.status(200).json({ success: true, message: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
+      });
     }
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {

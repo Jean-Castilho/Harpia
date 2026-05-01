@@ -334,7 +334,6 @@
     // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
     import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
 
-    document.addEventListener('DOMContentLoaded', () => {
         const serverDataElement = document.getElementById('server-data-products');
         const serverData = JSON.parse(serverDataElement.textContent);
         const isAuthenticated = serverData.isAuthenticated;
@@ -473,5 +472,4 @@
                 }
             });
         }
-    });
 </script>

@@ -136,32 +136,42 @@ export const getFavoritesPage = async (req, res, next) => {
     const pageOptions = {
       titulo: "Meus Favoritos",
       favorites: [],
+      message: "", // Inicializa a mensagem
     };
 
     // Se o usuário não estiver logado, o frontend lidará com os favoritos do localStorage.
     // Apenas renderizamos a página base sem favoritos do servidor.
-    if (!req.session.user) return renderPage(req, res, "../pages/public/favorites", pageOptions);
+    if (!req.session.user) {
+      pageOptions.message = "Faça login para salvar seus favoritos ou gerencie-os localmente.";
+      return renderPage(req, res, "../pages/public/favorites", pageOptions);
+    }
 
     const { favorites: favoritProducts } = req.session.user;
 
     if (!favoritProducts || favoritProducts.length === 0) {
-      return renderPage(req, res, "../pages/public/favorites", {
-        ...pageOptions,
-        message: "Você ainda não adicionou nenhum produto aos seus favoritos.",
-      });
+      pageOptions.message = "Você ainda não adicionou nenhum produto aos seus favoritos.";
+      return renderPage(req, res, "../pages/public/favorites", pageOptions);
     }
 
-    const favoriteObjectIds = favoritProducts.map((id) => new ObjectId(id));
+    // Filtra IDs inválidos para evitar erros e garantir robustez
+    const favoriteObjectIds = favoritProducts
+      .filter(id => ObjectId.isValid(id))
+      .map((id) => new ObjectId(id));
+
+    if (favoriteObjectIds.length === 0) {
+      pageOptions.message = "Não foi possível carregar seus favoritos. Alguns IDs podem ser inválidos.";
+      return renderPage(req, res, "../pages/public/favorites", pageOptions);
+    }
+
     const favoriteItems = await productControllers
       .getCollection()
       .find({ _id: { $in: favoriteObjectIds } })
       .toArray();
 
-    renderPage(req, res, "../pages/public/favorites", {
-      ...pageOptions,
-      favorites: favoriteItems,
-      message: "Seus produtos favoritos.",
-    });
+    pageOptions.favorites = favoriteItems;
+    pageOptions.message = "Seus produtos favoritos.";
+
+    renderPage(req, res, "../pages/public/favorites", pageOptions);
   } catch (error) {
     next(error);
   }

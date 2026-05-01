@@ -144,10 +144,11 @@
   // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
   import { getLocalStorageFavorites, setLocalStorageFavorites, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
 
-  document.addEventListener("DOMContentLoaded", () => {
+  // A lógica de inicialização é executada diretamente para garantir carregamento fluido
     const serverDataElement = document.getElementById('server-data');
     const serverData = JSON.parse(serverDataElement.textContent);
     const isUserAuthenticated = serverData.isAuthenticated;
+    const authenticatedEmptyMessage = document.querySelector('.card[style*="text-align: center; padding: 4rem"]'); // Select the empty message for authenticated users
     // Função auxiliar para showNotification com ID específico
     const showFavNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-fav');
 
@@ -255,8 +256,11 @@
           if (result.success) {
             const cardToRemove = document.getElementById(`favorite-card-${productId}`);
             if (cardToRemove) cardToRemove.remove();
-            const grid = document.querySelector(".favorites-grid");
-            if (grid && grid.children.length === 0) window.location.reload();
+            const grid = document.querySelector(".favorites-grid"); // Assuming this is the grid for authenticated users
+            if (grid && grid.children.length === 0) {
+              grid.style.display = 'none';
+              if (authenticatedEmptyMessage) authenticatedEmptyMessage.style.display = 'block';
+            }
           }
         } catch (error) {
           showNotification('Erro de conexão. Tente novamente.', false);
@@ -270,5 +274,4 @@
     } else {
       attachRemoveButtonListeners(); // Para botões renderizados pelo servidor (se houver)
     }
-  });
 </script>
