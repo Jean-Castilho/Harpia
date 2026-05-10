@@ -38,6 +38,7 @@ app.use(express.json({
     req.rawBody = buf;
   }
 }));
+
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'Views'));

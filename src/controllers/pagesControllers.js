@@ -22,7 +22,6 @@ const renderPage = (req, res, page, options = {}) => {
   }
 };
 
-
 export const getHome = async (req, res, next) => {
   try {
     const products = await productControllers

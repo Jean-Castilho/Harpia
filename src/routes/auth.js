@@ -71,7 +71,7 @@ router.post("/login", generateCsrfToken, async (req, res, next) => {
         .json({ message: "Login realizado", user: dataLogin.user });
     });
   } catch (error) {
-    next(error); // Passa o erro para o middleware de erro;
+    next(error);
   }
 });
 

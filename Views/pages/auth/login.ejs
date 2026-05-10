@@ -33,11 +33,10 @@
 
                 <div style="text-align: center; margin-top: 2rem;">
                     <p style="margin: 0;">Não tem uma conta? <a href="/register" style="color: #9a6250;">Registre-se
-                            aqui</a>.</p>
+                        aqui</a>.</p>
                 </div>
     </div>
 </div>
-
 
 <script>
     document
@@ -74,15 +73,12 @@
                     },
                     body: JSON.stringify(data),
                 });
-
                 const result = await response.json();
-
                 if (response.ok) {
                     showNotification(result.message || "Login realizado", true);
                     window.location.href = "/";
                     return;
                 }
-
                 // Exibe mensagem de erro retornada pelo servidor
                 showNotification(result.message || "Falha ao fazer login", false);
             } catch (error) {
@@ -92,6 +88,5 @@
                 loginButton.textContent = originalButonText;
                 loginButton.disabled = false;
             }
-
         });
 </script>
