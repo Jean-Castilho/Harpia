@@ -9,11 +9,12 @@ import { getProductDetail, getProductsByIds } from "../controllers/pagesControll
 import { getGridFSBucket } from "../config/db.js";
 import { handleResponse } from "../utils/handleResponse.js";
 
+const productControllers = new ProductControllers();
+
 const uploadDir = path.resolve(process.cwd(), 'uploads');
 
 fs.mkdirSync(uploadDir, { recursive: true });
 
-const productControllers = new ProductControllers();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();

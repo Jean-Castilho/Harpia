@@ -1,4 +1,5 @@
-<% const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
+<% 
+  const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
   userId=session?.user?._id || null; const favorites=(session?.user?.favorites || []).map(String); const
   cart=(session?.user?.cart || []).map(String); %>
 
@@ -27,7 +28,6 @@
     <div class="hero-content">
       <h1>Móveis Rústicos que </br> Contam Histórias</h1>
       <a href="/register" class="btn btn-primario" style="color: #ffffff;">Registre-se</a>
-
     </div>
   </section>
 
@@ -57,10 +57,9 @@
                 </h3>
               </a>
               <div class="category-products-scroll">
-                <% const productsInCategory=items.filter(p=> p.categoria === category); %>
+                <% const productsInCategory = items.filter(p=> p.categoria === category); %>
                   <% if (productsInCategory && productsInCategory.length> 0) { %>
                     <% productsInCategory.forEach(product=> { %>
-
 
                       <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'category' }) %>
 
