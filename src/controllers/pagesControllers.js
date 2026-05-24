@@ -261,6 +261,7 @@ export const getOrders = async (req, res, next) => {
   }
 };
 
+
 export const getCheckout = async (req, res, next) => {
   try {
     const pageOptions = {
@@ -305,46 +306,6 @@ export const getCheckout = async (req, res, next) => {
   }
 };
 
-export const getPayment = async (req, res, next) => {
-  try {
-    const pageOptions = {
-      titulo: "payment",
-    };
-    const id = req.params.id;
-    const data = req.body;
-
-    if (data && Object.keys(data).length > 0) {
-      await orderControllers
-        .getCollection()
-        .updateOne(
-          { _id: new ObjectId(id) },
-          { $set: { endereco: data.endereco } }
-        );
-    }
-
-    const order = await orderControllers
-      .getCollection()
-      .findOne({ _id: new ObjectId(id) });
-      
-    if (!order) {
-      throw new GeneralError("Pedido não encontrado.", 404);
-    }
-
-    pageOptions.qr_code = order.payment.data.qr_code;
-    pageOptions.qr_code_base64 = order.payment.data.qr_code_base64;
-    pageOptions.orderId = id;
-    pageOptions.paymentStatus = order.status;
-    pageOptions.paymentStatusLabel = formatters.statusLabel(order.status);
-
-    renderPage(req, res, "../pages/public/payment", {
-      ...pageOptions,
-      mensagem: "Detalhes da ordem.",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getPaymentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -372,6 +333,76 @@ export const getPaymentStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getPayment = async (req, res, next) => {
+  try {
+    const pageOptions = {
+      titulo: "payment",
+    };
+    const id = req.params.id;
+    const data = req.body;
+
+    if (data && Object.keys(data).length > 0) {
+      await orderControllers
+        .getCollection()
+        .updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { endereco: data.endereco } }
+        );
+    }
+
+    const order = await orderControllers
+      .getCollection()
+      .findOne({ _id: new ObjectId(id) });
+
+    if (!order) {
+      throw new GeneralError("Pedido não encontrado.", 404);
+    }
+
+    pageOptions.qr_code = order.payment.data.qr_code;
+    pageOptions.qr_code_base64 = order.payment.data.qr_code_base64;
+    pageOptions.orderId = id;
+    pageOptions.paymentStatus = order.status;
+    pageOptions.paymentStatusLabel = formatters.statusLabel(order.status);
+
+    renderPage(req, res, "../pages/public/payment", {
+      ...pageOptions,
+      mensagem: "Detalhes da ordem.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const postPayment = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { paymentMethod } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      throw new GeneralError("ID de pedido inválido.", 400);
+    }
+
+    const order = await orderControllers.getOrderById(id);
+    if (!order) {
+      throw new GeneralError("Pedido não encontrado.", 404);
+    }
+
+    if (order.status !== "pending") {
+      throw new GeneralError("Pedido não está pendente.", 400);
+    }
+
+    // Não fazer nada aqui - o webhook do Mercado Pago é responsável pela atualização
+    // Esta rota agora apenas valida o pedido
+    res.json({ 
+      success: true, 
+      message: "Pedido validado. Aguardando confirmação do pagamento via webhook." 
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 export const updateUserAddress = (req, res) => {
   const { cep } = req.body;
@@ -420,7 +451,7 @@ export const getAddressByCep = async (req, res, next) => {
 
 export const getProductsByIds = async (req, res, next) => {
   try {
-    const { productIds } = req.body; // Espera um array de IDs
+    const { productIds } = req.body; // Espera um array de IDs;
 
     if (!Array.isArray(productIds) || productIds.length === 0) {
       return res.status(400).json({ success: false, message: "Nenhum ID de produto fornecido." });

@@ -16,7 +16,8 @@ import {
   getCheckout,
   getPayment,
   getPaymentStatus,
-  getAddressByCep
+  getAddressByCep,
+  postPayment
 } from "#controllers/pagesControllers.js";
 
 import {
@@ -62,13 +63,12 @@ router.get("/orders", getOrders);
 router.get("/checkout/:id", getCheckout);
 router.get("/payment/:id", getPayment);
 router.get("/payment/:id/status", getPaymentStatus);
-router.post("/payment/:id", getPayment);
+router.post("/payment/:id", postPayment);
 
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);
 router.get('/cep/:cep', getAddressByCep);
-
-
+ 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
