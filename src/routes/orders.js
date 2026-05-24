@@ -18,6 +18,15 @@ router.post("/", async (req,res,next)=>{
 });
 
 router.post("/webhook/mercadopago", async (req, res, next) => {
+  console.log('Recebida notificação do Mercado Pago em /orders/webhook/mercadopago', {
+    method: req.method,
+    originalUrl: req.originalUrl,
+    signature: req.headers['x-signature'],
+    eventId: req.body?.id,
+    dataId: req.body?.data?.id,
+    eventType: req.body?.type || req.body?.topic,
+  });
+
   try {
     await orderControllers.handleMercadoPagoWebhook(req, res);
   } catch (error) {
