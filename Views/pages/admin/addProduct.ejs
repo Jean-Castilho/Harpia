@@ -5,7 +5,6 @@
             <p>Preencha os detalhes para adicionar um novo produto ao seu inventário.</p>
         </div>
 
-        <div id="notification-home" class="notification" style="display: none;"></div>
         <form id="uploadProductForm" enctype="multipart/form-data">
             <div class="form-grid">
                 <div class="form-group full-width">
@@ -142,17 +141,11 @@
         .addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            const notification = document.getElementById('notification-home');
             const loginButton = document.getElementById("uploadProduct");
             const originalButonText = loginButton.textContent;
 
             function showNotification(message, isSuccess) {
-                notification.textContent = message;
-                notification.style.backgroundColor = isSuccess ? '#dc3545' : '#28a745';
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+                window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
             }
 
             loginButton.textContent = "Sending...";

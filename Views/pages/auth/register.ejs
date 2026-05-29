@@ -65,17 +65,11 @@
             event.preventDefault();
 
 
-            const notification = document.getElementById('notification-home');
             const registerButton = document.getElementById("registerButton");
             const originalButtonText = registerButton.textContent;
 
             function showNotification(message, isSuccess) {
-                notification.textContent = message;
-                notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+                window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
             }
 
             registerButton.textContent = "Sending...";

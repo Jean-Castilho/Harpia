@@ -128,8 +128,6 @@
   <% } %>
 </div>
 
-<div id="notification-fav" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px; border-radius: 5px; color: white;"></div>
-
 <% /*
   Alternativa para passar variáveis do servidor para o cliente de forma mais robusta.
   Isso evita problemas de sintaxe JavaScript com strings e permite passar objetos complexos.
@@ -142,15 +140,15 @@
 
 <script type="module">
   // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
-  import { getLocalStorageFavorites, setLocalStorageFavorites, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
+  import { getLocalStorageFavorites, setLocalStorageFavorites, removeLocalStorageFavorite } from '/js/utils.js';
 
   // A lógica de inicialização é executada diretamente para garantir carregamento fluido
     const serverDataElement = document.getElementById('server-data');
     const serverData = JSON.parse(serverDataElement.textContent);
     const isUserAuthenticated = serverData.isAuthenticated;
     const authenticatedEmptyMessage = document.querySelector('.card[style*="text-align: center; padding: 4rem"]'); // Select the empty message for authenticated users
-    // Função auxiliar para showNotification com ID específico
-    const showFavNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-fav');
+    // Função auxiliar para exibir notificação usando o sistema global
+    const showFavNotification = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
 
     // --- Função para renderizar produtos do localStorage ---
     async function renderLocalFavorites() {
@@ -263,7 +261,7 @@
             }
           }
         } catch (error) {
-          showNotification('Erro de conexão. Tente novamente.', false);
+          showFavNotification('faça login e tente novamente.', false);
         }
       }
     }

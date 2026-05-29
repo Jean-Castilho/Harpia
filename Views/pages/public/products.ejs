@@ -315,10 +315,6 @@
         </div>
 </div>
 
-<div id="notification-products"
-    style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px; border-radius: 5px; color: white;">
-</div>
-
 <% /*
   Alternativa para passar variáveis do servidor para o cliente de forma mais robusta.
   Isso evita problemas de sintaxe JavaScript com strings e permite passar objetos complexos.
@@ -332,13 +328,13 @@
 
 <script type="module">
     // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
-    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
+    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite } from '/js/utils.js';
 
         const serverDataElement = document.getElementById('server-data-products');
         const serverData = JSON.parse(serverDataElement.textContent);
         const isAuthenticated = serverData.isAuthenticated;
-        // Função auxiliar para showNotification com ID específico
-        const showProductsNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-products');
+        // Função auxiliar para exibir notificação usando o sistema global
+        const showProductsNotification = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
 
         // --- LÓGICA DE FILTRAGEM DE PRODUTOS ---
         const filterButtons = document.querySelectorAll('.filter-btn');
@@ -444,12 +440,12 @@
                         },
                         body: JSON.stringify({
                             productId: productId,
-                            _csrf: csrfToken // Envia o token no corpo também por segurança
+                            _csrf: csrfToken // Envia o token no corpo também por segurança;
                         })
                     });
 
                     const result = await response.json();
-                    showNotification(result.message, result.success);
+                    showProductsNotification(result.message, result.success);
 
                     if (result.success) {
                         button.classList.add('in-cart');
@@ -457,12 +453,12 @@
                         icon.textContent = 'shopping_cart_checkout';
                     }
                 } catch (error) {
-                    showNotification('Erro de conexão. Tente novamente.', false);
+                    showProductsNotification('faça login e tente novamente.', false);
                 }
             });
         });
 
-        // Inicializa o estado dos botões de favoritos ao carregar a página para usuários não logados
+        // Inicializa o estado dos botões de favoritos ao carregar a página para usuários não logados;
         if (!isAuthenticated) {
             const localFavorites = getLocalStorageFavorites();
             favoriteButtons.forEach(button => {

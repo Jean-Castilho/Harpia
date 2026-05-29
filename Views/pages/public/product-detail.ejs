@@ -338,22 +338,18 @@
     </div>
 </div>
 
-<div id="notification-products"
-    style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px; border-radius: 5px; color: white;">
-</div>
 
 <script type="module">
     // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
-    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, showNotification } from '/js/utils.js';
+    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite } from '/js/utils.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         const isAuthenticated = <%= isAuthenticated %>;
         const mainProductImage = document.getElementById('main-product-image');
         const thumbnailImages = document.querySelectorAll('.thumbnail-images img');
-        const notification = document.getElementById('notification-products');
 
-        // Função auxiliar para showNotification com ID específico
-        const showProductNotification = (message, isSuccess) => showNotification(message, isSuccess, 'notification-products');
+        // Função auxiliar para exibir notificação usando o sistema global
+        const showProductNotification = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
 
         // --- Lógica de troca de imagem principal ---
         thumbnailImages.forEach(thumbnail => {
@@ -367,7 +363,7 @@
             });
         });
 
-        const csrfToken = '<%= csrfToken %>'; // Certifique-se de que o csrfToken está disponível
+        const csrfToken = '<%= csrfToken %>'; // Certifique-se de que o csrfToken está disponível;
 
         // Lógica para Favoritos
         const favoriteButton = document.querySelector('.favorite-btn');
@@ -415,7 +411,7 @@
                             icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
                         }
                     } catch (error) {
-                        showProductNotification('Erro de conexão. Tente novamente.', false); // Usa a função auxiliar
+                        showProductNotification('faça login e tente novamente.', false); // Usa a função auxiliar
                     } // Mantém a notificação original para erros de conexão
                 }
             });
@@ -453,6 +449,7 @@
                     const result = await response.json();
                     showProductNotification(result.message, result.success); // Usa a função importada
 
+                    console.log('Resposta do servidor para adicionar ao carrinho:', result); // Log para depuração
                     if (result.success) {
                         // Atualiza o texto do botão para "Ver no Carrinho"
                         addToCartButton.textContent = 'Ver no Carrinho';
@@ -460,7 +457,7 @@
                         addToCartButton.classList.add('in-cart');
                     }
                 } catch (error) {
-                    showProductNotification('Erro de conexão. Tente novamente.', false); // Usa a função importada
+                    showProductNotification('faça login e tente novamente.', false); // Usa a função importada
                 }
             });
         }

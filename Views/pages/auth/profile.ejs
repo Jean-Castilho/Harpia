@@ -252,9 +252,6 @@
         .addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            const notification = document.getElementById('notification-home');
-
-
             const saveButton = document.getElementById("saveButton");
             const originalButtonText = saveButton.textContent;
 
@@ -262,12 +259,7 @@
             saveButton.disabled = true;
 
             function showNotification(message, isSuccess) {
-                notification.textContent = message;
-                notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545';
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 6000);
+                window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
             }
 
             const formData = new FormData(this);

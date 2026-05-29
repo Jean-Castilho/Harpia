@@ -90,26 +90,9 @@
         <% } %>
 </div>
 
-<div id="notification-cart" style="
-    display: none;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    padding: 15px;
-    border-radius: 5px;
-    color: white;
-  "></div>
 <script>
-  const notification = document.getElementById("notification-cart");
-
   function showNotification(message, isSuccess) {
-    notification.textContent = message;
-    notification.style.backgroundColor = isSuccess ? "#28a745" : "#dc3545";
-    notification.style.display = "block";
-    setTimeout(() => {
-      notification.style.display = "none";
-    }, 3000);
+    window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
   }
 
   function updateSummary() {
@@ -257,7 +240,6 @@
       .addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const notification = document.getElementById("notification-home");
         const loginButton = document.getElementById("creatOrder");
         const originalButonText = loginButton.textContent;
 

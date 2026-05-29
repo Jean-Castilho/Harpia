@@ -15,16 +15,16 @@ export function addLocalStorageFavorite(productId) {
     if (!favorites.includes(productId)) {
         favorites.push(productId);
         setLocalStorageFavorites(favorites);
-        return true; // Adicionado com sucesso
+        return true; // Adicionado com sucesso;
     }
-    return false; // Já estava nos favoritos
+    return false; // Já estava nos favoritos;
 }
 
 export function removeLocalStorageFavorite(productId) {
     let favorites = getLocalStorageFavorites();
     favorites = favorites.filter(id => id !== productId);
     setLocalStorageFavorites(favorites);
-    return true; // Removido com sucesso
+    return true; // Removido com sucesso;
 }
 
 // --- Função para exibir notificações ---

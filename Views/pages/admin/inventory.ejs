@@ -109,20 +109,8 @@
                 return;
             }
 
-            const notification = document.getElementById('notification-home') || (()=>{
-                const newDiv = document.createElement('div');
-                newDiv.id = 'notification-home';
-                document.body.prepend(newDiv);
-                return newDiv;
-            })();
-
             function showNotification(message, isSuccess) {
-                notification.textContent = message;
-                notification.className = isSuccess ? 'notification success' : 'notification error';
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+                window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
             }
 
             button.textContent = "Removendo...";

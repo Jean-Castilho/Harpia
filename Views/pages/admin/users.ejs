@@ -89,21 +89,7 @@
                 return;
             }
 
-            const notification = document.getElementById('notification-home') || (()=>{
-                const newDiv = document.createElement('div');
-                newDiv.id = 'notification-home';
-                document.body.prepend(newDiv);
-                return newDiv;
-            })();
-
-            function showNotification(message, isSuccess) {
-                notification.textContent = message;
-                notification.className = isSuccess ? 'notification success' : 'notification error';
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
-            }
+            const notify = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
 
             button.textContent = "Removendo...";
             button.disabled = true;
@@ -121,14 +107,14 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    showNotification(result.message, true);
+                    notify(result.message, true);
                     this.closest('tr').remove();
                 } else {
-                    showNotification(result.message || 'Ocorreu um erro.', false);
+                    notify(result.message || 'Ocorreu um erro.', false);
                 }
             } catch (error) {
                 console.error("Error:", error);
-                showNotification("Ocorreu um erro ao excluir o usuário.", false);
+                notify("Ocorreu um erro ao excluir o usuário.", false);
             } finally {
                 button.textContent = originalButtonText;
                 button.disabled = false;

@@ -135,17 +135,11 @@
         .addEventListener("submit", async function (event) {
             event.preventDefault();
 
-            const notification = document.getElementById('notification-home');
             const loginButton = document.getElementById("updatedButton");
             const originalButonText = loginButton.textContent;
 
             function showNotification(message, isSuccess) {
-                notification.textContent = message;
-                notification.style.backgroundColor = isSuccess ? '#dc3545' : '#28a745';
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+                window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
             }
 
             loginButton.textContent = "Sending...";
