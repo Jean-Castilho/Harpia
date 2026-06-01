@@ -25,5 +25,4 @@ export const handleResponse = async (res, servicePromise, successStatusCode = 20
     const errorMessage = error.message || 'Ocorreu um erro interno no servidor.';
     sendResponse(res, statusCode, { error: errorMessage });
    }
-
 };

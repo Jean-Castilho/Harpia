@@ -72,6 +72,11 @@ function initHomePage() {
         return;
       }
 
+      if (!isAuthenticated) {
+        showHomeNotification('faça login e tente novamente.', false);
+        return;
+      }
+      
       const productId = button.dataset.productId;
       if (!productId) return;
 
@@ -93,7 +98,7 @@ function initHomePage() {
           if (icon) icon.textContent = 'shopping_cart_checkout';
         }
       } catch (error) {
-        showHomeNotification('faça login e tente novamente.', false);
+        showHomeNotification('erro tente novamente.', false);
       }
     });
   });
