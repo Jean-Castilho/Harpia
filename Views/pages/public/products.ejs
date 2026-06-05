@@ -327,8 +327,8 @@
 </script>
 
 <script type="module">
-    // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
-    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite } from '/js/utils.js';
+    // Importa o módulo de favoritos reutilizável
+    import { initFavoriteButtons } from '/js/favorites.js';
 
         const serverDataElement = document.getElementById('server-data-products');
         const serverData = JSON.parse(serverDataElement.textContent);
@@ -364,55 +364,8 @@
             });
         });
 
-        // --- LÓGICA DE NOTIFICAÇÃO (FAVORITOS E CARRINHO) ---
-        // Lógica para Favoritos
-        const favoriteButtons = document.querySelectorAll('.favorite-btn'); // Seleciona todos os botões de favoritos uma vez
-        favoriteButtons.forEach(button => {
-            button.addEventListener('click', async (event) => {
-                event.preventDefault(); // Previne o comportamento padrão do link
-                const productId = button.dataset.productId;
-                if (!productId) return;
-
-                if (!isAuthenticated) {
-                    // Lida com favoritos para usuários não autenticados (localStorage)
-                    const isCurrentlyFavorited = button.classList.contains('favorited');
-                    if (isCurrentlyFavorited) {
-                        removeLocalStorageFavorite(productId);
-                        showProductsNotification('Produto removido dos favoritos (local).', true);
-                    } else {
-                        addLocalStorageFavorite(productId);
-                        showProductsNotification('Produto adicionado aos favoritos (local).', true);
-                    }
-                    button.classList.toggle('favorited');
-                    const icon = button.querySelector('i');
-                    icon.textContent = isCurrentlyFavorited ? 'favorite_border' : 'favorite';
-                } else {
-                    // Lógica existente para usuários logados (requisição AJAX)
-                    const isFavorited = button.classList.contains('favorited');
-                    const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
-
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'x-csrf-token': csrfToken
-                            },
-                            body: JSON.stringify({ productId: productId, _csrf: csrfToken })
-                        });
-                        const result = await response.json();
-                        showProductsNotification(result.message, result.success);
-                        if (result.success) {
-                            button.classList.toggle('favorited');
-                            const icon = button.querySelector('i');
-                            icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
-                        }
-                    } catch (error) {
-                        showProductsNotification('Erro de conexão. Tente novamente.', false);
-                    }
-                }
-            });
-        });
+        // Inicializa o comportamento dos botões de favorito com o módulo reutilizável
+        initFavoriteButtons({ isAuthenticated, csrfToken });
 
         // Lógica para Carrinho
         const cartButtons = document.querySelectorAll('.add-to-cart-btn');
@@ -458,14 +411,4 @@
             });
         });
 
-        // Inicializa o estado dos botões de favoritos ao carregar a página para usuários não logados;
-        if (!isAuthenticated) {
-            const localFavorites = getLocalStorageFavorites();
-            favoriteButtons.forEach(button => {
-                if (localFavorites.includes(button.dataset.productId)) {
-                    button.classList.add('favorited');
-                    button.querySelector('i').textContent = 'favorite';
-                }
-            });
-        }
 </script>

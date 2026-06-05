@@ -340,8 +340,8 @@
 
 
 <script type="module">
-    // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
-    import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite } from '/js/utils.js';
+    // Importa o módulo de favoritos reutilizável
+    import { initFavoriteButtons, syncLocalFavoritesToServer } from '/js/favorites.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         const isAuthenticated = <%= isAuthenticated %>;
@@ -365,57 +365,8 @@
 
         const csrfToken = '<%= csrfToken %>'; // Certifique-se de que o csrfToken está disponível;
 
-        // Lógica para Favoritos
-        const favoriteButton = document.querySelector('.favorite-btn');
-        if (favoriteButton) {
-            favoriteButton.addEventListener('click', async (event) => {
-                const productId = favoriteButton.dataset.productId;
-                if (!productId) return;
-                
-                if (!isAuthenticated) { // Usa a variável isAuthenticated
-                    event.preventDefault(); // Impede o redirecionamento para /login
-                    const isCurrentlyFavorited = favoriteButton.classList.contains('favorited');
-                    if (isCurrentlyFavorited) {
-                        removeLocalStorageFavorite(productId); // Usa a função importada
-                        showProductNotification('Produto removido dos favoritos (local).', true); // Usa a função importada
-                    } else {
-                        addLocalStorageFavorite(productId); // Usa a função importada
-                        showProductNotification('Produto adicionado aos favoritos (local).', true); // Usa a função importada
-                    }
-                    favoriteButton.classList.toggle('favorited');
-                    const icon = favoriteButton.querySelector('i');
-                    icon.textContent = isCurrentlyFavorited ? 'favorite_border' : 'favorite';
-                } else {
-                    // Lógica existente para usuários logados (requisição AJAX)
-                    event.preventDefault();
-                    const isFavorited = favoriteButton.classList.contains('favorited');
-                    const url = isFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
-
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'x-csrf-token': csrfToken
-                            },
-                            body: JSON.stringify({
-                                productId: productId,
-                                _csrf: csrfToken
-                            })
-                        });
-                        const result = await response.json();
-                        showProductNotification(result.message, result.success); // Usa a função importada
-                        if (result.success) {
-                            favoriteButton.classList.toggle('favorited');
-                            const icon = favoriteButton.querySelector('i');
-                            icon.textContent = isFavorited ? 'favorite_border' : 'favorite';
-                        }
-                    } catch (error) {
-                        showProductNotification('faça login e tente novamente.', false); // Usa a função auxiliar
-                    } // Mantém a notificação original para erros de conexão
-                }
-            });
-        }
+        // Inicializa o botão de favorito usando o módulo reutilizável
+        initFavoriteButtons({ isAuthenticated, csrfToken });
 
         // Lógica para Carrinho
         const addToCartButton = document.querySelector('.add-to-cart-btn');
@@ -462,13 +413,15 @@
             });
         }
 
-        // Inicializa o estado dos botões de favoritos ao carregar a página para usuários não logados
-        if (!isAuthenticated) { // Usa a variável isAuthenticated
-            const localFavorites = getLocalStorageFavorites();
-            if (favoriteButton && localFavorites.includes(favoriteButton.dataset.productId)) {
-                favoriteButton.classList.add('favorited');
-                favoriteButton.querySelector('i').textContent = 'favorite';
-            }
+        // Sincroniza favoritos locais com o servidor quando o usuário está autenticado
+        if (isAuthenticated) {
+            (async () => {
+                try {
+                    await syncLocalFavoritesToServer(csrfToken);
+                } catch (e) {
+                    console.error('Erro ao sincronizar favoritos:', e);
+                }
+            })();
         }
     });
 </script>

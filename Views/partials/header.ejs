@@ -3,8 +3,7 @@
     <a href="/" class="nav-logo">Encanto Rústico</a>
 
     <ul class="nav-menu">
-      <li><a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>"
-          hx-get="/" hx-target="#main-content" hx-push-url="true" hx-swap="innerHTML">Home</a>
+      <li><a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">Home</a>
       </li>
       <li><a href="/products" class="nav-link <%= isActive('/products') ? 'active' : '' %>"
           hx-get="/products" hx-target="#main-content" hx-push-url="true" hx-swap="innerHTML">Produtos</a>

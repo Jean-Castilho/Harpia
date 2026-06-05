@@ -12,7 +12,7 @@ import {
 import {ensureAuthenticated} from "#src/middleware/authMiddleware.js";
 
 import { ObjectId } from "mongodb";
-import { getProductsByIds } from "#src/controllers/pagesControllers.js"; // Importar a nova função
+import { getProductsByIds } from "#src/controllers/pagesControllers.js"; // Importar a nova função;
 import { GeneralError } from "#src/errors/customErrors.js";
 
 const userControllers = new UserControllers();
@@ -117,22 +117,28 @@ router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
 
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
+  const userId = String(req.userId || req.session?.user?._id || "").trim();
 
   if (!productId) {
-    // Usando o fluxo de erro padronizado
     return next(new GeneralError("ID do produto é obrigatório.", 400));
   }
 
+  if (!ObjectId.isValid(userId)) {
+    return next(new GeneralError("Usuário não autenticado.", 401));
+  }
+
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(req.userId) },
+    const result = await userControllers.getCollection().findOneAndUpdate(
+      { _id: new ObjectId(userId) },
       { $addToSet: { favorites: productId } },
       { returnDocument: "after" }
     );
 
+    const updatedUser = result && result.value ? result.value : null;
+
     if (updatedUser) {
-      req.session.user = updatedUser; // Atualiza a sessão
-      req.session.save((err) => {
+      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
+      return req.session.save((err) => {
         if (err) {
           console.error('Error saving session after adding favorite:', err);
           return next(err);
@@ -140,7 +146,8 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
         return res.status(200).json({ success: true, message: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
       });
     }
-    // Se não encontrou o usuário, lança um erro 404
+
+    console.warn('Favorite add failed: user not found', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
     next(error);
@@ -149,21 +156,28 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
 
 router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
+  const userId = String(req.userId || req.session?.user?._id || "").trim();
 
   if (!productId) {
     return res.status(400).json({ success: false, message: "ID do produto é obrigatório." });
   }
 
+  if (!ObjectId.isValid(userId)) {
+    return res.status(401).json({ success: false, message: "Usuário não autenticado." });
+  }
+
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(req.userId) },
+    const result = await userControllers.getCollection().findOneAndUpdate(
+      { _id: new ObjectId(userId) },
       { $pull: { favorites: productId } },
       { returnDocument: "after" }
     );
 
+    const updatedUser = result && result.value ? result.value : null;
+
     if (updatedUser) {
-      req.session.user = updatedUser; // Atualiza a sessão
-      req.session.save((err) => {
+      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
+      return req.session.save((err) => {
         if (err) {
           console.error('Error saving session after removing favorite:', err);
           return next(err);
@@ -171,6 +185,8 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
         return res.status(200).json({ success: true, message: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
       });
     }
+
+    console.warn('Favorite remove failed: user not found', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
     next(error);
@@ -179,23 +195,30 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
 
 router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
-  const userId = req.userId;
+  const userId = String(req.userId || req.session?.user?._id || "").trim();
 
   if (!productId) {
     return res.status(400).json({ success: false, message: "ID do produto é obrigatório." });
   }
 
+  if (!ObjectId.isValid(userId)) {
+    return next(new GeneralError("Usuário não autenticado.", 401));
+  }
+
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
+    const result = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $addToSet: { cart: productId } },
       { returnDocument: "after" }
     );
 
+    const updatedUser = result && result.value ? result.value : null;
+
     if (updatedUser) {
-      req.session.user = updatedUser; // Atualiza a sessão
+      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
       return res.status(200).json({ success: true, message: "Produto adicionado ao carrinho.", cart: updatedUser.cart });
     }
+    console.warn('Cart add failed: user not found', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
     next(error);
@@ -204,22 +227,30 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
 
 router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
+  const userId = String(req.userId || req.session?.user?._id || "").trim();
 
   if (!productId) {
     return res.status(400).json({ success: false, message: "ID do produto é obrigatório." });
   }
 
+  if (!ObjectId.isValid(userId)) {
+    return next(new GeneralError("Usuário não autenticado.", 401));
+  }
+
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(req.userId) },
+    const result = await userControllers.getCollection().findOneAndUpdate(
+      { _id: new ObjectId(userId) },
       { $pull: { cart: productId } },
       { returnDocument: "after" }
     );
 
+    const updatedUser = result && result.value ? result.value : null;
+
     if (updatedUser) {
-      req.session.user = updatedUser; // Atualiza a sessão
+      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
       return res.status(200).json({ success: true, message: "Produto removido do carrinho.", cart: updatedUser.cart });
     }
+    console.warn('Cart remove failed: user not found', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
     next(error);

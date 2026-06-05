@@ -139,14 +139,19 @@
 </script>
 
 <script type="module">
-  // Importa as funções utilitárias (DEVE SER NO TOPO DO MÓDULO)
-  import { getLocalStorageFavorites, setLocalStorageFavorites, removeLocalStorageFavorite } from '/js/utils.js';
+  // Importa o módulo de favoritos reutilizável e utilitários de localStorage
+  import { initFavoriteButtons, syncLocalFavoritesToServer } from '/js/favorites.js';
+  import { getLocalStorageFavorites, removeLocalStorageFavorite } from '/js/utils.js';
 
   // A lógica de inicialização é executada diretamente para garantir carregamento fluido
     const serverDataElement = document.getElementById('server-data');
     const serverData = JSON.parse(serverDataElement.textContent);
     const isUserAuthenticated = serverData.isAuthenticated;
-    const authenticatedEmptyMessage = document.querySelector('.card[style*="text-align: center; padding: 4rem"]'); // Select the empty message for authenticated users
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Inicializa os botões de favorito na página, caso existam
+    initFavoriteButtons({ isAuthenticated: isUserAuthenticated, csrfToken });
+    const authenticatedEmptyMessage = document.querySelector('.card[style*="text-align: center; padding: 4rem"]');
     // Função auxiliar para exibir notificação usando o sistema global
     const showFavNotification = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
 
@@ -157,7 +162,7 @@
       const localEmptyMessage = document.getElementById('local-empty-message');
 
       if (localFavorites.length === 0) {
-        if (localFavoritesGrid) localFavoritesGrid.innerHTML = ''; // Limpa qualquer conteúdo anterior
+        if (localFavoritesGrid) localFavoritesGrid.innerHTML = '';
         if (localEmptyMessage) localEmptyMessage.style.display = 'block';
         return;
       }
@@ -271,5 +276,13 @@
       renderLocalFavorites();
     } else {
       attachRemoveButtonListeners(); // Para botões renderizados pelo servidor (se houver)
+      // Tenta sincronizar favoritos locais com o servidor (se houver) após login
+      (async () => {
+        try {
+          await syncLocalFavoritesToServer(csrfToken);
+        } catch (e) {
+          console.error('Erro ao sincronizar favoritos na página de favoritos:', e);
+        }
+      })();
     }
 </script>

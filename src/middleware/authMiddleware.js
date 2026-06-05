@@ -46,8 +46,9 @@ export const ensureAuthenticated = (req, res, next) => {
     });
   }
 
-  console.log('User authenticated:', req.session.user._id);
-  req.userId = req.session.user._id; // Anexa o ID do usuário à requisição
+  const userId = req.session.user._id;
+  console.log('User authenticated:', userId);
+  req.userId = String(userId); // Anexa o ID do usuário à requisição como string
   next();
 };
 
