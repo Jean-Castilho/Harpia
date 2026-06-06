@@ -22,13 +22,7 @@ export const checkUserRole = (req, res, next) => {
 
 // Middleware para garantir que o usuário está autenticado
 export const ensureAuthenticated = (req, res, next) => {
-  console.log('Checking authentication - Session user:', req.session?.user);
-  console.log('Session ID:', req.sessionID);
-  console.log('Cookies:', req.headers.cookie);
-  console.log('HX-Request:', req.headers['hx-request']);
-
   if (!req.session.user || !req.session.user._id) {
-    console.log('User not authenticated, redirecting to login');
 
     // URL de perfil sem autenticação -> redireciona para login
     if (req.headers['hx-request']) {
@@ -47,7 +41,6 @@ export const ensureAuthenticated = (req, res, next) => {
   }
 
   const userId = req.session.user._id;
-  console.log('User authenticated:', userId);
   req.userId = String(userId); // Anexa o ID do usuário à requisição como string
   next();
 };

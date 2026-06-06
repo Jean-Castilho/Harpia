@@ -88,8 +88,6 @@ export default class UserControllers {
       _id: createdUser._id.toString() // Converte ObjectId para string
     };
 
-    console.log('Session saved for new user:', req.session.user);
-
     return {
       message: "Usuário criado com sucesso.",
       token,
@@ -101,8 +99,6 @@ export default class UserControllers {
     const { email, password } = req.body;
 
     const user = await this.getUserByEmail(email);
-
-    console.log(user);
 
     if (!user) { // 401 Unauthorized é mais apropriado para falha de login
       throw new UnauthorizedError("Email ou senha incorretos.");
@@ -124,7 +120,6 @@ export default class UserControllers {
       _id: user._id.toString() // Converte ObjectId para string
     };
 
-    console.log('Session saved for user:', req.session.user);
     return { message: "Login realizado", user, token };
   }
 
