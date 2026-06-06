@@ -26,10 +26,6 @@ export const validateCsrfToken = (req, res, next) => {
   const receivedToken = req.headers["x-csrf-token"] || (req.body && req.body._csrf);
   const sessionToken = req.session.csrfToken;
 
-  console.log("receivedToken", receivedToken);
-
-  console.log("sessionToken", sessionToken);
-
   // Verifica se os tokens existem e são iguais;
   if (!sessionToken || !receivedToken || sessionToken !== receivedToken) {
     console.warn("Falha na validação do token CSRF.", {

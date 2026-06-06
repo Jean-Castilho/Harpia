@@ -52,9 +52,6 @@ router.post("/login", generateCsrfToken, async (req, res, next) => {
   try {
     const dataLogin = await userControllers.login(req, res);
 
-    console.log('Login successful, session ID:', req.sessionID);
-    console.log('Session user:', req.session.user);
-
     req.session.save((err) => {
       if (err) {
         console.error('Error saving session after login:', err);
@@ -117,6 +114,7 @@ router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
 
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
+
   const userId = String(req.userId || req.session?.user?._id || "").trim();
 
   if (!productId) {
@@ -128,13 +126,11 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
   }
 
   try {
-    const result = await userControllers.getCollection().findOneAndUpdate(
+    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $addToSet: { favorites: productId } },
       { returnDocument: "after" }
     );
-
-    const updatedUser = result && result.value ? result.value : null;
 
     if (updatedUser) {
       req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
@@ -167,13 +163,11 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
   }
 
   try {
-    const result = await userControllers.getCollection().findOneAndUpdate(
+    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $pull: { favorites: productId } },
       { returnDocument: "after" }
     );
-
-    const updatedUser = result && result.value ? result.value : null;
 
     if (updatedUser) {
       req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };

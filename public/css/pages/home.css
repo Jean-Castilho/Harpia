@@ -112,7 +112,7 @@
 
 .product-card-icons .icon-btn:hover {
     color: var(--cor-destaque);
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .product-card-icons .icon-btn .material-icons {
