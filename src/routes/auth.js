@@ -200,13 +200,11 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
   }
 
   try {
-    const result = await userControllers.getCollection().findOneAndUpdate(
+    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $addToSet: { cart: productId } },
       { returnDocument: "after" }
     );
-
-    const updatedUser = result && result.value ? result.value : null;
 
     if (updatedUser) {
       req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
@@ -232,13 +230,11 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
   }
 
   try {
-    const result = await userControllers.getCollection().findOneAndUpdate(
+    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
       { _id: new ObjectId(userId) },
       { $pull: { cart: productId } },
       { returnDocument: "after" }
     );
-
-    const updatedUser = result && result.value ? result.value : null;
 
     if (updatedUser) {
       req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };

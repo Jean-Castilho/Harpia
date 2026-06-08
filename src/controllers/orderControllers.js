@@ -3,13 +3,19 @@ import { getDataBase } from "../config/db.js";
 import crypto from 'crypto'; // Importar o módulo crypto
 
 import { gerarPix } from './paymantControllers.js';
-
 import { consultarPix } from './paymantControllers.js'; // Importar consultarPix
+import { broadcastPaymentStatusUpdate } from '#src/utils/websocket.js';
 import { validateOrderItems } from '../services/orderService.js';
 import { ValidationError } from "../errors/customErrors.js";
 import { GeneralError } from "../errors/customErrors.js";
 
-// Função auxiliar para validar a assinatura do webhook do Mercado Pago
+/**
+ * Valida se o webhook recebido veio realmente do Mercado Pago.
+ *
+ * O Mercado Pago envia o cabeçalho `x-signature` contendo um timestamp e uma assinatura HMAC-SHA256.
+ * O conteúdo assinado é composto por: `id:{notification_id};ts:{timestamp};`.
+ * O `notification_id` geralmente está em `req.body.id`, mas pode aparecer em `req.body.data.id`.
+ */
 function isValidMercadoPagoSignature(req, secret) {
   const signatureHeader = req.headers['x-signature'];
   if (!signatureHeader) {
@@ -30,9 +36,7 @@ function isValidMercadoPagoSignature(req, secret) {
     return false;
   }
 
-  // O ID usado na assinatura é o ID da notificação.
-  // O Mercado Pago geralmente usa o ID do payload de notificação no topo do JSON,
-  // mas em alguns casos o webhook pode vir apenas com data.id.
+  // O ID de notificação pode vir como `id` ou `data.id`.
   const notificationId = req.body.id || req.body?.data?.id;
 
   if (!notificationId) {
@@ -74,6 +78,16 @@ export default class OrderControllers {
     return orders;
   }
 
+  /**
+   * Cria um pedido e inicia o pagamento PIX no Mercado Pago.
+   *
+   * O fluxo faz:
+   * 1) valida os itens do pedido;
+   * 2) calcula o total;
+   * 3) chama gerarPix(totalPrice) para criar o pagamento PIX;
+   * 4) armazena o resultado do pagamento em order.payment.data;
+   * 5) mantém o pedido com status 'pending' até o feedback do webhook.
+   */
   async creatOrder(req, res) {
     const validatedItems = await validateOrderItems(req.body.items);
     const { _id, name, role, phone } = req.session.user;
@@ -98,11 +112,12 @@ export default class OrderControllers {
       createdAt: new Date(),
       updatedAt: new Date()
     };
+
     const orderCreat = await this.getCollection().insertOne(payloadOrder);
 
     return res.redirect(`/checkout/${orderCreat.insertedId.toString()}`);
-
   };
+
 
   /**
    * Obtém um pedido pelo seu ID.
@@ -163,6 +178,15 @@ export default class OrderControllers {
    * @returns {Promise<object>} Um objeto com uma mensagem de sucesso.
    * @throws {ValidationError} Se o ID do pedido for inválido, o pedido não for encontrado, ou já estiver pago.
    */
+  /**
+   * Confirma o pagamento de um pedido após receber feedback do Mercado Pago.
+   *
+   * Atualiza o pedido:
+   * - status principal para 'paid'
+   * - campos do subdocumento payment.data com informações do gateway
+   *
+   * Esse método é chamado a partir do webhook para persistir a confirmação.
+   */
   async confirmPayment(orderId, mercadoPagoPaymentInfo = {}) {
     if (!ObjectId.isValid(orderId)) {
       throw new ValidationError("ID de pedido inválido.");
@@ -205,6 +229,12 @@ export default class OrderControllers {
       if (order && order.status === 'paid') throw new ValidationError("Pedido já está com status de pago.");
       throw new ValidationError("Pedido não encontrado ou não pôde ser atualizado.");
     }
+
+    broadcastPaymentStatusUpdate(orderId, {
+      status: 'paid',
+      payment: mercadoPagoPaymentInfo,
+    });
+
     return { message: "Pagamento confirmado e status da ordem atualizado com sucesso." };
   }
 
@@ -229,6 +259,16 @@ export default class OrderControllers {
    *
    * @param {object} req - O objeto de requisição do Express.
    * @param {object} res - O objeto de resposta do Express.
+   */
+  /**
+   * Recebe a notificação de webhook do Mercado Pago e confirma o pagamento.
+   *
+   * Fluxo:
+   * 1) valida assinatura do webhook para garantir origem confiável;
+   * 2) identifica se o evento é de pagamento;
+   * 3) consulta o status do pagamento no Mercado Pago para garantir consistência;
+   * 4) localiza o pedido correspondente via payment.data.id;
+   * 5) atualiza o pedido para status 'paid' e grava informações adicionais de pagamento.
    */
   async handleMercadoPagoWebhook(req, res) {
     const { type, topic, data, id: notificationId } = req.body;

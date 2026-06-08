@@ -4,10 +4,13 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { WebSocketServer } from 'ws';
 
 // Importa os middlewares
 import { generateCsrfToken } from '#src/middleware/csrfMiddleware.js';
 import handleErrors from '#src/middleware/errorHandler.js'
+import { registerWebSocketClient, unregisterWebSocketClient } from '#src/utils/websocket.js';
 
 const app = express();
 const port = process.env.PORT || 3080;
@@ -102,6 +105,48 @@ import { connectDataBase, closeDataBase } from '#src/config/db.js';
 // Configuração das rotas da aplicação
 Server(app);
 
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: '/ws' });
+
+wss.on('connection', (ws, req) => {
+  const url = req.url || '';
+  const queryString = url.includes('?') ? url.slice(url.indexOf('?')) : '';
+  const params = new URLSearchParams(queryString);
+  const orderId = params.get('orderId');
+
+  if (orderId) {
+    registerWebSocketClient(ws, orderId);
+  }
+
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message.toString());
+      if (data?.type === 'subscribe' && data.orderId) {
+        registerWebSocketClient(ws, data.orderId);
+      }
+    } catch (error) {
+      console.warn('Mensagem WebSocket inválida:', error.message);
+    }
+  });
+
+  ws.on('close', () => {
+    unregisterWebSocketClient(ws);
+  });
+});
+
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Porta ${port} já está em uso. Verifique se outra instância do servidor está rodando ou altere NODE_ENV/PORT.`);
+  } else {
+    console.error('Erro ao iniciar o servidor HTTP:', error);
+  }
+  process.exit(1);
+});
+
+server.on('listening', () => {
+  console.log(`Servidor rodando: http://localhost:${port}`);
+});
+
 // Função para iniciar o servidor de forma controlada
 const start = async () => {
     try {
@@ -109,9 +154,7 @@ const start = async () => {
         await connectDataBase();
 
         // 2. Inicia o servidor Express para ouvir por requisições
-        app.listen(port, () => {
-            console.log(`Servidor rodando: http://localhost:${port}`);
-        });
+        server.listen(port, '0.0.0.0');
     } catch (error) {
         console.error(
             "Falha ao iniciar a aplicação. O servidor não será iniciado.",

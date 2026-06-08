@@ -105,6 +105,7 @@ export const getProductDetail = async (req, res, next) => {
   }
 };
 
+
 export const getProfile = (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login");
@@ -129,7 +130,6 @@ export const getVerifyOtp = (req, res) => {
     message: "solicite o codigo para redefinir senha",
   });
 };
-
 export const getFavoritesPage = async (req, res, next) => {
   try {
     const pageOptions = {
@@ -235,31 +235,7 @@ export const getCartPage = async (req, res, next) => {
   }
 };
 
-export const getOrders = async (req, res, next) => {
-  try {
-    if (!req.session.user) {
-      return res.redirect("/login");
-    }
 
-    const pageOptions = {
-      titulo: "Meus Pedidos",
-      orders: [],
-    };
-    const userId = req.session.user._id;
-
-    const orders = await orderControllers.getOrdersByUserId(userId);
-
-    pageOptions.orders = orders || [];
-
-    renderPage(req, res, "../pages/public/orders", {
-      ...pageOptions,
-      formatters,
-      message: orders && orders.length > 0 ? "Seu histórico de pedidos." : "Você ainda não fez nenhum pedido.",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 
 export const getCheckout = async (req, res, next) => {
@@ -306,6 +282,10 @@ export const getCheckout = async (req, res, next) => {
   }
 };
 
+/**
+ * Endpoint JSON usado pela página de pagamento para buscar o status atual do pedido.
+ * A página pode chamar este endpoint periodicamente para receber feedback de pagamento.
+ */
 export const getPaymentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -334,22 +314,16 @@ export const getPaymentStatus = async (req, res, next) => {
   }
 };
 
+/**
+ * Renderiza a página de pagamento com os dados PIX do pedido.
+ * A página exibe o QR Code e o status inicial do pagamento.
+ */
 export const getPayment = async (req, res, next) => {
   try {
     const pageOptions = {
       titulo: "payment",
     };
     const id = req.params.id;
-    const data = req.body;
-
-    if (data && Object.keys(data).length > 0) {
-      await orderControllers
-        .getCollection()
-        .updateOne(
-          { _id: new ObjectId(id) },
-          { $set: { endereco: data.endereco } }
-        );
-    }
 
     const order = await orderControllers
       .getCollection()
@@ -374,10 +348,15 @@ export const getPayment = async (req, res, next) => {
   }
 };
 
+/**
+ * Endpoint usado para validar o pedido antes da confirmação final.
+ * O fluxo de confirmação real é feito pelo webhook do Mercado Pago.
+ * Em produção, salva o endereço enviado no checkout e redireciona para a página de pagamento.
+ */
 export const postPayment = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { paymentMethod } = req.body;
+    const { endereco } = req.body;
 
     if (!ObjectId.isValid(id)) {
       throw new GeneralError("ID de pedido inválido.", 400);
@@ -392,17 +371,55 @@ export const postPayment = async (req, res, next) => {
       throw new GeneralError("Pedido não está pendente.", 400);
     }
 
-    // Não fazer nada aqui - o webhook do Mercado Pago é responsável pela atualização
-    // Esta rota agora apenas valida o pedido
+    if (endereco && Object.keys(endereco).length > 0) {
+      await orderControllers.getCollection().updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { endereco } }
+      );
+    }
+
+    if (req.accepts('html')) {
+      return res.redirect(`/payment/${id}`);
+    }
+
     res.json({ 
       success: true, 
-      message: "Pedido validado. Aguardando confirmação do pagamento via webhook." 
+      message: "Pedido validado. Aguardando confirmação do pagamento via webhook.",
+      redirect: `/payment/${id}`
     });
   } catch (error) {
     next(error);
   }
 };
 
+
+
+ 
+export const getOrders = async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+
+    const pageOptions = {
+      titulo: "Meus Pedidos",
+      orders: [],
+    };
+    const userId = req.session.user._id;
+
+    const orders = await orderControllers.getOrdersByUserId(userId);
+
+    pageOptions.orders = orders || [];
+
+    renderPage(req, res, "../pages/public/orders", {
+      ...pageOptions,
+      formatters,
+      message: orders && orders.length > 0 ? "Seu histórico de pedidos." : "Você ainda não fez nenhum pedido.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const updateUserAddress = (req, res) => {
   const { cep } = req.body;

@@ -65,6 +65,7 @@ router.get("/payment/:id", getPayment);
 router.get("/payment/:id/status", getPaymentStatus);
 router.post("/payment/:id", postPayment);
 
+
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);
 router.get('/cep/:cep', getAddressByCep);

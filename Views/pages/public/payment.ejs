@@ -43,6 +43,38 @@
     const paymentStatusMessage = document.getElementById('payment-status-message');
     const paymentStatusDiv = document.getElementById('payment-status');
     let paymentStatusInterval;
+    let socket;
+
+    function updatePaymentStatus(status) {
+        const label = status === 'paid' ? '✅ Pago' : status.replace('_', ' ').toUpperCase();
+        paymentStatusText.style.transition = 'color 0.3s ease';
+
+        if (status === 'paid') {
+            paymentStatusDiv.style.backgroundColor = '#e8f5e9';
+            paymentStatusDiv.style.borderLeft = '4px solid #4caf50';
+            paymentStatusText.style.color = '#2e7d32';
+            paymentStatusText.textContent = label;
+            paymentStatusMessage.textContent = 'Pagamento confirmado! Redirecionando...';
+            paymentStatusMessage.style.color = '#2e7d32';
+
+            clearInterval(paymentStatusInterval);
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+
+            playSuccessSound();
+            setTimeout(() => {
+                window.location.href = '/orders';
+            }, 3000);
+        } else {
+            paymentStatusDiv.style.backgroundColor = '#fff3e0';
+            paymentStatusDiv.style.borderLeft = '4px solid #ff9800';
+            paymentStatusText.style.color = '#e65100';
+            paymentStatusText.textContent = label;
+            paymentStatusMessage.textContent = 'Aguardando a compensação do Pix. Esta página atualizará automaticamente.';
+            paymentStatusMessage.style.color = '#e65100';
+        }
+    }
 
     async function refreshPaymentStatus() {
         try {
@@ -57,60 +89,60 @@
 
             const data = await response.json();
             const status = data.status || 'pending';
-            const label = status === 'paid' ? '✅ Pago' : status.replace('_', ' ').toUpperCase();
-
-            // Atualiza o texto com transição suave
-            paymentStatusText.style.transition = 'color 0.3s ease';
-            
-            if (status === 'paid') {
-                // Alternar cor para indicar sucesso
-                paymentStatusDiv.style.backgroundColor = '#e8f5e9';
-                paymentStatusDiv.style.borderLeft = '4px solid #4caf50';
-                paymentStatusText.style.color = '#2e7d32';
-                paymentStatusText.textContent = label;
-                paymentStatusMessage.textContent = 'Pagamento confirmado! Redirecionando...';
-                paymentStatusMessage.style.color = '#2e7d32';
-                
-                clearInterval(paymentStatusInterval);
-                
-                // Reproduz um som de sucesso (opcional)
-                playSuccessSound();
-                
-                // Redireciona para pedidos após 3 segundos
-                setTimeout(() => {
-                    window.location.href = '/orders';
-                }, 3000);
-            } else {
-                // Status pendente
-                paymentStatusDiv.style.backgroundColor = '#fff3e0';
-                paymentStatusDiv.style.borderLeft = '4px solid #ff9800';
-                paymentStatusText.style.color = '#e65100';
-                paymentStatusText.textContent = label;
-                paymentStatusMessage.textContent = 'Aguardando a compensação do Pix. Esta página atualizará automaticamente.';
-                paymentStatusMessage.style.color = '#e65100';
-            }
+            updatePaymentStatus(status);
         } catch (error) {
             console.error('Erro ao atualizar status do pagamento:', error);
             paymentStatusMessage.textContent = 'Erro ao atualizar o status. Tentando novamente...';
         }
     }
 
+    function startWebSocket() {
+        try {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const wsUrl = `${protocol}://${window.location.host}/ws?orderId=${orderId}`;
+            socket = new WebSocket(wsUrl);
+
+            socket.addEventListener('open', () => {
+                socket.send(JSON.stringify({ type: 'subscribe', orderId }));
+            });
+
+            socket.addEventListener('message', (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    if (message.type === 'paymentStatus' && message.orderId === orderId) {
+                        updatePaymentStatus(message.status);
+                    }
+                } catch (error) {
+                    console.warn('Mensagem WebSocket inválida:', error.message);
+                }
+            });
+
+            socket.addEventListener('close', () => {
+                console.info('Conexão WebSocket fechada. Voltando para polling.');
+                if (!paymentStatusInterval) {
+                    paymentStatusInterval = setInterval(refreshPaymentStatus, 5000);
+                }
+            });
+
+            socket.addEventListener('error', (error) => {
+                console.warn('Erro no WebSocket:', error);
+            });
+        } catch (error) {
+            console.warn('WebSocket não pode ser iniciado:', error.message);
+        }
+    }
+
     function playSuccessSound() {
-        // Cria um som simples de sucesso usando Web Audio API
         try {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
             oscillator.frequency.value = 800;
             oscillator.type = 'sine';
-            
             gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
         } catch (e) {
@@ -118,28 +150,24 @@
         }
     }
 
-    // Inicia o polling a cada 5 segundos
     paymentStatusInterval = setInterval(refreshPaymentStatus, 5000);
+    startWebSocket();
     refreshPaymentStatus();
 
     function copyPixCode() {
         const pixCodeElement = document.getElementById('pix-code');
         const pixCode = pixCodeElement.textContent;
         const button = event.target;
-        
-        // Usa a API Clipboard se disponível (mais moderna e confiável)
+
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(pixCode).then(() => {
-                // Feedback visual
                 const originalText = button.textContent;
                 button.textContent = '✅ Copiado!';
                 button.style.backgroundColor = '#4caf50';
-                
                 setTimeout(() => {
                     button.textContent = originalText;
                     button.style.backgroundColor = '';
                 }, 2000);
-                console.log('Código Pix copiado com sucesso');
             }).catch(() => {
                 fallbackCopyPix(pixCode, button);
             });
@@ -149,18 +177,15 @@
     }
 
     function fallbackCopyPix(pixCode, button) {
-        // Fallback para navegadores antigos
         const textarea = document.createElement('textarea');
         textarea.value = pixCode;
         document.body.appendChild(textarea);
         textarea.select();
-        
         try {
             document.execCommand('copy');
             const originalText = button.textContent;
             button.textContent = '✅ Copiado!';
             button.style.backgroundColor = '#4caf50';
-            
             setTimeout(() => {
                 button.textContent = originalText;
                 button.style.backgroundColor = '';

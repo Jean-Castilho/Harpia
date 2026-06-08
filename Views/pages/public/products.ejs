@@ -376,6 +376,12 @@
                     return;
                 }
 
+                
+                if (!isAuthenticated) {
+                    showNotification('faça login e tente novamente.', false);
+                    return;
+                }
+
                 const productId = button.dataset.productId;
                 if (!productId) return;
 
