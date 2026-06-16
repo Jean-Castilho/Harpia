@@ -17,9 +17,9 @@ router.post("/", async (req,res,next)=>{
   }
 });
 
-// Rota de webhook que recebe notificações do Mercado Pago.
-// O Mercado Pago envia eventos de pagamento e esta rota encaminha
-// o payload para o controlador que valida a assinatura e confirma o pedido.
+/* Rota de webhook que recebe notificações do Mercado Pago.
+ O Mercado Pago envia eventos de pagamento e esta rota encaminha
+ o payload para o controlador que valida a assinatura e confirma o pedido.*/
 router.post("/webhook/mercadopago", async (req, res, next) => {
   console.log('Recebida notificação do Mercado Pago em /orders/webhook/mercadopago', {
     method: req.method,
@@ -66,6 +66,5 @@ router.post("/cancel/:id", ensureAuthenticated, validateCsrfToken, async (req, r
     next(error);
   }
 });
-
 
 export default router;

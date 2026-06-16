@@ -282,10 +282,6 @@ export const getCheckout = async (req, res, next) => {
   }
 };
 
-/**
- * Endpoint JSON usado pela página de pagamento para buscar o status atual do pedido.
- * A página pode chamar este endpoint periodicamente para receber feedback de pagamento.
- */
 export const getPaymentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -314,10 +310,6 @@ export const getPaymentStatus = async (req, res, next) => {
   }
 };
 
-/**
- * Renderiza a página de pagamento com os dados PIX do pedido.
- * A página exibe o QR Code e o status inicial do pagamento.
- */
 export const getPayment = async (req, res, next) => {
   try {
     const pageOptions = {

@@ -1,12 +1,17 @@
 <style>
     /* --- Estilos Gerais --- */
-    html, body {
-        overflow-x: hidden; /* Previne rolagem horizontal na página inteira */
+    html,
+    body {
+        overflow-x: hidden;
+        /* Previne rolagem horizontal na página inteira */
     }
+
     .container {
-        max-width: 1200px; /* Valor de exemplo, ajuste conforme necessário */
+        max-width: 1200px;
+        /* Valor de exemplo, ajuste conforme necessário */
         margin: 0 auto;
-        padding: 0 15px; /* Adiciona um pouco de padding em telas menores */
+        padding: 0 15px;
+        /* Adiciona um pouco de padding em telas menores */
     }
 
     .page-header {
@@ -16,14 +21,24 @@
     }
 
     .page-header h1 {
-        font-size: 2.5rem; /* Tamanho de exemplo, ajuste conforme necessário */
-        color: var(--cor-secundaria); /* Usando variável de variables.css */
+        width: 100%;
+        font-size: 2.5rem;
+        /* Tamanho de exemplo, ajuste conforme necessário */
+        color: var(--cor-secundaria);
+        /* Usando variável de variables.css */
     }
 
     /* --- Animações --- */
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* --- Barra de Filtro de Categoria --- */
@@ -64,25 +79,36 @@
 
     /* --- Contêiner do Grid de Produtos (para gerenciar o overflow e a rolagem sem barra) --- */
     .product-grid-container {
-        width: 100%; /* Ocupa a largura total disponível do pai */
-        overflow-x: auto; /* Habilita a rolagem horizontal quando o conteúdo transborda */
-        -webkit-overflow-scrolling: touch; /* Suaviza a rolagem em dispositivos iOS */
-        padding-bottom: 1rem; /* Adiciona um pouco de padding para a barra de rolagem (mesmo que oculta) */
+        width: 100%;
+        /* Ocupa a largura total disponível do pai */
+        overflow-x: auto;
+        /* Habilita a rolagem horizontal quando o conteúdo transborda */
+        -webkit-overflow-scrolling: touch;
+        /* Suaviza a rolagem em dispositivos iOS */
+        padding-bottom: 1rem;
+        /* Adiciona um pouco de padding para a barra de rolagem (mesmo que oculta) */
         /* Oculta a barra de rolagem para uma estética mais limpa, mas mantém a funcionalidade */
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE and Edge */
     }
+
     .product-grid-container::-webkit-scrollbar {
-        display: none; /* Chrome, Safari, Opera */
+        display: none;
+        /* Chrome, Safari, Opera */
     }
 
     /* --- Grid de Produtos --- */
     .product-grid {
         display: grid;
-        grid-auto-flow: column; /* Organiza os itens em colunas, permitindo que o grid se estenda horizontalmente */
-        grid-auto-columns: minmax(280px, 1fr); /* Define a largura mínima de cada coluna e permite que ela cresça */
+        grid-auto-flow: column;
+        /* Organiza os itens em colunas, permitindo que o grid se estenda horizontalmente */
+        grid-auto-columns: minmax(280px, 1fr);
+        /* Define a largura mínima de cada coluna e permite que ela cresça */
         gap: 2rem;
-        width: max-content; /* Permite que o grid se expanda para acomodar todos os itens em uma linha */
+        width: max-content;
+        /* Permite que o grid se expanda para acomodar todos os itens em uma linha */
     }
 
     /* --- Card de Produto --- */
@@ -95,12 +121,15 @@
         overflow: hidden;
         animation: fadeIn 0.5s ease-in-out;
         box-shadow: var(--sombra-padrao);
+        height: 400px; /* Garante uma altura fixa consistente para todos os cartões */
+        /* Garante uma altura mínima consistente para todos os cartões */
     }
 
     .product-image-container {
         position: relative;
         width: 100%;
-        padding-bottom: 75%; /* Proporção de aspecto 4:3 para imagens, ajuste se necessário */
+        padding-bottom: 75%;
+        /* Proporção de aspecto 4:3 para imagens, ajuste se necessário */
         overflow: hidden;
     }
 
@@ -110,7 +139,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Garante que a imagem cubra a área sem distorção */
+        object-fit: cover;
+        /* Garante que a imagem cubra a área sem distorção */
         display: block;
     }
 
@@ -121,7 +151,7 @@
         display: flex;
         flex-direction: column;
         gap: 5px;
-        z-index: 10; /* Garante que os ícones fiquem acima da imagem */
+        z-index: 10;
     }
 
     .icon-btn {
@@ -149,19 +179,21 @@
     }
 
     .favorite-btn.favorited i {
-        color: var(--cor-destaque); /* Cor para ícone favoritado */
+        color: var(--cor-destaque);
+        /* Cor para ícone favoritado */
     }
 
     .add-to-cart-btn.in-cart i {
-        color: var(--cor-destaque); /* Cor para ícone no carrinho */
+        color: var(--cor-destaque);
+        /* Cor para ícone no carrinho */
     }
 
     .product-card-content {
         padding: 15px;
-        flex-grow: 1; /* Permite que o conteúdo ocupe o espaço disponível */
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* Empurra o botão para a parte inferior */
+        justify-content: space-between;
     }
 
     .product-card h3 {
@@ -173,6 +205,11 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
         line-height: 1.3;
+        /* Limita o título a duas linhas para altura consistente */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .product-card .price {
@@ -202,7 +239,8 @@
     }
 
     .btn-secundario:hover {
-        background-color: #4a453e; /* Um tom ligeiramente mais escuro de --cor-secundaria */
+        background-color: #4a453e;
+        /* Um tom ligeiramente mais escuro de --cor-secundaria */
         border-color: #4a453e;
     }
 
@@ -217,6 +255,7 @@
             flex-direction: column;
             gap: 0.5rem;
         }
+
         .filter-btn {
             width: 100%;
         }
@@ -228,13 +267,9 @@
         <h1>Todos os Produtos</h1>
     </header>
 
-    <% 
-    const allCategories=['Sala de Estar', 'Área Gourmet' , 'Cozinha'
-        , 'Quarto' , 'Área Externa' , 'Banheiro' , 'Escritório' ]; 
-        const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); 
-        %>
-
-
+    <% const allCategories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' , 'Quarto' , 'Área Externa' , 'Banheiro'
+        , 'Escritório' ]; const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts :
+        []); %>
 
         <!-- Barra de Filtro de Categoria -->
         <div class="category-filter-bar">
@@ -251,11 +286,12 @@
             <div class="product-grid">
                 <% if (items.length> 0) { %>
                     <% items.forEach(product=> { %>
-                        <% 
-                         const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] : '/assets/img/fallback.jpg';
+                        <% const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] :
+                            '/assets/img/fallback.jpg';
                             const id = product._id || '';
                             const productUrl = `/products/${id}`;
-                            const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', { style:
+                            const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', {
+                            style:
                             'currency', currency: 'BRL' }) : 'Preço sob consulta';
 
                             // Verifica se o produto está nos favoritos ou no carrinho do usuário
@@ -263,8 +299,9 @@
                             const isInCart = (session?.user?.cart || []).map(String).includes(String(id));
 
                             // Define as URLs de ação (requer login)
-                        const favoritUrl = '#'; // Garante que o href seja sempre #
-                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) : '/login';
+                            const favoritUrl = '#'; // Garante que o href seja sempre #
+                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) :
+                            '/login';
 
                             // Formata as categorias do produto para o atributo de dados
                             const productCategories = Array.isArray(product.categoria) ? product.categoria.join(',') :
@@ -314,20 +351,18 @@
         </div>
 </div>
 
-<% /*
-  Alternativa para passar variáveis do servidor para o cliente de forma mais robusta.
-  Isso evita problemas de sintaxe JavaScript com strings e permite passar objetos complexos.
-*/ %>
-<script id="server-data-products" type="application/json">
+<% /* Alternativa para passar variáveis do servidor para o cliente de forma mais robusta. Isso evita problemas de
+    sintaxe JavaScript com strings e permite passar objetos complexos. */ %>
+    <script id="server-data-products" type="application/json">
   {
     "isAuthenticated": <%= !!session?.user?._id %>,
     "csrfToken": "<%= csrfToken %>"
   }
 </script>
 
-<script type="module">
-    // Importa o módulo de favoritos reutilizável
-    import { initFavoriteButtons } from '/js/favorites.js';
+    <script type="module">
+        // Importa o módulo de favoritos reutilizável
+        import { initFavoriteButtons } from '/js/favorites.js';
 
         const serverDataElement = document.getElementById('server-data-products');
         const serverData = JSON.parse(serverDataElement.textContent);
@@ -376,7 +411,7 @@
                     return;
                 }
 
-                
+
                 if (!isAuthenticated) {
                     showNotification('faça login e tente novamente.', false);
                     return;
@@ -416,4 +451,4 @@
             });
         });
 
-</script>
+    </script>

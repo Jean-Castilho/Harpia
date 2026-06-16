@@ -51,7 +51,7 @@
 }
 
 .product-card {
-    max-width: 290px;
+    min-width: 245px;
     background-color: #fff;
     border: 1px solid var(--cor-borda);
     border-radius: var(--borda-radius);

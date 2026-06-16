@@ -3,7 +3,7 @@ import { getDataBase } from "../config/db.js";
 import crypto from 'crypto'; // Importar o módulo crypto
 
 import { gerarPix } from './paymantControllers.js';
-import { consultarPix } from './paymantControllers.js'; // Importar consultarPix
+import { consultarPix } from './paymantControllers.js';
 import { broadcastPaymentStatusUpdate } from '#src/utils/websocket.js';
 import { validateOrderItems } from '../services/orderService.js';
 import { ValidationError } from "../errors/customErrors.js";
@@ -11,12 +11,12 @@ import { GeneralError } from "../errors/customErrors.js";
 
 /**
  * Valida se o webhook recebido veio realmente do Mercado Pago.
- *
  * O Mercado Pago envia o cabeçalho `x-signature` contendo um timestamp e uma assinatura HMAC-SHA256.
  * O conteúdo assinado é composto por: `id:{notification_id};ts:{timestamp};`.
  * O `notification_id` geralmente está em `req.body.id`, mas pode aparecer em `req.body.data.id`.
  */
 function isValidMercadoPagoSignature(req, secret) {
+  
   const signatureHeader = req.headers['x-signature'];
   if (!signatureHeader) {
     return false;
@@ -187,6 +187,7 @@ export default class OrderControllers {
    *
    * Esse método é chamado a partir do webhook para persistir a confirmação.
    */
+ 
   async confirmPayment(orderId, mercadoPagoPaymentInfo = {}) {
     if (!ObjectId.isValid(orderId)) {
       throw new ValidationError("ID de pedido inválido.");
