@@ -265,6 +265,7 @@
 }
 
 @media (max-width: 576px) {
+
     body {
         font-size: 16px;
     }
@@ -297,16 +298,15 @@
         padding: 0.8rem;
     }
 
-
     .btn {
         font-size: 0.8rem;
         padding: 10px 16px;
     }
 
+
     .product-grid {
         gap: 1rem;
         padding: 1.2rem 1.2rem;
-        width: max-content;
         overflow-x: auto;
     }
 
@@ -347,6 +347,5 @@
     .card-content h3 {
         font-size: 1.1rem;
     }
-}
 
-;
+}
