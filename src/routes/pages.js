@@ -46,12 +46,10 @@ router.get("/profile", ensureAuthenticated, generateCsrfToken, getProfile);
 
 router.get("/solicit-otp", generateCsrfToken, getSolicitOtp);
 router.get("/verify-otp", getVerifyOtp);
-
 /*
 router.get("/reset-password", generateCsrfToken, getResetPassword);
 router.post("/atualiz", generateCsrfToken, getSolicit_otp);
 */
-
 router.get("/contact", getContact);
 router.post("/send-fedback", postSendFedBack);
 
@@ -64,7 +62,6 @@ router.get("/checkout/:id", getCheckout);
 router.get("/payment/:id", getPayment);
 router.get("/payment/:id/status", getPaymentStatus);
 router.post("/payment/:id", postPayment);
-
 
 router.get('/favorites', generateCsrfToken, getFavoritesPage);
 router.get('/cart', generateCsrfToken, getCartPage);

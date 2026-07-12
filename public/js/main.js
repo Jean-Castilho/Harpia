@@ -41,7 +41,7 @@ function createNotificationContainer() {
         document.body.appendChild(container);
     }
     return container;
-}
+};
 
 function showNotification(message, type = 'info', duration = 3000) {
     const container = createNotificationContainer();
@@ -93,8 +93,8 @@ function showNotification(message, type = 'info', duration = 3000) {
             toast.remove();
         }, 200);
     }, duration);
-}
-
+};
+ 
 window.NotificationSystem = {
     show: showNotification,
     success: (message, duration) => showNotification(message, 'success', duration),

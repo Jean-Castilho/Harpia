@@ -2,7 +2,8 @@ import express from "express";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { generateCsrfToken } from '../middleware/csrfMiddleware.js';
+import { generateCsrfToken, validateCsrfToken } from '../middleware/csrfMiddleware.js';
+import { ensureAuthenticated } from '../middleware/authMiddleware.js';
 
 import ProductControllers from "../controllers/productControllers.js";
 import { getProductDetail, getProductsByIds } from "../controllers/pagesControllers.js"; // Importa getProductsByIds;
@@ -54,6 +55,28 @@ router.get('/images/:filename', (req, res) => {
 
   // 'pipe' envia o stream do arquivo diretamente para a resposta da requisição
   downloadStream.pipe(res);
+});
+
+// Rota para adicionar comentário a um produto
+router.post('/:id/comment', ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
+  const { id } = req.params;
+  const { text } = req.body;
+
+  if (!text || String(text).trim().length === 0) {
+    return res.status(400).json({ success: false, message: 'Comentário vazio.' });
+  }
+
+  try {
+    // Monta o objeto de comentário usando dados da sessão quando disponível
+    const author = req.session?.user ? { _id: req.session.user._id, nome: req.session.user.nome } : undefined;
+    const commentObj = author ? { texto: String(text).trim(), author } : { texto: String(text).trim(), nome: 'Usuário' };
+
+    const added = await productControllers.addComment(id, commentObj);
+
+    return res.json({ success: true, message: 'Comentário adicionado.', comment: added });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

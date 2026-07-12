@@ -13,13 +13,14 @@ router.post("/", async (req,res,next)=>{
   try {
       await orderControllers.creatOrder(req,res);
   } catch (error) {
-      next(error); // Pass error to the error handling middleware
+      next(error);
   }
 });
 
 /* Rota de webhook que recebe notificações do Mercado Pago.
  O Mercado Pago envia eventos de pagamento e esta rota encaminha
  o payload para o controlador que valida a assinatura e confirma o pedido.*/
+ 
 router.post("/webhook/mercadopago", async (req, res, next) => {
   console.log('Recebida notificação do Mercado Pago em /orders/webhook/mercadopago', {
     method: req.method,
@@ -29,21 +30,8 @@ router.post("/webhook/mercadopago", async (req, res, next) => {
     dataId: req.body?.data?.id,
     eventType: req.body?.type || req.body?.topic,
   });
-
   try {
     await orderControllers.handleMercadoPagoWebhook(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/pay/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).send('ID de pedido inválido.');
-    }
-    return res.redirect(`/payment/${id}`);
   } catch (error) {
     next(error);
   }

@@ -1,7 +1,7 @@
 <% 
-  const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
-  userId=session?.user?._id || null; const favorites=(session?.user?.favorites || []).map(String); const
-  cart=(session?.user?.cart || []).map(String); %>
+  const items = Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
+  userId = session?.user?._id || null; const favorites=(session?.user?.favorites || []).map(String); const
+  cart = (session?.user?.cart || []).map(String); %>
 
   <style>
     /* ===== General Section Styles ===== */
@@ -27,12 +27,15 @@
   <section class="hero-section">
     <div class="hero-content">
       <h1>Móveis Rústicos que </br> Contam Histórias</h1>
-      <a href="/register" class="btn btn-primario" style="color: #ffffff;">Registre-se</a>
+
+      <% if(userId == null) { %>
+        <a href="/register" class="btn btn-primario" style="color: #ffffff;">Registre-se</a>
+      <% } %>
     </div>
   </section>
 
   <div class="container">
-    <h2 class="section-title">Destaques da Semana</h2>
+    <h2 class="section-title">Destaques</h2>
     <section class="featured-products">
       <div class="product-grid">
         <% if (items.length> 0) { %>
@@ -46,7 +49,7 @@
     </section>
 
     <section class="product-categories">
-      <h2 class="section-title">Categorias em Destaque</h2>
+      <h2 class="section-title">Categorias</h2>
       <div class="category-grid">
         <% const categories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' , 'Escritorio' ]; %>
           <% categories.forEach(category=> { %>

@@ -247,4 +247,30 @@ export default class ProductController {
     return result;
   }
 
+  async addComment(productId, comment) {
+    if (!ObjectId.isValid(productId)) {
+      const err = new Error('ID de produto inválido.');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const objectId = new ObjectId(productId);
+    const product = await this.getProductById(productId);
+    if (!product) {
+      const err = new Error('Produto não encontrado.');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    // assegura um _id local para o comentário para retorno imediato
+    const commentWithId = { _id: new ObjectId(), criadoEm: new Date(), ...comment };
+
+    await this.getCollection().updateOne(
+      { _id: objectId },
+      { $push: { comentarios: commentWithId } }
+    );
+
+    return commentWithId;
+  }
+
 }

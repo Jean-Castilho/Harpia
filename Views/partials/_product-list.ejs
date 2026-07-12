@@ -1,0 +1,26 @@
+<% if (!products || !products.length) { %>
+  <div class="product-list-empty">Nenhum produto encontrado.</div>
+<% } else { %>
+  <style>
+    .product-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+
+    @media (min-width: 1000px) {
+      .product-list-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .product-list-empty { color: #666; padding: 0.5rem; }
+  </style>
+
+  <div class="product-list-grid">
+    <% products.forEach(product => { %>
+      <%- include('./_product-card', { product, favorites: (favorites || []), cart: (cart || []), cardType: (cardType || 'related') }) %>
+    <% }) %>
+  </div>
+<% } %>
