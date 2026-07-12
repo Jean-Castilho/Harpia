@@ -373,11 +373,12 @@
                     <img id="main-product-image" src="/assets/img/fallback.jpg" alt="Imagem não disponível">
                     <% } %>
                         <div class="product-card-icons">
-                            <% const id=product._id || '' ; const isFavorited=(session?.user?.favorites ||
-                                []).map(String).includes(String(id)); const isInCart=(session?.user?.cart ||
-                                []).map(String).includes(String(id)); const favoritUrl=session?.user?._id ? `#` : `#` ;
-                                %>
-                                <a href="<%= favoritUrl %>"
+                            <% 
+                            const id=product._id || '' ; 
+                            const isFavorited=(session?.user?.favorites || []).map(String).includes(String(id));
+                            const isInCart=(session?.user?.cart || []).map(String).includes(String(id)); 
+                            %>
+                                <a href="#"
                                     class="favorite-btn icon-btn <%= isFavorited ? 'favorited' : '' %>"
                                     data-product-id="<%= id %>">
                                     <i class="material-icons">
@@ -595,34 +596,7 @@
                     </ul>
                     <% } else { %>
                         <div class="comment-placeholder">Seja o primeiro a comentar sobre este produto.</div>
-                        <% const sampleComments=[ { nome: 'Ana' ,
-                            texto: 'Produto lindo! A foto não faz jus ao acabamento.' , criadoEm: Date.now() - 1000 * 60
-                            * 60 * 24 }, { nome: 'Carlos' , texto: 'Entrega rápida e embalagem segura. Recomendo.' ,
-                            criadoEm: Date.now() - 1000 * 60 * 60 * 48 }, { nome: 'Mariana' ,
-                            texto: 'Tamanho perfeito, cumpre o que promete.' , criadoEm: Date.now() - 1000 * 60 * 30 },
-                            { nome: 'Rafael' , texto: 'Ótima relação custo-benefício.' , criadoEm: Date.now() - 1000 *
-                            60 * 60 * 72 }, { nome: 'Beatriz' , texto: 'Comprei como presente e fizeram sucesso!' ,
-                            criadoEm: Date.now() - 1000 * 60 * 60 * 5 } ]; %>
-                            <ul class="comment-list" id="comment-list">
-                                <li style="font-size:0.95rem;color:#555;padding:0.25rem 0 0.75rem;"><em>Exemplos de
-                                        comentários:</em></li>
-                                <% sampleComments.forEach(c=> { %>
-                                    <li class="comment example">
-                                        <div class="avatar">
-                                            <%= c.nome.charAt(0).toUpperCase() %>
-                                        </div>
-                                        <div class="body">
-                                            <div class="meta"><strong>
-                                                    <%= c.nome %>
-                                                </strong> • <%= new Date(c.criadoEm).toLocaleString('pt-BR') %>
-                                            </div>
-                                            <div class="text">
-                                                <%= c.texto %>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <% }) %>
-                            </ul>
+                       
                             <% } %>
 
                                 <% if (session?.user?._id) { %>
@@ -651,7 +625,7 @@
     import { initFavoriteButtons, syncLocalFavoritesToServer } from '/js/favorites.js';
 
     document.addEventListener('DOMContentLoaded', () => {
-        const isAuthenticated = <%= isAuthenticated %>;
+        const isAuthenticated = <%- JSON.stringify(!!session?.user?._id) %>;
         const mainProductImage = document.getElementById('main-product-image');
         const thumbnailImages = document.querySelectorAll('.thumbnail-images img');
         const commentList = document.getElementById('comment-list');

@@ -115,7 +115,7 @@ router.post("/forgot-password", validateCsrfToken, async (req, res, next) => {
 router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
 
-  const userId = String(req.userId || req.session?.user?._id || "").trim();
+  const userId = req.session.user._id.toString();
 
   if (!productId) {
     return next(new GeneralError("ID do produto é obrigatório.", 400));
@@ -132,8 +132,8 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
       { returnDocument: "after" }
     );
 
-    if (updatedUser) {
-      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
+    if (updatedUser.value) {
+      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
       return req.session.save((err) => {
         if (err) {
           console.error('Error saving session after adding favorite:', err);
@@ -143,7 +143,7 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
       });
     }
 
-    console.warn('Favorite add failed: user not found', { userId });
+    console.warn('Favorite add failed: user not found or not updated', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
     next(error);
@@ -152,7 +152,7 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
 
 router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
-  const userId = String(req.userId || req.session?.user?._id || "").trim();
+  const userId = req.session.user._id.toString();
 
   if (!productId) {
     return res.status(400).json({ success: false, message: "ID do produto é obrigatório." });
@@ -169,8 +169,8 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
       { returnDocument: "after" }
     );
 
-    if (updatedUser) {
-      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
+    if (updatedUser.value) {
+      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
       return req.session.save((err) => {
         if (err) {
           console.error('Error saving session after removing favorite:', err);
@@ -180,7 +180,7 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
       });
     }
 
-    console.warn('Favorite remove failed: user not found', { userId });
+    console.warn('Favorite remove failed: user not found or not updated', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
   } catch (error) {
     next(error);
@@ -189,7 +189,7 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
 
 router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
-  const userId = String(req.userId || req.session?.user?._id || "").trim();
+  const userId = req.session.user._id.toString();
 
   if (!productId) {
     return res.status(400).json({ success: false, message: "ID do produto é obrigatório." });
@@ -206,9 +206,9 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
       { returnDocument: "after" }
     );
 
-    if (updatedUser) {
-      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
-      return res.status(200).json({ success: true, message: "Produto adicionado ao carrinho.", cart: updatedUser.cart });
+    if (updatedUser.value) {
+      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
+      return res.status(200).json({ success: true, message: "Produto adicionado ao carrinho.", cart: updatedUser.value.cart });
     }
     console.warn('Cart add failed: user not found', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);
@@ -219,7 +219,7 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
 
 router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, res, next) => {
   const { productId } = req.body;
-  const userId = String(req.userId || req.session?.user?._id || "").trim();
+  const userId = req.session.user._id.toString();
 
   if (!productId) {
     return res.status(400).json({ success: false, message: "ID do produto é obrigatório." });
@@ -236,9 +236,9 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
       { returnDocument: "after" }
     );
 
-    if (updatedUser) {
-      req.session.user = { ...updatedUser, _id: updatedUser._id.toString() };
-      return res.status(200).json({ success: true, message: "Produto removido do carrinho.", cart: updatedUser.cart });
+    if (updatedUser.value) {
+      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
+      return res.status(200).json({ success: true, message: "Produto removido do carrinho.", cart: updatedUser.value.cart });
     }
     console.warn('Cart remove failed: user not found', { userId });
     throw new GeneralError("Usuário não encontrado.", 404);

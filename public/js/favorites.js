@@ -100,7 +100,7 @@ export async function syncLocalFavoritesToServer(csrfToken, { silent = true } = 
 
   for (const productId of productIds) {
     try {
-      const result = await postJson('/auth/favorites/add', { productId, _csrf: csrfToken }, csrfToken);
+      const result = await postJson('/auth/favorites/add', { productId }, csrfToken);
       if (result.ok && result.data && result.data.success) {
         synced += 1;
       }
