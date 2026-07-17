@@ -1,14 +1,17 @@
 import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, setLocalStorageFavorites } from '/js/utils.js';
 
 export const FAVORITES_MESSAGES = {
-  added_local: 'Produto adicionado aos favoritos (local).',
-  already_local: 'Produto já estava nos favoritos (local).',
-  removed_local: 'Produto removido dos favoritos (local).',
+  added_local: 'Produto adicionado aos favoritos.',
+  already_local: 'Produto já estava nos favoritos.',
+  removed_local: 'Produto removido dos favoritos.',
   added_server: 'Produto adicionado aos favoritos.',
   removed_server: 'Produto removido dos favoritos.',
   sync_success: 'Favoritos sincronizados.',
   sync_error: 'Não foi possível sincronizar os favoritos.'
 };
+
+// Estado global para rastrear sincronização
+let isSyncingFavorites = false;
 
 function safeNotify(message, isSuccess, duration) {
   if (!message) return;
@@ -42,6 +45,9 @@ export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticate
   const buttons = document.querySelectorAll(selector);
   if (!buttons || buttons.length === 0) return;
 
+  // Rastrear botões em processamento para evitar múltiplos cliques
+  const processingButtons = new Set();
+
   if (!isAuthenticated) {
     const localFavs = getLocalStorageFavorites();
     buttons.forEach(btn => {
@@ -57,7 +63,7 @@ export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticate
     button.addEventListener('click', async (event) => {
       event.preventDefault();
       const productId = button.dataset.productId;
-      if (!productId) return;
+      if (!productId || processingButtons.has(productId)) return;
 
       const currentlyFavorited = button.classList.contains('favorited');
 
@@ -75,17 +81,34 @@ export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticate
         return;
       }
 
-      const url = currentlyFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
-      const result = await postJson(url, { productId, _csrf: csrfToken }, csrfToken);
-      const success = result.ok && result.data && result.data.success;
+      // Adiciona feedback visual de loading e desabilita o botão
+      processingButtons.add(productId);
+      button.style.opacity = '0.6';
+      button.style.pointerEvents = 'none';
+      button.style.cursor = 'wait';
 
-      if (success) {
-        button.classList.toggle('favorited');
-        const icon = button.querySelector('i');
-        if (icon) icon.textContent = currentlyFavorited ? 'favorite_border' : 'favorite';
-        safeNotify(result.data.message || (currentlyFavorited ? FAVORITES_MESSAGES.removed_server : FAVORITES_MESSAGES.added_server), true);
-      } else {
-        safeNotify(result.data?.message || 'Erro ao atualizar favoritos.', false);
+      try {
+        const url = currentlyFavorited ? '/auth/favorites/remove' : '/auth/favorites/add';
+        const result = await postJson(url, { productId, _csrf: csrfToken }, csrfToken);
+        const success = result.ok && result.data && result.data.success;
+
+        if (success) {
+          button.classList.toggle('favorited');
+          const icon = button.querySelector('i');
+          if (icon) icon.textContent = currentlyFavorited ? 'favorite_border' : 'favorite';
+          safeNotify(result.data.message || (currentlyFavorited ? FAVORITES_MESSAGES.removed_server : FAVORITES_MESSAGES.added_server), true);
+        } else {
+          safeNotify(result.data?.message || 'Erro ao atualizar favoritos.', false);
+        }
+      } catch (error) {
+        console.error('Erro ao processar favorito:', error);
+        safeNotify('Erro ao processar favorito. Tente novamente.', false);
+      } finally {
+        // Remove feedback visual e reabilita o botão
+        processingButtons.delete(productId);
+        button.style.opacity = '1';
+        button.style.pointerEvents = 'auto';
+        button.style.cursor = 'pointer';
       }
     });
   });
@@ -94,6 +117,9 @@ export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticate
 export async function syncLocalFavoritesToServer(csrfToken, { silent = true } = {}) {
   const localFavs = getLocalStorageFavorites();
   if (!localFavs.length) return { synced: 0 };
+
+  if (isSyncingFavorites) return { synced: 0 };
+  isSyncingFavorites = true;
 
   const productIds = [...new Set(localFavs)];
   let synced = 0;
@@ -115,11 +141,21 @@ export async function syncLocalFavoritesToServer(csrfToken, { silent = true } = 
 
   if (!silent) {
     if (synced > 0) {
-      safeNotify(`${synced} ${FAVORITES_MESSAGES.sync_success}`, true);
-    } else {
+      safeNotify(`${synced} favoritos sincronizados com sucesso!`, true, 3000);
+    } else if (productIds.length > 0) {
       safeNotify(FAVORITES_MESSAGES.sync_error, false);
     }
   }
 
+  isSyncingFavorites = false;
   return { synced };
+}
+
+/**
+ * Sincroniza favoritos locais quando o usuário faz login
+ * Deve ser chamada após autenticação bem-sucedida
+ * @param {string} csrfToken - Token CSRF para requisições
+ */
+export async function syncFavoritesOnLogin(csrfToken) {
+  return syncLocalFavoritesToServer(csrfToken, { silent: false });
 }

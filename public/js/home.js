@@ -12,10 +12,10 @@ async function initHomePage() {
   const isAuthenticated = serverData.isAuthenticated;
   const csrfToken = serverData.csrfToken;
 
-  // Inicializa botões de favorito (módulo reutilizável)
+  // Inicializa botões de favorito (módulo reutilizável);
   initFavoriteButtons({ isAuthenticated, csrfToken });
 
-  // Sincroniza favoritos locais com o servidor após login
+  // Sincroniza favoritos locais com o servidor após login;
   if (isAuthenticated) {
     try {
       const res = await syncLocalFavoritesToServer(csrfToken);

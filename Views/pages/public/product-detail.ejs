@@ -170,14 +170,20 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.3s ease, opacity 0.2s ease;
         color: var(--cor-secundaria);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 0;
+        font-size: inherit;
     }
 
     .icon-btn:hover {
         color: #fff;
         transform: scale(1.15);
+    }
+
+    .icon-btn:active {
+        transform: scale(0.95);
     }
 
     .icon-btn i.material-icons {
@@ -190,6 +196,22 @@
 
     .add-to-cart-btn.in-cart i {
         color: var(--cor-destaque);
+    }
+
+    /* Estado de carregamento */
+    .icon-btn[style*="opacity: 0.6"] {
+        opacity: 0.6 !important;
+        pointer-events: none;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.6;
+        }
+        50% {
+            opacity: 0.4;
+        }
     }
 
     /* Responsividade */
@@ -378,7 +400,7 @@
                             const isFavorited=(session?.user?.favorites || []).map(String).includes(String(id));
                             const isInCart=(session?.user?.cart || []).map(String).includes(String(id)); 
                             %>
-                                <a href="#"
+                                <a type="button"
                                     class="favorite-btn icon-btn <%= isFavorited ? 'favorited' : '' %>"
                                     data-product-id="<%= id %>">
                                     <i class="material-icons">
@@ -623,34 +645,54 @@
 <script type="module">
     // Importa o módulo de favoritos reutilizável
     import { initFavoriteButtons, syncLocalFavoritesToServer } from '/js/favorites.js';
-
+    
+    console.log("verifica execuçao")
     document.addEventListener('DOMContentLoaded', () => {
-        const isAuthenticated = <%- JSON.stringify(!!session?.user?._id) %>;
+        const isAuthenticated = <%- !!session?.user?._id %>;
+
         const mainProductImage = document.getElementById('main-product-image');
         const thumbnailImages = document.querySelectorAll('.thumbnail-images img');
         const commentList = document.getElementById('comment-list');
         const commentPlaceholder = document.querySelector('.comment-placeholder'); // Select the placeholder message
         const sampleCommentsList = document.querySelector('.comment-list .example')?.closest('ul'); // Select the ul containing example comments
 
+        /**
+         * Inicializa a galeria de imagens do produto, permitindo a troca de imagem
+         * principal ao clicar nas miniaturas.
+         */
+        function initImageGallery() {
+            if (!mainProductImage || thumbnailImages.length === 0) return;
+
+            thumbnailImages.forEach(thumbnail => {
+                thumbnail.addEventListener('click', () => {
+                    // Remove a classe 'active' de todas as miniaturas
+                    thumbnailImages.forEach(img => img.classList.remove('active'));
+                    // Adiciona a classe 'active' à miniatura clicada
+                    thumbnail.classList.add('active');
+                    // Altera a imagem principal
+                    mainProductImage.src = thumbnail.dataset.fullImage;
+                });
+            });
+        }
+
+        const csrfToken = '<%- csrfToken || '' %>'; // Certifique-se de que o csrfToken está disponível;
+
         // Função auxiliar para exibir notificação usando o sistema global
         const showProductNotification = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
 
-        // --- Lógica de troca de imagem principal ---
-        thumbnailImages.forEach(thumbnail => {
-            thumbnail.addEventListener('click', () => {
-                // Remove a classe 'active' de todas as miniaturas
-                thumbnailImages.forEach(img => img.classList.remove('active'));
-                // Adiciona a classe 'active' à miniatura clicada
-                thumbnail.classList.add('active');
-                // Altera a imagem principal
-                mainProductImage.src = thumbnail.dataset.fullImage;
-            });
-        });
-
-        const csrfToken = '<%= csrfToken %>'; // Certifique-se de que o csrfToken está disponível;
+        // DEBUG: Log para verificar se os dados estão corretos
+        console.log('Product Detail - isAuthenticated:', isAuthenticated, 'csrfToken:', !!csrfToken);
 
         // Inicializa o botão de favorito usando o módulo reutilizável
-        initFavoriteButtons({ isAuthenticated, csrfToken });
+        try {
+            initFavoriteButtons({ isAuthenticated, csrfToken });
+            console.log('Favorito botão inicializado com sucesso.');
+        } catch (error) {
+            console.error('Erro ao inicializar botão de favorito:', error);
+        }
+
+        // Inicializa a galeria de imagens
+        initImageGallery();
 
         // Lógica para Carrinho
         const addToCartButton = document.querySelector('.add-to-cart-btn');
@@ -675,10 +717,7 @@
                             'Content-Type': 'application/json',
                             'x-csrf-token': csrfToken
                         },
-                        body: JSON.stringify({
-                            productId: productId,
-                            _csrf: csrfToken
-                        })
+                        body: JSON.stringify({ productId })
                     });
 
                     const result = await response.json();
@@ -710,7 +749,7 @@
         const commentForm = document.getElementById('comment-form');
         const commentText = document.getElementById('comment-text');
         const commentCancel = document.getElementById('comment-cancel');
-        const productIdForComments = '<%= product._id || '' %>';
+        const productIdForComments = '<%- JSON.stringify(product._id || '') %>';
 
         if (commentCancel) {
             commentCancel.addEventListener('click', (e) => {
@@ -797,8 +836,8 @@
                 const products = data?.data || data || [];
 
                 // Filtra por categoria do produto atual (se disponível)
-                const currentCategory = <%= JSON.stringify(product.categoria || null) %>;
-                const currentId = '<%= product._id %>';
+                const currentCategory = <%- JSON.stringify(product.categoria || null) %>;
+                const currentId = <%- JSON.stringify(product._id) %>;
 
                 let related = products.filter(p => String(p._id) !== String(currentId));
                 if (currentCategory) {

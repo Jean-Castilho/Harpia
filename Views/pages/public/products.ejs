@@ -164,14 +164,36 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.3s ease, opacity 0.2s ease;
         color: var(--cor-secundaria);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 0;
+        font-size: inherit;
     }
 
     .icon-btn:hover {
         color: #fff;
         transform: scale(1.15);
+    }
+
+    .icon-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* Estado de carregamento */
+    .icon-btn[style*="opacity: 0.6"] {
+        opacity: 0.6 !important;
+        pointer-events: none;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.6;
+        }
+        50% {
+            opacity: 0.4;
+        }
     }
 
     .icon-btn i.material-icons {
@@ -298,10 +320,8 @@
                             const isFavorited = (session?.user?.favorites || []).map(String).includes(String(id));
                             const isInCart = (session?.user?.cart || []).map(String).includes(String(id));
 
-                            // Define as URLs de ação (requer login)
-                            const favoritUrl = '#'; // Garante que o href seja sempre #
-                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) :
-                            '/login';
+                            // Define a URL de ação para o carrinho (requer login)
+                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) : '/login';
 
                             // Formata as categorias do produto para o atributo de dados
                             const productCategories = Array.isArray(product.categoria) ? product.categoria.join(',') :
@@ -315,13 +335,14 @@
                                         <img src="/products/images/<%= product.imagens[0] %>" alt="<%= product.nome %>">
                                     </a>
                                     <div class="product-card-icons">
-                                        <a href="<%= favoritUrl %>"
+                                        <button type="button"
                                             class="favorite-btn icon-btn <%= isFavorited ? 'favorited' : '' %>"
-                                            data-product-id="<%= id %>">
+                                            data-product-id="<%= id %>"
+                                            title="Adicionar aos favoritos">
                                             <i class="material-icons">
                                                 <%= isFavorited ? 'favorite' : 'favorite_border' %>
                                             </i>
-                                        </a>
+                                        </button>
                                         <a href="<%= carrinhoUrl %>"
                                             class="add-to-cart-btn icon-btn <%= isInCart ? 'in-cart' : '' %>"
                                             data-product-id="<%= id %>">

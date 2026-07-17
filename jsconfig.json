@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "#controllers/*.js": ["./src/controllers/*.js"],
       "#middleware/*.js": ["./src/middleware/*.js"],
