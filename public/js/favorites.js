@@ -45,7 +45,7 @@ export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticate
   const buttons = document.querySelectorAll(selector);
   if (!buttons || buttons.length === 0) return;
 
-  // Rastrear botões em processamento para evitar múltiplos cliques
+  // Rastrear botões em processamento para evitar múltiplos cliques;
   const processingButtons = new Set();
 
   if (!isAuthenticated) {
@@ -74,7 +74,7 @@ export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticate
         } else {
           const added = addLocalStorageFavorite(productId);
           safeNotify(added ? FAVORITES_MESSAGES.added_local : FAVORITES_MESSAGES.already_local, added);
-        }
+        } 
         button.classList.toggle('favorited');
         const icon = button.querySelector('i');
         if (icon) icon.textContent = currentlyFavorited ? 'favorite_border' : 'favorite';

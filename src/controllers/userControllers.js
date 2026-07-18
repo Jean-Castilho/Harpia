@@ -182,6 +182,11 @@ export default class UserControllers {
       // Atualiza apenas o endereço de e-mail, mantendo o status de verificação
       updateFields['phone.number'] = updateData.phone;
     }
+    if (updateData.cart) {
+      // Permite a atualização do carrinho (usado para adicionar/remover itens)
+      updateFields.cart = updateData.cart;
+    }
+
     if (updateData.role) {
       // Adicione validação de role se necessário
       const allowedRoles = ['user', 'stockist', 'delivery', 'admin'];
@@ -210,6 +215,70 @@ export default class UserControllers {
     }
 
     return await this.getUserById(id);
+  }
+
+  async addFavorite(userId, productId) {
+    if (!ObjectId.isValid(userId)) {
+      throw new ValidationError("ID de usuário inválido.", 401);
+    }
+    const result = await this.getCollection().updateOne(
+      { _id: new ObjectId(userId) },
+      { $addToSet: { favorites: productId } }
+    );
+    if (result.matchedCount === 0) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
+    return await this.getUserById(userId);
+  }
+
+  async removeFavorite(userId, productId) {
+    if (!ObjectId.isValid(userId)) {
+      throw new ValidationError("ID de usuário inválido.", 401);
+    }
+    const result = await this.getCollection().updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { favorites: productId } }
+    );
+    if (result.matchedCount === 0) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
+    return await this.getUserById(userId);
+  }
+
+  async addToCart(userId, productId) {
+    if (!ObjectId.isValid(userId)) {
+      throw new ValidationError("ID de usuário inválido.", 401);
+    }
+    const result = await this.getCollection().updateOne(
+      { _id: new ObjectId(userId) },
+      { $push: { cart: productId } }
+    );
+    if (result.matchedCount === 0) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
+    return await this.getUserById(userId);
+  }
+
+  async removeFromCart(userId, productId) {
+    if (!ObjectId.isValid(userId)) {
+      throw new ValidationError("ID de usuário inválido.", 401);
+    }
+
+    const user = await this.getUserById(userId);
+    if (!user) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
+
+    const cart = user.cart || [];
+    const productIndex = cart.findIndex(id => id.toString() === productId);
+
+    // Se o produto for encontrado no carrinho, remove apenas a primeira ocorrência.
+    if (productIndex > -1) {
+      cart.splice(productIndex, 1);
+    }
+
+    // Atualiza o carrinho do usuário no banco de dados.
+    return await this.updateUser(userId, { cart: cart });
   }
 
   async deleteUser(id) {

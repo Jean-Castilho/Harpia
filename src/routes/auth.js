@@ -126,27 +126,22 @@ router.post("/favorites/add", ensureAuthenticated, validateCsrfToken, async (req
   }
 
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(userId) },
-      { $addToSet: { favorites: productId } },
-      { returnDocument: "after" }
-    );
+    const updatedUser = await userControllers.addFavorite(userId, productId);
 
-    if (updatedUser.value) {
-      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
-      return req.session.save((err) => {
-        if (err) {
-          console.error('Error saving session after adding favorite:', err);
-          return next(err);
-        }
-        return res.status(200).json({ success: true, message: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
-      });
-    }
+    req.session.user = {
+      ...updatedUser,
+      _id: updatedUser._id.toString()
+    };
 
-    console.warn('Favorite add failed: user not found or not updated', { userId });
-    throw new GeneralError("Usuário não encontrado.", 404);
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session after adding favorite:', err);
+        return next(err);
+      }
+      res.status(200).json({ success: true, message: "Produto adicionado aos favoritos.", favorites: updatedUser.favorites });
+    });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -163,25 +158,20 @@ router.post("/favorites/remove", ensureAuthenticated, validateCsrfToken, async (
   }
 
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(userId) },
-      { $pull: { favorites: productId } },
-      { returnDocument: "after" }
-    );
+    const updatedUser = await userControllers.removeFavorite(userId, productId);
 
-    if (updatedUser.value) {
-      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
-      return req.session.save((err) => {
-        if (err) {
-          console.error('Error saving session after removing favorite:', err);
-          return next(err);
-        }
-        return res.status(200).json({ success: true, message: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
-      });
-    }
+    req.session.user = {
+      ...updatedUser,
+      _id: updatedUser._id.toString()
+    };
 
-    console.warn('Favorite remove failed: user not found or not updated', { userId });
-    throw new GeneralError("Usuário não encontrado.", 404);
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session after removing favorite:', err);
+        return next(err);
+      }
+      res.status(200).json({ success: true, message: "Produto removido dos favoritos.", favorites: updatedUser.favorites });
+    });
   } catch (error) {
     next(error);
   }
@@ -200,18 +190,21 @@ router.post("/cart/add", ensureAuthenticated, validateCsrfToken, async (req, res
   }
 
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(userId) },
-      { $addToSet: { cart: productId } },
-      { returnDocument: "after" }
-    );
+    const updatedUser = await userControllers.addToCart(userId, productId);
 
-    if (updatedUser.value) {
-      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
-      return res.status(200).json({ success: true, message: "Produto adicionado ao carrinho.", cart: updatedUser.value.cart });
-    }
-    console.warn('Cart add failed: user not found', { userId });
-    throw new GeneralError("Usuário não encontrado.", 404);
+    req.session.user = {
+      ...updatedUser,
+      _id: updatedUser._id.toString()
+    };
+
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session after adding to cart:', err);
+        return next(err);
+      }
+      res.status(200).json({ success: true, message: "Produto adicionado ao carrinho.", cart: updatedUser.cart });
+    });
+
   } catch (error) {
     next(error);
   }
@@ -230,18 +223,20 @@ router.post("/cart/remove", ensureAuthenticated, validateCsrfToken, async (req, 
   }
 
   try {
-    const updatedUser = await userControllers.getCollection().findOneAndUpdate(
-      { _id: new ObjectId(userId) },
-      { $pull: { cart: productId } },
-      { returnDocument: "after" }
-    );
+    const updatedUser = await userControllers.removeFromCart(userId, productId);
 
-    if (updatedUser.value) {
-      req.session.user = { ...updatedUser.value, _id: updatedUser.value._id.toString() };
-      return res.status(200).json({ success: true, message: "Produto removido do carrinho.", cart: updatedUser.value.cart });
-    }
-    console.warn('Cart remove failed: user not found', { userId });
-    throw new GeneralError("Usuário não encontrado.", 404);
+    req.session.user = {
+      ...updatedUser,
+      _id: updatedUser._id.toString()
+    };
+
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session after removing from cart:', err);
+        return next(err);
+      }
+      res.status(200).json({ success: true, message: "Produto removido do carrinho.", cart: updatedUser.cart });
+    });
   } catch (error) {
     next(error);
   }
