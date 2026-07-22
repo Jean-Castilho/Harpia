@@ -1,0 +1,132 @@
+.product-card,
+.category-product-item {
+    min-width: 100px;
+    /* Largura mínima aumentada */
+    background-color: #fff;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-radius);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--sombra-padrao);
+}
+
+.product-card:hover,
+.category-product-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-card .product-image-container,
+.category-product-item .product-image-container {
+    position: relative;
+    overflow: hidden;
+    height: 200px;
+    /* Altura fixa para a imagem */
+}
+
+.product-card img,
+.category-product-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Manter a proporção e preencher o espaço */
+    transition: transform 0.4s ease;
+}
+
+.product-card:hover img,
+.category-product-item:hover img {
+    transform: scale(1.08);
+}
+
+.product-card-content,
+.category-card-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card h3,
+.category-product-item h3 {
+    font-size: 1.3rem;
+    margin: 0 0 0.8rem;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+.product-card .price,
+.category-product-item .price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cor-destaque);
+    margin-bottom: 1.2rem;
+}
+
+.product-card .btn,
+.category-product-item .btn {
+    margin-top: auto;
+    width: 100%;
+    /* Botão ocupa toda a largura */
+    padding: 12px 0;
+    /* Aumenta o padding do botão */
+}
+
+/* Responsividade */
+@media (max-width: 990px) {
+
+    .product-card,
+    .category-product-item {
+        /* max-width: calc(50% - 1rem); Removido para controle do grid */
+        /* flex: 1 1 calc(50% - 1rem); Removido para controle do grid */
+    }
+
+    .product-card .product-image-container,
+    .category-product-item .product-image-container {
+        height: 180px;
+        /* Ajusta a altura da imagem para telas menores */
+    }
+
+    .product-card h3,
+    .category-product-item h3 {
+        font-size: 1.1rem;
+        /* Reduz o tamanho da fonte do título */
+    }
+
+    .product-card .price,
+    .category-product-item .price {
+        font-size: 1.3rem;
+        /* Reduz o tamanho da fonte do preço */
+    }
+
+    .product-card-content,
+    .category-card-content {
+        padding: 1rem;
+        /* Reduz o padding do conteúdo */
+    }
+
+    .product-card .btn,
+    .category-product-item .btn {
+        padding: 10px 0;
+        /* Ajusta o padding do botão */
+        font-size: 0.9rem;
+        /* Reduz o tamanho da fonte do botão */
+    }
+}
+
+@media (max-width: 576px) {
+
+    .product-card,
+    .category-product-item {
+        /* max-width: 100%; Removido para controle do grid */
+        /* flex: 1 1 100%; Removido para controle do grid */
+    }
+
+    .product-card .product-image-container,
+    .category-product-item .product-image-container {
+        height: 150px;
+        /* Altura da imagem para telas extra pequenas */
+    }
+}

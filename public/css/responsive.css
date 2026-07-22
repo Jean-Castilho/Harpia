@@ -1,11 +1,13 @@
 /* --- Responsiveness --- */
 @media (max-width: 1800px) {
-    .container{ max-width: 80rem;}
+    .container {
+        max-width: 80rem;
+    }
 
 }
 
 @media (max-width: 1200px) {
-    
+
     .delivery-dashboard {
         padding: 1.5rem;
     }
@@ -54,7 +56,7 @@
     }
 
     .filter-btn {
-        padding: 10px 10px;
+        padding: 0px 0px;
     }
 
     .search-bar {
@@ -306,8 +308,11 @@
 
     .product-grid {
         gap: 1rem;
-        padding: 1.2rem 1.2rem;
+        grid-auto-columns: minmax(150px, 150px);
+        padding: 0.6rem 0.6rem;
         overflow-x: auto;
+        display: flex;
+        justify-content: space-around;
     }
 
     .favorites-grid,

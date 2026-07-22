@@ -31,124 +31,14 @@
 }
 
 .product-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     padding: 1rem;
-    gap: 4rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    justify-items: center;
-    justify-content: center;
-}
-
-.favorites-grid {
-    display: flex;
-    /* Adjusted minmax */
     gap: 2rem;
-    /* Reduced gap */
-    max-width: 1200px;
+    max-width: 1300px; /* Aumentado para acomodar 5 cartões com espaçamento */
     margin: 0 auto;
-    justify-items: center;
+    justify-content: center; /* Centraliza a grade quando há espaço extra */
 }
-
-.product-card {
-    min-width: 200px;
-    background-color: #fff;
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--borda-radius);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-align: left;
-    /* Align text to the left */
-    display: flex;
-    flex-direction: column;
-}
-
-.product-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 2px 3px 9px rgba(0, 0, 0, 0.12);
-}
-
-.product-card .product-image-container {
-    position: relative;
-    overflow: hidden;
-}
-
-.product-card img {
-    height: 200px;
-    aspect-ratio: 1 / 1;
-    /* Changed from 250px */
-    object-fit: contain;
-    /* Changed from cover */
-    transition: transform 0.4s ease;
-}
-
-.product-card:hover img {
-    transform: scale(1.05);
-}
-
-.product-card-icons {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    flex-direction: column;
-    /* Stack icons vertically */
-    gap: 0.8rem;
-}
-
-.product-card-icons .icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    color: #333;
-}
-
-.product-card-icons .icon-btn:hover {
-    color: var(--cor-destaque);
-    transform: scale(1.15);
-}
-
-.product-card-icons .icon-btn .material-icons {
-    font-size: 1.4rem;
-}
-
-.favorited .material-icons {
-    color: var(--cor-destaque);
-}
-
-.product-card-content {
-    padding: 1.5rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-
-.product-card h3 {
-    font-size: 1.25rem;
-    margin: 0 0 0.5rem;
-    line-height: 1.4;
-}
-
-.product-card .price {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--cor-destaque);
-    margin-bottom: 1.5rem;
-}
-
-.product-card .btn {
-    margin-top: auto;
-    /* Pushes button to the bottom */
-}
-
 
 /* --- Page: Home - Product Categories --- */
 .product-categories {
@@ -165,7 +55,6 @@
     flex-direction: column;
     padding: 1rem;
     gap: 2rem;
-
 }
 
 .category-card {
@@ -197,65 +86,29 @@
 }
 
 .category-products-scroll {
-    display: flex;
-    overflow-x: auto;
-    /* Enable horizontal scrolling */
-    -webkit-overflow-scrolling: touch;
-    /* Smooth scrolling on iOS */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* Layout de grade responsivo */
     gap: 1rem;
     padding: 1.2rem;
-    /* Space for scrollbar */
-    flex-grow: 1;
-    /* Allow scroll area to grow */
+    justify-content: center; /* Centraliza os cartões */
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.category-products-scroll::-webkit-scrollbar {
-    display: none;
+/* Media Queries para responsividade */
+@media (max-width: 990px) {
+    .product-grid,
+    .category-products-scroll {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        /* Duas colunas em telas médias */
+        gap: 1.5rem;
+    }
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-.category-products-scroll {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
-}
-
-.category-product-item {
-    flex: 0 0 auto;
-    /* Prevent items from shrinking */
-    width: 220px;
-    /* Fixed width for items in scroll */
-    text-align: center;
-    border: 1px solid var(--cor-borda);
-    /* Add border for individual product cards */
-    border-radius: var(--borda-radius);
-    box-shadow: none;
-    /* Remove shadow inherited from product-card */
-}
-
-.category-product-item img {
-    height: 150px;
-    /* Smaller image height for scrollable items */
-    object-fit: cover;
-    margin-bottom: 1rem;
-}
-
-.category-product-item h4 {
-    font-size: 1.2rem;
-    margin: 0.5rem 0.5rem 0;
-    line-height: 1.3;
-}
-
-.category-product-item .price {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-}
-
-.category-product-item .btn-sm {
-    margin: 0px 25px;
-    padding: 8px 15px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
+@media (max-width: 576px) {
+    .product-grid,
+    .category-products-scroll {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        /* Uma coluna em telas muito pequenas */
+        gap: 1rem;
+    }
 }

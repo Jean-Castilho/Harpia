@@ -1,10 +1,13 @@
 /* --- Component: Cards --- */
 .card {
+    
+    max-width: 480px;
+    margin-top: 2.5rem;
     background-color: #fff;
     border: 1px solid var(--cor-borda);
     border-radius: var(--borda-radius);
     box-shadow: var(--sombra-padrao);
-    padding: 1rem;
+    padding: 1.6rem;
     margin-top: 3.5rem;
     margin-bottom: 2.5rem;
     overflow: hidden;
