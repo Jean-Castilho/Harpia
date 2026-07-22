@@ -43,7 +43,7 @@
 
 .product-card-content,
 .category-card-content {
-    padding: 1.5rem;
+    padding: 0.8rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -101,11 +101,6 @@
         /* Reduz o tamanho da fonte do preço */
     }
 
-    .product-card-content,
-    .category-card-content {
-        padding: 1rem;
-        /* Reduz o padding do conteúdo */
-    }
 
     .product-card .btn,
     .category-product-item .btn {

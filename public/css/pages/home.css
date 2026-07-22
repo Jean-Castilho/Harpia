@@ -34,7 +34,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     padding: 1rem;
-    gap: 2rem;
+    gap: 0.6rem;
     max-width: 1300px; /* Aumentado para acomodar 5 cartões com espaçamento */
     margin: 0 auto;
     justify-content: center; /* Centraliza a grade quando há espaço extra */
@@ -100,15 +100,24 @@
     .category-products-scroll {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         /* Duas colunas em telas médias */
-        gap: 1.5rem;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 660px) {
+    .product-grid,
+    .category-products-scroll {
+        grid-template-columns: repeat(2, 1fr);
+        /* Duas colunas de tamanho igual */
+        gap: 0.6rem;
     }
 }
 
 @media (max-width: 576px) {
     .product-grid,
     .category-products-scroll {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-template-columns: repeat(1, 1fr);
         /* Uma coluna em telas muito pequenas */
-        gap: 1rem;
+        gap: 0.6rem;
     }
 }
