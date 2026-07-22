@@ -33,7 +33,7 @@
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    padding: 1rem;
+    padding: 0.6rem;
     gap: 0.6rem;
     max-width: 1300px; /* Aumentado para acomodar 5 cartões com espaçamento */
     margin: 0 auto;
