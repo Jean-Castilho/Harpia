@@ -18,7 +18,6 @@
     color: var(--cor-destaque);
 }
 
-/* --- Page: Contact (Compact) --- */
 #contact-page .page-header {
     text-align: center;
     margin-bottom: 1rem;
@@ -33,7 +32,7 @@
     gap: 2rem;
 }
 
-#contact-page .card {
+#contact-page {
     padding: 1.5rem;
     margin-bottom: 0; /* Remove margin bottom from card inside contact page */
 }

@@ -1,17 +1,14 @@
 /* --- Responsiveness --- */
-@media (max-width: 1800px) {
+@media (min-width: 1000px) {
     .container {
-        max-width: 80rem;
+        max-width: calc(100vw);
+        padding: 1.9rem 3.0rem 0rem;
     }
 
     .icon-btn {
         width: 35px;
         height: 35px;
     }
-
-}
-
-@media (max-width: 1200px) {
 
     .delivery-dashboard {
         padding: 1.5rem;
@@ -23,20 +20,13 @@
         flex-direction: row-reverse;
     }
 
-}
-
-@media (max-width: 1090px) {
-
-    .container {
-        padding: 0.0rem 3rem;
-    }
-
     .cart-content {
         gap: 3rem;
     }
 }
 
-@media (max-width: 990px) {
+
+@media (max-width: 1000px) {
 
     .container {
         padding: 0.9rem 1.3rem;
