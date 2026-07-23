@@ -160,12 +160,9 @@
     }
 
     .icon-btn {
-        /* Reutilizando estilos do products.ejs */
         background-color: rgba(255, 255, 255, 0.8);
         border: none;
         border-radius: 50%;
-        width: 36px;
-        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -178,7 +175,7 @@
     }
 
     .icon-btn:hover {
-        color: #fff;
+        color: var(--cor-destaque);
         transform: scale(1.15);
     }
 
@@ -215,7 +212,7 @@
     }
 
     /* Responsividade */
-    @media (max-width: 768px) {
+    @media (max-width: 740px) {
         .product-detail-container {
             display: flow;
             flex-direction: column;
@@ -280,7 +277,7 @@
     }
 
     /* Grid para telas grandes (>=1000px): 2 colunas x 2 linhas */
-    @media (min-width: 1000px) {
+    @media (min-width: 750px) {
         .product-detail-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -300,6 +297,7 @@
         }
 
         .product-info {
+            padding: 3.5em;
             grid-area: info;
         }
 
@@ -648,7 +646,7 @@
     
     console.log("verifica execuçao")
     document.addEventListener('DOMContentLoaded', () => {
-        const isAuthenticated = <%- !!session?.user?._id %>;
+        const isAuthenticated = <%= !!session?.user?._id %>
 
         const mainProductImage = document.getElementById('main-product-image');
         const thumbnailImages = document.querySelectorAll('.thumbnail-images img');
@@ -675,7 +673,7 @@
             });
         }
 
-        const csrfToken = '<%- csrfToken || '' %>'; // Certifique-se de que o csrfToken está disponível;
+        const csrfToken =  <%- JSON.stringify(csrfToken || '') %>
 
         // Função auxiliar para exibir notificação usando o sistema global
         const showProductNotification = (message, isSuccess) => window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
@@ -749,7 +747,7 @@
         const commentForm = document.getElementById('comment-form');
         const commentText = document.getElementById('comment-text');
         const commentCancel = document.getElementById('comment-cancel');
-        const productIdForComments = '<%- JSON.stringify(product._id || '') %>';
+        const productIdForComments = <%- JSON.stringify(product._id || '') %>
 
         if (commentCancel) {
             commentCancel.addEventListener('click', (e) => {
@@ -836,8 +834,8 @@
                 const products = data?.data || data || [];
 
                 // Filtra por categoria do produto atual (se disponível)
-                const currentCategory = <%- JSON.stringify(product.categoria || null) %>;
-                const currentId = <%- JSON.stringify(product._id) %>;
+                const currentCategory = <%- JSON.stringify(product.categoria || null) %>
+                const currentId = <%- JSON.stringify(product._id) %>
 
                 let related = products.filter(p => String(p._id) !== String(currentId));
                 if (currentCategory) {
