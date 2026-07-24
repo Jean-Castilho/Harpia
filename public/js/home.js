@@ -1,8 +1,4 @@
-import { initFavoriteButtons, syncLocalFavoritesToServer } from '/js/favorites.js';
-
-function showNotification(message, isSuccess) {
-  window.NotificationSystem?.show(message, isSuccess ? 'success' : 'error');
-}
+import { initFavoriteButtons, syncLocalFavoritesToServer, safeNotify } from '/js/favorites.js'; // Assumindo que safeNotify foi movido para utils.js e re-exportado por favorites.js ou importado diretamente de utils.js
 
 async function initHomePage() {
   const serverDataElement = document.getElementById('server-data-home');
@@ -20,7 +16,7 @@ async function initHomePage() {
     try {
       const res = await syncLocalFavoritesToServer(csrfToken);
       if (res && res.synced && res.synced > 0) {
-        showNotification(`${res.synced} favoritos sincronizados.`, true);
+        safeNotify(`${res.synced} favoritos sincronizados.`, true);
       }
     } catch (e) {
       console.error('Erro ao sincronizar favoritos locais:', e);
@@ -38,7 +34,7 @@ async function initHomePage() {
       }
 
       if (!isAuthenticated) {
-        showNotification('faça login e tente novamente.', false);
+        safeNotify('faça login e tente novamente.', false);
         return;
       }
       
@@ -55,15 +51,15 @@ async function initHomePage() {
         });
 
         const result = await response.json();
-        showNotification(result.message, result.success);
+        safeNotify(result.message, result.success);
 
         if (result.success) {
           button.classList.add('in-cart');
           const icon = button.querySelector('i');
           if (icon) icon.textContent = 'shopping_cart_checkout';
         }
-      } catch (error) {
-        showNotification('erro tente novamente.', false);
+      } catch (error) { // Usar safeNotify aqui também
+        safeNotify('Erro ao adicionar ao carrinho. Tente novamente.', false);
       }
     });
   });

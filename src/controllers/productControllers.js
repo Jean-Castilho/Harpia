@@ -105,7 +105,7 @@ export default class ProductController {
 
   async getProductById(id) {
     if (!ObjectId.isValid(id)) {
-      throw new Error("ID inválido");
+      throw new GeneralError("ID de produto inválido.", 400); // Usar GeneralError para consistência
     }
     const objectId = new ObjectId(id);
     const product = await this.getCollection().findOne({ _id: objectId });
@@ -137,19 +137,15 @@ export default class ProductController {
     const { id } = req.params;
     const { body, files } = req;
 
-    if (!ObjectId.isValid(id)) {
-      const err = new Error("ID de produto inválido.");
-      err.statusCode = 400;
-      throw err;
+    if (!ObjectId.isValid(id)) { // Usar GeneralError para consistência
+      throw new GeneralError("ID de produto inválido.", 400);
     }
 
     const bucket = getGridFSBucket();
     const existingProduct = await this.getProductById(id);
 
     if (!existingProduct) {
-      const err = new Error("Produto não encontrado.");
-      err.statusCode = 404;
-      throw err;
+      throw new GeneralError("Produto não encontrado.", 404); // Usar GeneralError para consistência
     }
 
     // Gerenciar imagens novas
@@ -197,8 +193,8 @@ export default class ProductController {
   }
 
   async deleteProduct(id) {
-    if (!ObjectId.isValid(id)) {
-      throw new Error("ID de produto inválido.");
+    if (!ObjectId.isValid(id)) { // Usar GeneralError para consistência
+      throw new GeneralError("ID de produto inválido.", 400);
     }
 
     const objectId = new ObjectId(id);
@@ -207,8 +203,8 @@ export default class ProductController {
     // 1. Encontrar o produto para obter a lista de imagens
     const product = await this.getCollection().findOne({ _id: objectId });
 
-    if (!product) {
-      throw new Error("Produto não encontrado.");
+    if (!product) { // Usar GeneralError para consistência
+      throw new GeneralError("Produto não encontrado.", 404);
     }
 
     // 2. Se o produto tiver imagens, deletá-las do GridFS
@@ -235,31 +231,26 @@ export default class ProductController {
       });
 
       // Espera todas as operações de exclusão de imagem terminarem
-      await Promise.all(deletePromises);
+      await Promise.allSettled(deletePromises); // Usar Promise.allSettled para que todas as promessas sejam resolvidas
     }
 
     // 3. Após deletar as imagens, deletar o documento do produto
     const result = await this.getCollection().deleteOne({ _id: objectId });
     if (result.deletedCount === 0) {
-      throw new Error("Não foi possível deletar o produto.");
+      throw new GeneralError("Não foi possível deletar o produto.", 500); // Usar GeneralError para consistência
     }
-
     return result;
   }
 
   async addComment(productId, comment) {
-    if (!ObjectId.isValid(productId)) {
-      const err = new Error('ID de produto inválido.');
-      err.statusCode = 400;
-      throw err;
+    if (!ObjectId.isValid(productId)) { // Usar GeneralError para consistência
+      throw new GeneralError('ID de produto inválido.', 400);
     }
 
     const objectId = new ObjectId(productId);
     const product = await this.getProductById(productId);
     if (!product) {
-      const err = new Error('Produto não encontrado.');
-      err.statusCode = 404;
-      throw err;
+      throw new GeneralError('Produto não encontrado.', 404); // Usar GeneralError para consistência
     }
 
     // assegura um _id local para o comentário para retorno imediato

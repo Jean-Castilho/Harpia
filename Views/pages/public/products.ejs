@@ -349,25 +349,20 @@
             <div class="product-grid">
                 <% if (items.length> 0) { %>
                     <% items.forEach(product=> { %>
-                        <% const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] :
-                            '/assets/img/fallback.jpg';
+                        <%  const imagem=(product.imagens && product.imagens.length>0) ? product.imagens[0] : '/assets/img/fallback.jpg';
                             const id = product._id || '';
                             const productUrl = `/products/${id}`;
-                            const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', {
-                            style:
-                            'currency', currency: 'BRL' }) : 'Preço sob consulta';
+                            const preco = (product.preco != null) ? Number(product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'Preço sob consulta';
 
                             // Verifica se o produto está nos favoritos ou no carrinho do usuário
                             const isFavorited = (session?.user?.favorites || []).map(String).includes(String(id));
                             const isInCart = (session?.user?.cart || []).map(String).includes(String(id));
 
                             // Define a URL de ação para o carrinho (requer login)
-                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) :
-                            '/login';
+                            const carrinhoUrl = session?.user?._id ? (isInCart ? '/cart' : `/cart/add/${id}`) : '/login';
 
                             // Formata as categorias do produto para o atributo de dados
-                            const productCategories = Array.isArray(product.categoria) ? product.categoria.join(',') :
-                            (product.categoria || '');
+                            const productCategories = Array.isArray(product.categoria) ? product.categoria.join(',') : (product.categoria || '');
                             %>
 
                             <!-- Card do Produto -->

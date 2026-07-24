@@ -11,6 +11,7 @@ import { WebSocketServer } from 'ws';
 import { generateCsrfToken } from '#src/middleware/csrfMiddleware.js';
 import handleErrors from '#src/middleware/errorHandler.js'
 import { registerWebSocketClient, unregisterWebSocketClient } from '#src/utils/websocket.js';
+import dotenv from 'dotenv'; // Importar dotenv
 
 const app = express();
 const port = process.env.PORT || 3080;
@@ -20,6 +21,9 @@ const clientUrl = process.env.CLIENT_URL || `http://localhost:${port}`;
 const isLocalhost = /localhost|127\.0\.0\.1/.test(clientUrl);
 const cookieSecure = isProduction && !isLocalhost;
 const cookieSameSite = cookieSecure ? 'none' : 'lax';
+
+// Carregar variáveis de ambiente
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -41,10 +45,10 @@ app.use(express.json({
     req.rawBody = buf;
   }
 }));
-
-app.use(express.json());
+// O express.json() sem verify deve vir depois do que tem verify, ou ser o único.
+// Se o objetivo é ter o rawBody, o express.json() normal não deve vir antes.
+// Removendo a duplicata e garantindo que o rawBody seja capturado.
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'Views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -66,6 +70,7 @@ app.use(session({
   }
 }));
 
+app.set('views', path.join(__dirname, 'Views')); // Mover para depois do dotenv.config()
 // Middleware para gerar e expor o token CSRF para os templates
 app.use(generateCsrfToken);
 
@@ -82,7 +87,7 @@ app.use((req, res, next) => {
   res.locals.isActive = (pathPrefix) => req.path.startsWith(pathPrefix);
 
   // Garante que `products` seja sempre um array para evitar erros nos templates
-  res.locals.products = res.locals.products || [];
+  res.locals.products = res.locals.products || []; // Melhorar a clareza se allProducts é sempre igual a products
   res.locals.allProducts = res.locals.allProducts || res.locals.products;
 
   next();

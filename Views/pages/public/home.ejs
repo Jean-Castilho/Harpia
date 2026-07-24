@@ -1,7 +1,6 @@
-<% 
-  const items = Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
-  userId = session?.user?._id || null; const favorites=(session?.user?.favorites || []).map(String); const
-  cart = (session?.user?.cart || []).map(String); %>
+<% const items=Array.isArray(products) ? products : (Array.isArray(allProducts) ? allProducts : []); const
+  userId=session?.user?._id || null; const favorites=(session?.user?.favorites || []).map(String); const
+  cart=(session?.user?.cart || []).map(String); %>
 
   <style>
     /* ===== General Section Styles ===== */
@@ -12,6 +11,7 @@
 
     .icon-btn {
       cursor: pointer;
+      padding: 4px;
     }
 
     .product-categories {
@@ -28,52 +28,48 @@
     <div class="hero-content">
       <h1>Móveis Rústicos que </br> Contam Histórias</h1>
 
-      <% if(userId == null) { %>
+      <% if(userId==null) { %>
         <a href="/register" class="btn btn-primario" style="color: #ffffff;">Registre-se</a>
-      <% } %>
+        <% } %>
     </div>
   </section>
 
   <div class="container">
     <h2 class="section-title">Destaques</h2>
-    <section class="featured-products">
-      <div class="product-grid">
-        <% if (items.length> 0) { %>
-          <% items.slice(0, 1).forEach(product=> { %>
-            <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'main' }) %>
-              <% }); %>
-                <% } else { %>
-                  <p>Nenhum produto em destaque no momento. Volte em breve!</p>
-                  <% } %>
-      </div>
-    </section>
+    <div class="product-grid">
+      <% if (items.length> 0) { %>
+        <% items.slice(0, 1).forEach(product=> { %>
+          <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'main' }) %>
+            <% }); %>
+              <% } else { %>
+                <p>Nenhum produto em destaque no momento. Volte em breve!</p>
+                <% } %>
+    </div>
 
     <section class="product-categories">
       <h2 class="section-title">Categorias</h2>
-      <div class="category-grid">
-        <% const categories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' , 'Escritorio' ]; %>
-          <% categories.forEach(category=> { %>
-            <div class="category-card">
-              <a href="/category/<%= category %>" class="category-title-link">
-                <h3>
-                  <%= category %>
-                </h3>
-              </a>
-              <div class="category-products-scroll">
-                <% const productsInCategory = items.filter(p=> p.categoria === category); %>
-                  <% if (productsInCategory && productsInCategory.length> 0) { %>
-                    <% productsInCategory.forEach(product=> { %>
+      <% const categories=['Sala de Estar', 'Área Gourmet' , 'Cozinha' , 'Escritorio' ]; %>
+        <% categories.forEach(category=> { %>
+          <div class="category-card">
+            <a href="/category/<%= category %>" class="category-title-link">
+              <h3>
+                <%= category %>
+              </h3>
+            </a>
+            <div class="category-products-scroll">
+              <% const productsInCategory=items.filter(p=> p.categoria === category); %>
+                <% if (productsInCategory && productsInCategory.length> 0) { %>
+                  <% productsInCategory.forEach(product=> { %>
 
-                      <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'category' }) %>
+                    <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'category' }) %>
 
-                        <% }); %>
-                          <% } else { %>
-                            <p>Nenhum produto disponível nesta categoria no momento.</p>
-                            <% } %>
-              </div>
+                      <% }); %>
+                        <% } else { %>
+                          <p>Nenhum produto disponível nesta categoria no momento.</p>
+                          <% } %>
             </div>
-            <% }); %>
-      </div>
+          </div>
+          <% }); %>
     </section>
   </div>
 

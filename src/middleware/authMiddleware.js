@@ -7,9 +7,6 @@ export const checkUserRole = (req, res, next) => {
   let layout = './layout/main';
   if (req.session.user) {
     switch (req.session.user.role) {
-      case 'admin':
-        layout = './layout/admin-layout';
-        break;
       case 'delivery':
         layout = './layout/delivery';
         break;

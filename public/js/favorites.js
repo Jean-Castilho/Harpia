@@ -1,4 +1,4 @@
-import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, setLocalStorageFavorites } from '/js/utils.js';
+import { getLocalStorageFavorites, addLocalStorageFavorite, removeLocalStorageFavorite, setLocalStorageFavorites, safeNotify, postJson } from '/js/utils.js';
 
 export const FAVORITES_MESSAGES = {
   added_local: 'Produto adicionado aos favoritos.',
@@ -12,34 +12,6 @@ export const FAVORITES_MESSAGES = {
 
 // Estado global para rastrear sincronização
 let isSyncingFavorites = false;
-
-function safeNotify(message, isSuccess, duration) {
-  if (!message) return;
-  if (window.NotificationSystem) {
-    if (typeof duration === 'number') {
-      window.NotificationSystem.show(message, isSuccess ? 'success' : 'error', duration);
-    } else {
-      window.NotificationSystem.show(message, isSuccess ? 'success' : 'error');
-    }
-    return;
-  }
-  console[isSuccess ? 'log' : 'error'](message);
-}
-
-async function postJson(url, body, csrfToken) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrfToken) headers['x-csrf-token'] = csrfToken;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-    credentials: 'include'
-  });
-
-  const data = await response.json().catch(() => ({}));
-  return { ok: response.ok, status: response.status, data };
-}
 
 export function initFavoriteButtons({ selector = '.favorite-btn', isAuthenticated = false, csrfToken = null } = {}) {
   const buttons = document.querySelectorAll(selector);

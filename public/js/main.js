@@ -1,24 +1,96 @@
-const hamburger = document.querySelector(".hamburger");
-const navMenu = document.querySelector(".nav-menu");
-const navOverlay = document.querySelector(".nav-overlay");
+// Header/Navigation Interactivity
+(function() {
+    const hamburger = document.querySelector(".hamburger");
+    const navMenu = document.querySelector(".nav-menu");
+    const navOverlay = document.querySelector(".nav-overlay");
+    const navLinks = document.querySelectorAll(".nav-link");
 
-hamburger.addEventListener("click", () => {
-    hamburger.classList.toggle("active");
-    navMenu.classList.toggle("active");
-    navOverlay.classList.toggle("active");
-});
+    // Verifica se os elementos essenciais do cabeçalho existem
+    if (!hamburger || !navMenu || !navOverlay) {
+        console.warn("Elementos do cabeçalho (hamburger, nav-menu, nav-overlay) não encontrados. A configuração da interatividade do cabeçalho será ignorada.");
+        return;
+    }
 
-document.querySelectorAll(".nav-link").forEach(n => n.addEventListener("click", () => {
-    hamburger.classList.remove("active");
-    navMenu.classList.remove("active");
-    navOverlay.classList.remove("active");
-}));
+    // Atributos ARIA iniciais para acessibilidade
+    hamburger.setAttribute("aria-expanded", "false");
+    // Se o navMenu tiver um ID, use-o para aria-controls. Caso contrário, loga um aviso.
+    if (navMenu.id) {
+        hamburger.setAttribute("aria-controls", navMenu.id);
+    } else {
+        console.warn("O elemento '.nav-menu' não possui um ID. Considere adicionar um para melhor acessibilidade (aria-controls).");
+    }
+    navMenu.setAttribute("aria-hidden", "true");
+    navOverlay.setAttribute("aria-hidden", "true");
 
-navOverlay.addEventListener("click", () => {
-    hamburger.classList.remove("active");
-    navMenu.classList.remove("active");
-    navOverlay.classList.remove("active");
-});
+    /**
+     * Alterna o estado de abertura/fechamento do menu de navegação.
+     */
+    const toggleMenu = () => {
+        const isExpanded = hamburger.classList.toggle("active");
+        navMenu.classList.toggle("active");
+        navOverlay.classList.toggle("active");
+        hamburger.setAttribute("aria-expanded", isExpanded);
+        navMenu.setAttribute("aria-hidden", !isExpanded);
+        navOverlay.setAttribute("aria-hidden", !isExpanded);
+
+        // Impede o scroll do corpo da página quando o menu está aberto
+        if (isExpanded) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = ''; // Restaura o scroll
+        }
+    };
+    
+    /**
+     * Fecha o menu de navegação se estiver aberto.
+     */
+    const closeMenu = () => {
+        if (hamburger.classList.contains("active")) {
+            hamburger.classList.remove("active");
+            navMenu.classList.remove("active");
+            navOverlay.classList.remove("active");
+            
+            hamburger.setAttribute("aria-expanded", "false");
+            navMenu.setAttribute("aria-hidden", "true");
+            navOverlay.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = ''; // Restaura o scroll
+        }
+    };
+    /**
+     * Adiciona a classe 'active' ao link de navegação correspondente à página atual.
+     * Isso permite estilizar o link (e seus ícones) quando a página está ativa.
+     */
+    const highlightActiveNavLink = () => {
+        const currentPath = window.location.pathname;
+        navLinks.forEach(link => {
+            // Remove a classe 'active' de todos os links primeiro para garantir que apenas um esteja ativo
+            link.classList.remove('active');
+            // Obtém o caminho do link, removendo a barra final se houver
+            const linkPath = link.getAttribute('href')?.replace(/\/$/, '');
+            const cleanedCurrentPath = currentPath.replace(/\/$/, '');
+            // Verifica se o href do link corresponde ao caminho atual
+            // Considera links como / ou /home como a página inicial
+            if (linkPath === cleanedCurrentPath || (linkPath === '/' && cleanedCurrentPath === '/home')) {
+                link.classList.add('active');
+            }
+        });
+    };
+    // Event Listeners
+    hamburger.addEventListener("click", toggleMenu);
+    navLinks.forEach(link => link.addEventListener("click", closeMenu));
+    navOverlay.addEventListener("click", closeMenu);
+
+    // Fecha o menu ao pressionar a tecla ESC
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && hamburger.classList.contains("active")) {
+            closeMenu();
+        }
+    });
+    // Chama a função para destacar o link ativo quando o DOM estiver completamente carregado
+    document.addEventListener('DOMContentLoaded', highlightActiveNavLink);
+    // Chama a função para destacar o link ativo após uma troca de conteúdo via HTMX
+    document.body.addEventListener('htmx:afterSwap', highlightActiveNavLink);
+})(); // Fim da IIFE de Interatividade do Cabeçalho/Navegação
 
 const NOTIFICATION_CONTAINER_ID = 'notification-root';
 

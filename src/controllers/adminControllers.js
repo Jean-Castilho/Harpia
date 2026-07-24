@@ -13,7 +13,7 @@ const renderAdminPage = (req, res, page, options = {}) => {
   if (req.headers['hx-request']) {
     res.render(page.replace('../', ''), options);
   } else {
-    res.render('./layout/admin-layout', { page, ...options });
+    res.render('./layout/main.ejs', { page, ...options });
   }
 };
 

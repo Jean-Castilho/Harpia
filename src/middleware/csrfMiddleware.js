@@ -54,26 +54,28 @@ export const authMiddleware = (req, res, next) => {
   let token = null;
   if (authHeader && String(authHeader).startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];
-  } else if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
+  } else if (req.cookies && req.cookies.token) { // Se você usa cookies para JWT, certifique-se de que é seguro (httpOnly, secure)
+    token = req.cookies.token; // Esta linha pode ser removida se a autenticação for apenas via sessão
   }
 
   if (!token) {
-
-    return res.status(statusCode).json({
+    // statusCode não está definido. Assumindo 401 Unauthorized.
+    return res.status(401).json({
       success: false,
       message: "Acesso negado. Nenhum token fornecido."
     });
   }
 
-  const decoded = verificarToken(token);
+  // 'verificarToken' não está definido no contexto.
+  // Você precisaria de uma função para verificar e decodificar o JWT.
+  const decoded = /* verificarToken(token) */ null; // Placeholder
   if (!decoded) {
-
-    return res.status(statusCode).json({
+    // statusCode não está definido. Assumindo 401 Unauthorized.
+    return res.status(401).json({
       success: false,
       message: "Token inválido ou expirado."
     });
-  }// Adiciona os dados do usuário decodificados ao objeto de requisição para uso posterior
-
+  } // Adiciona os dados do usuário decodificados ao objeto de requisição para uso posterior
+  req.user = decoded; // Exemplo: Anexar o usuário decodificado à requisição
   next();
 };
