@@ -58,8 +58,9 @@
 
 .header-icons {
     display: flex;
-    gap: 1rem;
     align-items: center;
+    margin-top: 15px;
+    gap: 0.7rem;
 }
 
 .header-icons .nav-link {

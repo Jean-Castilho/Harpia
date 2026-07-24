@@ -18,7 +18,6 @@ import {
     getOrdersPage,
     getUsersPage,
     getAddProductPage,
-    getDelivery,
     getEditProductPage,
     postEditProduct,
     deleteProduct,
@@ -42,7 +41,5 @@ router.get('/add-product', generateCsrfToken,  getAddProductPage);
 router.get('/products/edit/:id', generateCsrfToken, getEditProductPage);
 router.post('/products/edit/:id', upload.array('imagens', 5), validateCsrfToken, postEditProduct);
 router.post('/products/delete', ensureAuthenticated, ensureAdmin, validateCsrfToken, deleteProduct);
-
-router.get('/delivery', getDelivery);
 
 export default router;

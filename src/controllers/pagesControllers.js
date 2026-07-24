@@ -413,6 +413,30 @@ export const getOrders = async (req, res, next) => {
   }
 };
 
+export const getDelivery = async (req, res) => {
+
+  const pageOptions = {
+    titulo: 'Página de Entrega',
+    message: 'Página de entrega é rota',
+    apiKey: process.env.GOOGLE_MAPS_API_KEY,
+    orders: [],
+  };
+
+  try {
+    const orders = await orderControllers.getCollection().find({}).toArray();
+    const ordernsShipped = orders.filter(order => order.status === 'shipped');
+    const ordernsApproved = orders.filter(order => order.status === 'approved'); // Existing approved orders
+    const ordernsPaid = orders.filter(order => order.status === 'paid'); // New: Include paid orders
+    pageOptions.orders = [...ordernsShipped, ...ordernsApproved, ...ordernsPaid] || [];
+
+    renderPage(req, res, "../pages/admin/delivery/dashboard", {...pageOptions });
+
+  } catch (error) {
+    console.error('Erro ao buscar pedidos para entrega:', error);
+   renderPage(req, res, "../pages/admin/delivery/dashboard", {...pageOptions, message: 'Erro ao carregar pedidos para entrega.' });
+  }
+};
+
 export const updateUserAddress = (req, res) => {
   const { cep } = req.body;
 

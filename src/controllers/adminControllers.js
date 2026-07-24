@@ -203,32 +203,3 @@ export const postEditProduct = async (req, res, next) => {
     next(error);
   }
 };
-
-export const getDelivery = async (req, res) => {
-
-  res.locals.layout = './layout/delivery'
-
-  const pageOptions = {
-    titulo: 'Página de Entrega',
-    message: 'Página de entrega é rota',
-    apiKey: process.env.GOOGLE_MAPS_API_KEY,
-    orders: [],
-  };
-
-  try {
-    const orders = await orderControllers.getCollection().find({}).toArray();
-    const ordernsShipped = orders.filter(order => order.status === 'shipped');
-    const ordernsApproved = orders.filter(order => order.status === 'approved'); // Existing approved orders
-    const ordernsPaid = orders.filter(order => order.status === 'paid'); // New: Include paid orders
-    pageOptions.orders = [...ordernsShipped, ...ordernsApproved, ...ordernsPaid] || [];
-
-    // This still uses the old renderPage function, which I should have removed.
-    // I will assume the user wants to keep the delivery page separate for now and not apply HTMX to it.
-    // The old `renderPage` is not defined anymore, so this will crash. I need to render it directly.
-    res.render('./layout/delivery', { page: '../pages/admin/delivery/dashboard', ...pageOptions });
-
-  } catch (error) {
-    console.error('Erro ao buscar pedidos para entrega:', error);
-    res.render('./layout/delivery', { page: '../pages/admin/delivery/dashboard', ...pageOptions, message: 'Erro ao carregar pedidos para entrega.' });
-  }
-};

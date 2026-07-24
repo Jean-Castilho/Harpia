@@ -13,6 +13,7 @@ import {
   getFavoritesPage,
   getCartPage,
   getOrders,
+  getDelivery,
   getCheckout,
   getPayment,
   getPaymentStatus,
@@ -57,6 +58,8 @@ router.get("/about", getAbout);
 router.get("/products", generateCsrfToken, getProducts);
 
 router.get("/orders", getOrders);
+
+router.get('/delivery', getDelivery);
 
 router.get("/checkout/:id", getCheckout);
 router.get("/payment/:id", getPayment);
