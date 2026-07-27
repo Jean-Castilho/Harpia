@@ -156,6 +156,7 @@
 
     .header-icons {
 
+        margin-top: 20px;
         flex-wrap: wrap;
         flex-direction: row;
         justify-content: center;

@@ -59,7 +59,6 @@
 .header-icons {
     display: flex;
     align-items: center;
-    margin-top: 15px;
     gap: 0.7rem;
 }
 

@@ -16,7 +16,6 @@ import { GeneralError } from "../errors/customErrors.js";
  * O `notification_id` geralmente está em `req.body.id`, mas pode aparecer em `req.body.data.id`.
  */
 function isValidMercadoPagoSignature(req, secret) {
-  
   const signatureHeader = req.headers['x-signature'];
   if (!signatureHeader) {
     return false;
@@ -117,7 +116,6 @@ export default class OrderControllers {
 
     return res.redirect(`/checkout/${orderCreat.insertedId.toString()}`);
   };
-
 
   /**
    * Obtém um pedido pelo seu ID.
