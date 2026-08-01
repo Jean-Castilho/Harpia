@@ -96,6 +96,16 @@
     justify-content: center; /* Centraliza os cartões */
 }
 
+
+@media (max-width: 2200px) {
+    .price-home{
+        height: 0px;
+        padding: 0px;
+        margin: 0px;
+        overflow: hidden;
+    }
+}
+
 /* Media Queries para responsividade */
 @media (max-width: 990px) {
     .product-grid,
@@ -118,8 +128,16 @@
 @media (max-width: 576px) {
     .product-grid,
     .category-products-scroll {
-        grid-template-columns: repeat(1, 1fr);
+        grid-template-columns: repeat(2, 1fr);     
         /* Uma coluna em telas muito pequenas */
         gap: 0.6rem;
     }
+
+    .price-home{
+        height: 0px;
+        padding: 0px;
+        margin: 0px;
+        overflow: hidden;
+    }
+
 }

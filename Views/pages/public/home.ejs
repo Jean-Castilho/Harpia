@@ -61,7 +61,7 @@
                 <% if (productsInCategory && productsInCategory.length> 0) { %>
                   <% productsInCategory.forEach(product=> { %>
 
-                    <%- include('../../partials/_product-card', { product, favorites, cart, cardType: 'category' }) %>
+                    <%- include('../../partials/_product-card-home', { product, favorites, cart, cardType: 'category' }) %>
 
                       <% }); %>
                         <% } else { %>
