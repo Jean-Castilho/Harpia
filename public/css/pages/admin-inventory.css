@@ -1,14 +1,6 @@
 /* --- Page: Admin Inventory --- */
 
-@media (max-width: 576px) {
-    .inventory-container {
-        margin: 1.5rem auto;
-        padding: 0.5rem;
-    }
-    .inventory-table{
-    width: auto;
-   }
-}
+
 
 .inventory-container {
     width: 980px;
@@ -18,6 +10,17 @@
     padding: 2rem;
     border-radius: var(--borda-radius);
     box-shadow: var(--sombra-padrao);
+}
+
+@media (max-width: 576px) {
+    .inventory-container {
+        margin: 1.5rem auto;
+        padding: 0.5rem;
+    }
+
+    .inventory-table {
+        width: auto;
+    }
 }
 
 .inventory-actions {
@@ -34,6 +37,11 @@
     border-collapse: collapse;
     font-size: 0.95rem;
 }
+
+.inventory-table {
+    width: auto;
+}
+
 
 .inventory-table thead th {
     background-color: #f8f9fa;

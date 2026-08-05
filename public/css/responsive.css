@@ -271,16 +271,6 @@
         grid-template-columns: 1fr;
     }
 
-    .inventory-container {
-        width: auto;
-        margin: 1.5rem auto;
-        padding: 0.5rem;
-    }
-
-    .inventory-table {
-        width: auto;
-    }
-
 
     .container {
         width: -webkit-fill-available;
