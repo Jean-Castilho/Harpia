@@ -171,11 +171,6 @@
     .inventory-table-container {
         overflow-x: inherit;
     }
-
-    .inventory-table {
-        width: auto;
-    }
-
     .inventory-table thead th {
         padding: 0.7rem 0.2rem;
     }
