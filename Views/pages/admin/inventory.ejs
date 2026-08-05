@@ -1,3 +1,21 @@
+
+<style>
+@media (max-width: 576px) {
+   
+    /* Oculta colunas específicas da tabela em telas pequenas para melhor visualização */
+    .inventory-table th:nth-child(2), /* Oculta a coluna 'Nome do Produto' */
+    .inventory-table td:nth-child(2),
+
+    .inventory-table th:nth-child(3), /* Oculta a coluna 'Preço' */
+    .inventory-table td:nth-child(3),
+
+    .inventory-table th:nth-child(5), /* Oculta a coluna 'Categoria' */
+    .inventory-table td:nth-child(5) {
+        display: none;
+    }
+}
+</style>
+
 <div class="container">
     <link rel="stylesheet" href="/css/main.css">
 

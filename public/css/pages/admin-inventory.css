@@ -1,6 +1,16 @@
 /* --- Page: Admin Inventory --- */
+
+@media (max-width: 576px) {
+    .inventory-container {
+        margin: 1.5rem auto;
+        padding: 0.5rem;
+    }
+    .inventory-table{
+    width: auto;
+   }
+}
+
 .inventory-container {
-    
     width: 980px;
     min-height: 400px;
     margin: 40px;

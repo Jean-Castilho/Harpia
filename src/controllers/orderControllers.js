@@ -7,7 +7,6 @@ import { consultarPix } from './paymantControllers.js';
 import { broadcastPaymentStatusUpdate } from '#src/utils/websocket.js';
 import { validateOrderItems } from '../services/orderService.js';
 import { ValidationError } from "../errors/customErrors.js";
-import { GeneralError } from "../errors/customErrors.js";
 
 /**
  * Valida se o webhook recebido veio realmente do Mercado Pago.

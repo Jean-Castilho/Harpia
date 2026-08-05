@@ -2,12 +2,10 @@
 .card {
     
     width: 100%;
-    margin-top: 1.5rem;
     background-color: #fff;
     border: 1px solid var(--cor-borda);
     border-radius: var(--borda-radius);
     box-shadow: var(--sombra-padrao);
     padding: 1.6rem;
-    margin-bottom: 2.5rem;
     overflow: hidden;
 }

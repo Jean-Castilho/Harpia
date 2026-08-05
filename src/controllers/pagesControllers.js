@@ -39,35 +39,30 @@ export const getHome = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getRegister = (req, res) => {
   renderPage(req, res, "../pages/auth/register", {
     titulo: "Registrar Conta",
     message: "Crie sua conta para começar a comprar!",
   });
 };
-
 export const getLogin = (req, res) => {
   renderPage(req, res, "../pages/auth/login", {
     titulo: "Realizar Login",
     message: "seja Bem vindo de volta...",
   });
 };
-
 export const getContact = (req, res) => {
   renderPage(req, res, "../pages/public/contact", {
     titulo: "Contato",
     message: "Entre em contato conosco!",
   });
 };
-
 export const getAbout = (req, res) => {
   renderPage(req, res, "../pages/public/about", {
     titulo: "Sobre Nós",
     message: "Saiba mais sobre nossa loja!",
   });
 };
-
 export const getProducts = async (req, res, next) => {
   try {
     const allProducts = await productControllers.getCollection().find().toArray();
@@ -80,7 +75,6 @@ export const getProducts = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getProductDetail = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -105,7 +99,6 @@ export const getProductDetail = async (req, res, next) => {
   }
 };
 
-
 export const getProfile = (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login");
@@ -116,14 +109,12 @@ export const getProfile = (req, res) => {
     message: "sessao profile...",
   });
 };
-
 export const getSolicitOtp = (req, res) => {
   renderPage(req, res, "../pages/auth/solicit-otp", {
     titulo: "Alterar Senha",
     message: "solicite o codigo para redefinir senha",
   });
 };
-
 export const getVerifyOtp = (req, res) => {
   renderPage(req, res, "../pages/auth/verifyOtp", {
     titulo: "Alterar Senha",
@@ -175,7 +166,6 @@ export const getFavoritesPage = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getCartPage = async (req, res, next) => {
   try {
     const pageOptions = {
@@ -234,10 +224,6 @@ export const getCartPage = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
-
 export const getCheckout = async (req, res, next) => {
   try {
     const pageOptions = {
@@ -281,7 +267,6 @@ export const getCheckout = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getPaymentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -309,7 +294,6 @@ export const getPaymentStatus = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getPayment = async (req, res, next) => {
   try {
     const pageOptions = {
@@ -339,7 +323,6 @@ export const getPayment = async (req, res, next) => {
     next(error);
   }
 };
-
 /**
  * Endpoint usado para validar o pedido antes da confirmação final.
  * O fluxo de confirmação real é feito pelo webhook do Mercado Pago.
@@ -383,10 +366,6 @@ export const postPayment = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
- 
 export const getOrders = async (req, res, next) => {
   try {
     if (!req.session.user) {
@@ -412,7 +391,6 @@ export const getOrders = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getDelivery = async (req, res) => {
 
   const pageOptions = {
@@ -436,7 +414,6 @@ export const getDelivery = async (req, res) => {
    renderPage(req, res, "../pages/admin/delivery/dashboard", {...pageOptions, message: 'Erro ao carregar pedidos para entrega.' });
   }
 };
-
 export const updateUserAddress = (req, res) => {
   const { cep } = req.body;
 
@@ -447,7 +424,6 @@ export const updateUserAddress = (req, res) => {
   req.session.user.cep = cep;
   res.redirect("/profile");
 };
-
 export const getAddressByCep = async (req, res, next) => {
   try {
     const { cep } = req.params;
@@ -481,7 +457,6 @@ export const getAddressByCep = async (req, res, next) => {
     next(error);
   }
 };
-
 export const getProductsByIds = async (req, res, next) => {
   try {
     const { productIds } = req.body; // Espera um array de IDs;
