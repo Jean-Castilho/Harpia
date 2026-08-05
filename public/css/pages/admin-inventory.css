@@ -3,8 +3,7 @@
 
 
 .inventory-container {
-    width: 980px;
-    min-height: 400px;
+    max-width: 980px;
     margin: 40px;
     background-color: #fff;
     padding: 2rem;
@@ -27,10 +26,10 @@
     font-size: 0.95rem;
 }
 
-.inventory-table {
-    width: auto;
-}
+.inventory-table {}
 
+.inventory-table thead,
+.inventory-table tbody {}
 
 .inventory-table thead th {
     background-color: #f8f9fa;
@@ -159,9 +158,18 @@
 }
 
 @media (max-width: 576px) {
+    h1 {
+        margin: 0px
+    }
+
     .inventory-container {
+        width: auto;
         margin: 1.5rem auto;
         padding: 0.5rem;
+    }
+
+    .inventory-table-container {
+        overflow-x: inherit;
     }
 
     .inventory-table {
@@ -179,11 +187,5 @@
     .inventory-product-image {
         width: 50px;
         height: 50px;
-    }
-
-
-    .inventory-container {
-        width: auto;
-        min-height: auto;
     }
 }
