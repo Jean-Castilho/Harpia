@@ -70,14 +70,12 @@
     background-color: #fff;
     border-radius: var(--borda-radius);
     box-shadow: var(--sombra-padrao);
-    padding: 1.5rem;
-    overflow-x: auto;
 }
 
 .order-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+    overflow: hidden;
 }
 
 .order-table th, .order-table td {

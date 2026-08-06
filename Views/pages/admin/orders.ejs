@@ -1,3 +1,50 @@
+<style>
+  @media (max-width: 756px) {
+    .order-table th:nth-child(1),
+    .order-table td:nth-child(1) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .order-table-container {
+      padding: 0.6rem;
+    }
+
+    .orders-admin-header h1 {
+      margin-bottom: 1.5rem;
+    }
+
+    .order-summary {
+      gap: 1.0rem;
+      margin-bottom: 1.0rem;
+    }
+
+    .summary-card {
+      padding: 1.5rem;
+    }
+
+    .order-table th,
+    .order-table td {
+      padding: 0.8rem;
+    }
+
+    .action-btn {
+      padding: 6px 6px;
+    }
+
+    /* Oculta colunas específicas da tabela em telas pequenas para melhor visualização */
+    .order-table th:nth-child(1),
+    /* Oculta a coluna 'Nome do Produto' */
+    .order-table td:nth-child(1),
+
+    .order-table th:nth-child(3),
+    /* Oculta a coluna 'Preço' */
+    .order-table td:nth-child(3) {
+      display: none;
+    }
+  }
+</style>
 
 
 <div class="orders-admin-container">
@@ -10,21 +57,27 @@
       <div class="icon"><span class="material-icons">shopping_bag</span></div>
       <div class="text">
         <h3>Total de Pedidos</h3>
-        <p><%= totalApproved %></p>
+        <p>
+          <%= totalApproved %>
+        </p>
       </div>
     </div>
     <div class="summary-card pending">
       <div class="icon"><span class="material-icons">hourglass_top</span></div>
       <div class="text">
         <h3>Pedidos Entregues</h3>
-        <p><%= totalDelivered %></p>
+        <p>
+          <%= totalDelivered %>
+        </p>
       </div>
     </div>
     <div class="summary-card in-transit">
       <div class="icon"><span class="material-icons">local_shipping</span></div>
       <div class="text">
         <h3>Em Rota</h3>
-        <p><%= ordernsEnviada%></p>
+        <p>
+          <%= ordernsEnviada%>
+        </p>
       </div>
     </div>
   </div>
@@ -36,15 +89,19 @@
           <th>ID do Pedido</th>
           <th>Cliente</th>
           <th>Status</th>
-          <th>Prazo de Entrega</th>
+          <th>Entrega em</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
-        <% orders.forEach(order => { %>
+        <% orders.forEach(order=> { %>
           <tr>
-            <td><%= order._id %></td>
-            <td><%= order.user.name %></td>
+            <td>
+              <%= order._id %>
+            </td>
+            <td>
+              <%= order.user.name %>
+            </td>
             <td>
               <span class="status <%= 
                 order.status === 'Pendente' ? 'status-pending' : 
@@ -56,7 +113,7 @@
             <td>15 dias</td>
             <td><a href="/orders/<%= order._id %>/details" class="action-btn">Detalhes</a></td>
           </tr>
-        <% }); %>
+          <% }); %>
       </tbody>
     </table>
   </div>
