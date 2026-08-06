@@ -128,19 +128,6 @@
     color: #fff;
 }
 
-@media (max-width: 576px) {
-    .action-buttons {
-        display: none;
-    }
-
-    .action-icons {
-        display: flex;
-    }
-
-    .inventory-table tbody td {
-        padding: 0.4rem 0.4rem;
-    }
-}
 
 .btn-sm {
     padding: 0.4rem 0.8rem;
@@ -156,8 +143,19 @@
     border: 1px solid #b8daff;
     border-radius: var(--borda-radius);
 }
-
 @media (max-width: 576px) {
+    .action-buttons {
+        display: none;
+    }
+
+    .action-icons {
+        display: flex;
+    }
+
+    .inventory-table tbody td {
+        padding: 0.4rem 0.4rem;
+    }
+
     h1 {
         margin: 0px
     }
@@ -182,5 +180,19 @@
     .inventory-product-image {
         width: 50px;
         height: 50px;
+    }
+
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        /* Adjust gap for smaller screens */
+    }
+
+    .dashboard-card {
+        width: 100%;
+        /* Make cards take full width in their grid column */
+        justify-content: center;
     }
 }
